@@ -1,3 +1,4 @@
+OPENSCAD=/usr/local/bin/openscad
 
 all:	population_storage_tray.dxf
 
@@ -7,4 +8,4 @@ clean:
 include $(wildcard *.deps)
 
 %.dxf:	%.scad
-	openscad -m make -o $@ -d $@.deps $<
+	$(OPENSCAD) -m make -o $@ -d $@.deps $<
