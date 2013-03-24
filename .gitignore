@@ -1,2 +1,4 @@
 *.dxf
 *.save
+*.deps
+.~*

@@ -17,14 +17,14 @@ R_BORDER = 2;		// Size of right border
 T_BORDER = 2;		// Size of top border
 B_BORDER = 4;		// Size of bottom border
 
+H_SIZE = L_BORDER + (H_COUNT-1) * H_ALIGN + HOLE + R_BORDER;
+V_SIZE = T_BORDER + (V_COUNT-1) * V_ALIGN + HOLE + B_BORDER;
+
 // ----------------------------------------------------------------------------
 // The tray_frame comprises the outer dimensions of the tray
 // ----------------------------------------------------------------------------
 
 module tray_frame() {
-	H_SIZE = L_BORDER + (H_COUNT-1) * H_ALIGN + HOLE + R_BORDER;
-	V_SIZE = T_BORDER + (V_COUNT-1) * V_ALIGN + HOLE + B_BORDER;
-
 	square( [H_SIZE, V_SIZE] );
 }
 
@@ -65,5 +65,6 @@ module tray() {
 // ----- Rendered Parts -------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-tray();
-
+translate( [0, 2*(V_SIZE + T_BORDER) ] ) tray();
+translate( [0, 1*(V_SIZE + T_BORDER) ] ) tray();
+translate( [0, 0*(V_SIZE + T_BORDER) ] ) tray();

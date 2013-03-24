@@ -1,6 +1,6 @@
 OPENSCAD=/usr/local/bin/openscad
 
-all:	population_storage_tray.dxf
+all:	eclipse_population_tray.dxf
 
 clean:
 	@rm -f *.dxf
