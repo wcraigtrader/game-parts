@@ -6,8 +6,8 @@ Parts to improve board games.
 * eclipse_population_tray
   This is a laser-cut tray for quickly arranging the population cubes for Eclipse.
 
-* eclipse_system_tray
-  This is a laser-cut tray for organizing the star system hexes
+* eclipse_sector_tray
+  This is a laser-cut tray for organizing the sector hexes for Eclipse.
 
 These parts and associated files are dual-licensed by W. Craig Trader under 
 Creative Commons Attribution-ShareAlike 3.0 Unported License and
