@@ -3,11 +3,17 @@ game-parts
 
 Parts to improve board games.
 
-* eclipse_population_tray
+* eclipse_population_tray:
   This is a laser-cut tray for quickly arranging the population cubes for Eclipse.
 
-* eclipse_sector_tray
+* eclipse_sector_tray:
   This is a laser-cut tray for organizing the sector hexes for Eclipse.
+
+The images directory contains generated DXF files. 
+The laser-cutter directory contains files for use with Mongo, the Nova-Labs laser cutter.
+
+License
+-------
 
 These parts and associated files are dual-licensed by W. Craig Trader under 
 Creative Commons Attribution-ShareAlike 3.0 Unported License and
