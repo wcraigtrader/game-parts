@@ -1,11 +1,11 @@
 OPENSCAD=/usr/local/bin/openscad
 
-all:	eclipse_population_tray.dxf
+all:	images/eclipse_population_tray.dxf
 
 clean:
-	@rm -f *.dxf
+	@rm -f *.deps
 
 include $(wildcard *.deps)
 
-%.dxf:	%.scad
+images/%.dxf:	%.scad
 	$(OPENSCAD) -m make -o $@ -d $@.deps $<
