@@ -71,6 +71,17 @@ module three_trays() {
 	translate( [0, 0*(V_SIZE + T_BORDER) ] ) tray();
 }
 
+module six_trays() {
+	translate( [0, 3*(V_SIZE + T_BORDER) ] ) three_trays();
+	translate( [0, 0*(V_SIZE + T_BORDER) ] ) three_trays();
+}
+
+module nine_trays() {
+	translate( [0, 6*(V_SIZE + T_BORDER) ] ) three_trays();
+	translate( [0, 3*(V_SIZE + T_BORDER) ] ) three_trays();
+	translate( [0, 0*(V_SIZE + T_BORDER) ] ) three_trays();
+}
+
 // ----------------------------------------------------------------------------
 // ----- Rendered Parts -------------------------------------------------------
 // ----------------------------------------------------------------------------
