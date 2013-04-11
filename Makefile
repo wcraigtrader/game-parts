@@ -1,12 +1,12 @@
 OPENSCAD=/usr/local/bin/openscad
 
-all:	images/eclipse_population_tray.dxf images/eclipse_sector_tray.dxf
+all:	models/eclipse_population_tray.dxf models/eclipse_sector_tray.dxf
 
 clean:
-	@rm -f images/*.deps
+	@rm -f models/*.deps
 
 cleanall:	clean
-	@rm -f images/*
+	@rm -f models/*
 
 include $(wildcard *.deps)
 
