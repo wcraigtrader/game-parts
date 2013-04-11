@@ -10,5 +10,5 @@ cleanall:	clean
 
 include $(wildcard *.deps)
 
-images/%.dxf:	%.scad
+models/%.dxf:	%.scad
 	$(OPENSCAD) -m make -o $@ -d $@.deps $<
