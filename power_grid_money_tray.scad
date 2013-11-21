@@ -9,7 +9,7 @@ include <functions.scad>;
 
 // ----- Measurements ---------------------------------------------------------
 
-THICKNESS = 2.25;           // Acrylic thickness for 1/8" acrylic
+THICKNESS = 2.25;           // Acrylic thickness for 3/32" acrylic
 
 SECTIONS = 4;
 
@@ -47,7 +47,10 @@ BACK_SLOT = BACK_HEIGHT / 2;
 
 module tray_base() {
 	difference() {
+		// base plate
 		square( [ BASE_LENGTH, BASE_HEIGHT ] );
+
+		// remove the material for the slots
 		for (i=[0:SECTIONS] ) {
 			translate( [SIDE_PADDING+i*(SECTION_WIDTH+SLOT_WIDTH),BASE_HEIGHT-BASE_SLOT,0] )
 				straight_slot( SLOT_WIDTH, BASE_SLOT );
@@ -59,7 +62,10 @@ module tray_base() {
 
 module tray_back() {
 	difference() {
+		// back plate
 		square( [ BACK_LENGTH, BACK_HEIGHT ] );
+
+		// remove the material for the slots
 		for (i=[0:SECTIONS] ) {
 			translate( [SIDE_PADDING+i*(SECTION_WIDTH+SLOT_WIDTH),0,0] )
 				straight_slot( SLOT_WIDTH, BACK_SLOT );
@@ -71,9 +77,14 @@ module tray_back() {
 
 module tray_divider() {
 	difference() {
+		// divider
 		square( [ DIVIDER_LENGTH, DIVIDER_HEIGHT ] );
+
+		// remove the material for the base slot
 		translate( [BASE_PADDING,0,0] )
 			straight_slot( SLOT_WIDTH, BASE_SLOT );
+
+		// remove the material for the back slot
 		translate( [DIVIDER_LENGTH-BACK_SLOT,DIVIDER_HEIGHT-BACK_PADDING-SLOT_WIDTH,0] )
 			straight_slot( BACK_SLOT, SLOT_WIDTH );
 	}
@@ -103,13 +114,12 @@ module assembled_view() {
 						tray_divider();
 		}
 
-		color( "Grey" )
+		color( "Orange" )
 		for (i=[0:SECTIONS-1] ) {
 			translate( [SIDE_PADDING+i*(SECTION_WIDTH+SLOT_WIDTH)+SLOT_WIDTH+BILL_PADDING/2,-BILL_OVERHANG,BASE_PADDING+SLOT_WIDTH ] )
 				cube( [BILL_WIDTH, BILL_LENGTH, 6 ] );
 		}
 	}
-
 }
 
 // ----- Cut Parts View -------------------------------------------------------
@@ -150,9 +160,9 @@ module dimensions() {
 // ----- Rendered Parts -------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-if ( 0 ) {
+dimensions();
+if ( 1 ) {
 	assembled_view();
 } else {
 	cut_parts();
 }
-dimensions();
