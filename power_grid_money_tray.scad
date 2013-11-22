@@ -9,14 +9,15 @@ include <functions.scad>;
 
 // ----- Measurements ---------------------------------------------------------
 
-THICKNESS = 2.25;           // Acrylic thickness for 3/32" acrylic
+// THICKNESS = 2.25;           // Acrylic thickness for 3/32" acrylic
+THICKNESS = 2.80;	           // Cardboard
 
 SECTIONS = 4;
 
 BILL_LENGTH   = 90.0;       // Power Grid money size
 BILL_WIDTH    = 45.0;       // Power Grid money size
 
-BILL_HEIGHT   = 20.0;       // Vertical space for money in the tray
+BILL_HEIGHT   = 25.0;       // Vertical space for money in the tray
 BILL_PADDING  = 5.0;        // Padding around the money in the tray
 BILL_OVERHANG = 3.0;        // Amount that bills should extend beyond the tray
 
@@ -42,6 +43,7 @@ BACK_HEIGHT = DIVIDER_LENGTH - SLOT_WIDTH - BASE_PADDING;
 
 BASE_SLOT = BASE_HEIGHT / 2;
 BACK_SLOT = BACK_HEIGHT / 2;
+TAB_SLOT  = SECTION_WIDTH / 2;
 
 // ----- Tray Base ------------------------------------------------------------
 
@@ -50,10 +52,19 @@ module tray_base() {
 		// base plate
 		square( [ BASE_LENGTH, BASE_HEIGHT ] );
 
-		// remove the material for the slots
-		for (i=[0:SECTIONS] ) {
-			translate( [SIDE_PADDING+i*(SECTION_WIDTH+SLOT_WIDTH),BASE_HEIGHT-BASE_SLOT,0] )
+		// remove the material for the side slots
+		for ( i=[0:SECTIONS] ) {
+			translate( [SIDE_PADDING + i*(SECTION_WIDTH + SLOT_WIDTH),BASE_HEIGHT-BASE_SLOT,0] )
 				straight_slot( SLOT_WIDTH, BASE_SLOT );
+		}
+
+		// remove the material for the tab slots
+		for (i=[0:SECTIONS-1] ) {
+			translate( [
+					SIDE_PADDING+SLOT_WIDTH+(SECTION_WIDTH/4)+i*(SECTION_WIDTH+SLOT_WIDTH),
+					BASE_HEIGHT-BACK_PADDING-SLOT_WIDTH,0] )
+				straight_slot( TAB_SLOT, SLOT_WIDTH );
+				
 		}
 	}
 }
@@ -62,14 +73,24 @@ module tray_base() {
 
 module tray_back() {
 	difference() {
-		// back plate
-		square( [ BACK_LENGTH, BACK_HEIGHT ] );
+		union() {
+			// back plate
+			translate( [0,BASE_PADDING+SLOT_WIDTH,0] )
+				square( [ BACK_LENGTH, BACK_HEIGHT ] );
+
+			// add the tabs
+			for (i=[0:SECTIONS-1] ) {
+				translate( [SIDE_PADDING+SLOT_WIDTH+(SECTION_WIDTH/4)+i*(SECTION_WIDTH+SLOT_WIDTH),0,0] ) 
+					square( TAB_SLOT, BASE_PADDING+SLOT_WIDTH );
+			}
+		}
 
 		// remove the material for the slots
 		for (i=[0:SECTIONS] ) {
-			translate( [SIDE_PADDING+i*(SECTION_WIDTH+SLOT_WIDTH),0,0] )
+			translate( [SIDE_PADDING+i*(SECTION_WIDTH+SLOT_WIDTH),BASE_PADDING+SLOT_WIDTH,0] )
 				straight_slot( SLOT_WIDTH, BACK_SLOT );
 		}
+
 	}
 }
 
@@ -101,7 +122,7 @@ module assembled_view() {
 				tray_base();
 
 		color( "Green" )
-		translate( [0,BASE_HEIGHT-BACK_PADDING,BASE_PADDING+THICKNESS] )
+		translate( [0,BASE_HEIGHT-BACK_PADDING,0] )
 			rotate( a=[+90,0,0] )
 				linear_extrude( height=THICKNESS )
 					tray_back();
@@ -131,7 +152,7 @@ module cut_parts() {
 	ay = BASE_HEIGHT + spacing;
 
 	bx = BACK_LENGTH + spacing;
-	by = BACK_HEIGHT + spacing;
+	by = BACK_HEIGHT + BASE_PADDING + SLOT_WIDTH + spacing;
 
 	cx = DIVIDER_LENGTH + spacing;
 	cy = DIVIDER_HEIGHT + spacing;
