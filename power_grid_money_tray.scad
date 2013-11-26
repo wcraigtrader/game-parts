@@ -9,8 +9,8 @@ include <functions.scad>;
 
 // ----- Measurements ---------------------------------------------------------
 
-// THICKNESS = 2.25;           // Acrylic thickness for 3/32" acrylic
-THICKNESS = 2.80;	           // Cardboard
+THICKNESS = 2.25;           // Acrylic thickness for 3/32" acrylic
+// THICKNESS = 2.80;	           // Cardboard
 
 SECTIONS = 4;
 
@@ -182,7 +182,7 @@ module dimensions() {
 // ----------------------------------------------------------------------------
 
 dimensions();
-if ( 1 ) {
+if ( 0 ) {
 	assembled_view();
 } else {
 	cut_parts();
