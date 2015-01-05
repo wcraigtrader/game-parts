@@ -4,8 +4,9 @@
 
 // ----- Measurements ---------------------------------------------------------
 
-inch = 25.4;            // millimeters in an inch
-epsilon = 0.05;		// padding for slots
+inch = 25.4;        	// millimeters in an inch
+epsilon = 0.05;			// padding for slots
+hepsilon = epsilon / 2;
 
 // ----- Place a part via translation and rotation ----------------------------
 
@@ -25,7 +26,7 @@ module place( translation=[0,0,0], angle=0, hue="" ) {
 
 module straight_slot( width, height ) {
 
-	translate( [-epsilon/2, -epsilon/2, 0 ] )
+	translate( [-hepsilon, -hepsilon, 0 ] )
 		square( [ width+epsilon, height+epsilon ] );
 }
 
