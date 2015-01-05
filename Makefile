@@ -1,6 +1,6 @@
 OPENSCAD=/usr/local/bin/openscad
 
-all:	models/eclipse_population_tray.dxf models/eclipse_sector_tray.dxf models/power_grid_money_tray.dxf
+all:	models/eclipse_population_tray.dxf models/eclipse_sector_tray.dxf models/power_grid_money_tray.dxf models/lords_of_vegas_tray.dxf
 
 clean:
 	@rm -f models/*.deps
