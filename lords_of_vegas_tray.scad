@@ -7,7 +7,7 @@ include <functions.scad>;
 
 // ----- Measurements ---------------------------------------------------------
 
-THICKNESS = 3.00;		// 1/8" plywood
+THICKNESS = 3.30;		// 1/8" plywood
 // THICKNESS = 2.25;     // Acrylic thickness for 3/32" acrylic
 // THICKNESS = 2.80;	    // Cardboard
 
@@ -22,7 +22,7 @@ TILE_SIZE      = 45.0;
 TILE_HOLE      = 16.5;
 TILE_THICKNESS = 1/8 * inch;
 TILE_STACK     = 10 * TILE_THICKNESS;
-FULL_STACK     = 50 * TILE_THICKNESS + 12.5;
+FULL_STACK     = 50 * TILE_THICKNESS + 20.0;
 
 DECK_WIDTH     = 88.0;
 DECK_HEIGHT    = 63.0;
@@ -61,8 +61,8 @@ echo( str( "FINGER_OFFSET = ", FINGER_OFFSET, " mm" ) );
 
 DIV0 = 0;
 DIV2 = ( BOX_HEIGHT - 2*THICKNESS ) / 2 + THICKNESS;
-DIV1 = DIV2 - (TILE_SIZE + THICKNESS + PADDING);
-DIV3 = DIV2 + (TILE_SIZE + THICKNESS + PADDING);
+DIV1 = DIV2 - (TILE_SIZE + THICKNESS + 2 * PADDING);
+DIV3 = DIV2 + (TILE_SIZE + THICKNESS + 2 * PADDING);
 DIV4 = BOX_HEIGHT - THICKNESS;
 
 // ----- Tray Pieces ----------------------------------------------------------
@@ -328,7 +328,7 @@ module cut_parts_2() {
 // ----- Rendered PART -------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-if ( 0 ) {
+if ( 1 ) {
 	assembled_view();
 } else {
 	cut_parts_1();

@@ -5,7 +5,7 @@
 // ----- Measurements ---------------------------------------------------------
 
 inch = 25.4;        	// millimeters in an inch
-epsilon = 0.05;			// padding for slots
+epsilon = 0.02;			// padding for slots
 hepsilon = epsilon / 2;
 
 // ----- Place a part via translation and rotation ----------------------------
