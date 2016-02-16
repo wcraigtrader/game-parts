@@ -4,8 +4,12 @@
 
 // ----- Measurements ---------------------------------------------------------
 
-inch = 25.4;        	// millimeters in an inch
-epsilon = 0.02;			// padding for slots
+mm = 1.0;                   // single millimeter
+cm = 10.0;                  // millimeters in a centimeter
+inch = 25.4;                // millimeters in an inch
+in = inch;
+
+epsilon = 0.02;             // padding for slots
 hepsilon = epsilon / 2;
 
 // ----- Place a part via translation and rotation ----------------------------
@@ -15,9 +19,9 @@ module place( translation=[0,0,0], angle=0, hue="" ) {
 		translate( translation ) 
 			rotate( a=angle ) 
 				if ( hue != "" ) {
-					color( hue ) child(i);
+					color( hue ) children(i);
 				} else {
-					child(i);
+					children(i);
 				}
 	}
 }
@@ -29,6 +33,4 @@ module straight_slot( width, height ) {
 	translate( [-hepsilon, -hepsilon, 0 ] )
 		square( [ width+epsilon, height+epsilon ] );
 }
-
-
 
