@@ -5,6 +5,8 @@
 
 include <functions.scad>;
 
+HINTS = true; // Set to false to render without glue-up hints
+
 // ----- Measurements ---------------------------------------------------------
 
 THICKNESS = 5*mm;		// Foam Core
@@ -68,12 +70,14 @@ ft = FULL_TRAY;
 ht = HALF_TRAY;
 eps = 0.5;
 
-// ----- Macros ---------------------------------------------------------------
+// ----- Macros -----------------------------------------------------------------------------------
 
 module plain_tray_base( w, d ) {
     difference() {
         square( [ w, d ] );
-        translate( [th, th, 0 ] ) square( [ w-2*th, d-2*th ] );
+        if (HINTS) {
+            translate( [th, th, 0 ] ) square( [ w-2*th, d-2*th ] );
+        }
     }
 }
 
@@ -96,7 +100,7 @@ module plain_tray( w, d ) {
 function plain_tray_x( w, d ) = w + 2*pad;
 function plain_tray_y( w, d ) = d + 4*ht + 6*pad;
 
-// ----- Player Trays ---------------------------------------------------------
+// ----- Player Trays -----------------------------------------------------------------------------
 
 module player_base( short=false ) {
     pw = PLAYER_WIDTH;
@@ -107,11 +111,13 @@ module player_base( short=false ) {
 
     difference() {
         square( [ pw-offset, pd ] );
-        translate( [1*th,               1*th,               0] ) square( [ ps1[0], pd-2*th ] );
-        translate( [2*th+ps1[0],        1*th,               0] ) square( [ ps1[1], ps2[0] ] );
-        translate( [2*th+ps1[0],        2*th+ps2[0],        0] ) square( [ ps1[1], ps2[1] ] );
-        translate( [2*th+ps1[0],        3*th+ps2[0]+ps2[1], 0] ) square( [ ps1[1], ps2[2] ] );
-        translate( [3*th+ps1[0]+ps1[1], 1*th,               0] ) square( [ ps1[2]-offset, pd-2*th ] );
+        if (HINTS) {
+            translate( [1*th,               1*th,               0] ) square( [ ps1[0], pd-2*th ] );
+            translate( [2*th+ps1[0],        1*th,               0] ) square( [ ps1[1], ps2[0] ] );
+            translate( [2*th+ps1[0],        2*th+ps2[0],        0] ) square( [ ps1[1], ps2[1] ] );
+            translate( [2*th+ps1[0],        3*th+ps2[0]+ps2[1], 0] ) square( [ ps1[1], ps2[2] ] );
+            translate( [3*th+ps1[0]+ps1[1], 1*th,               0] ) square( [ ps1[2]-offset, pd-2*th ] );
+        }
     }
 }
 
@@ -152,15 +158,17 @@ module player_set( short=false ) {
     translate( [1*pw+0*ht+1*pad, 1*pd+1*ht+2*pad, 0 ] ) player_inner2( );
 }
 
-// ----- Map Tile Tray --------------------------------------------------------
+// ----- Map Tile Tray ----------------------------------------------------------------------------
 
 module map_base() {
     s = ( MAP_DEPTH - 4*th ) / 3;
     difference() {
         square( [MAP_WIDTH,MAP_DEPTH] );
-        translate( [1*th,1*th+0*s,0] ) square( [MAP_WIDTH-th-eps,s] );
-        translate( [1*th,2*th+1*s,0] ) square( [MAP_WIDTH-th-eps,s] );
-        translate( [1*th,3*th+2*s,0] ) square( [MAP_WIDTH-th-eps,s] );
+        if (HINTS) {
+            translate( [1*th,1*th+0*s,0] ) square( [MAP_WIDTH-th-eps,s] );
+            translate( [1*th,2*th+1*s,0] ) square( [MAP_WIDTH-th-eps,s] );
+            translate( [1*th,3*th+2*s,0] ) square( [MAP_WIDTH-th-eps,s] );
+        }
     }
 }
 
@@ -168,9 +176,11 @@ module map_back() {
     s = ( MAP_DEPTH - 4*th ) / 3;
     difference() {
         square( [ FULL_TRAY, MAP_DEPTH] );
-        translate( [eps,1*th+0*s,0] ) square( [ft-2*eps,s] );
-        translate( [eps,2*th+1*s,0] ) square( [ft-2*eps,s] );
-        translate( [eps,3*th+2*s,0] ) square( [ft-2*eps,s] );
+        if (HINTS) {
+            translate( [eps,1*th+0*s,0] ) square( [ft-2*eps,s] );
+            translate( [eps,2*th+1*s,0] ) square( [ft-2*eps,s] );
+            translate( [eps,3*th+2*s,0] ) square( [ft-2*eps,s] );
+        }
     }
 }
 
@@ -193,13 +203,15 @@ module map_set() {
 map_x = MAP_WIDTH + 1*ft + 3*pad;
 map_y = MAP_DEPTH + 2 * MAP_WIDTH + 4*pad;
 
-// ----- Cards Tray -----------------------------------------------------------
+// ----- Cards Tray -------------------------------------------------------------------------------
 
 module card_base() {
     difference() {
         square( [ CARD_WIDTH, CARD_DEPTH ] );
-        for ( slot = CARD_SLOTS ) {
-            translate( [th, slot[0], 0] ) square( [CARD_WIDTH-th-eps, slot[1]] );
+        if (HINTS) {
+            for ( slot = CARD_SLOTS ) {
+                translate( [th, slot[0], 0] ) square( [CARD_WIDTH-th-eps, slot[1]] );
+            }
         }
     }
 }
@@ -207,8 +219,10 @@ module card_base() {
 module card_back() {
     difference() {
         square( [ ft, CARD_DEPTH ] );
-        for ( slot = CARD_SLOTS ) {
-            translate( [eps, slot[0], 0] ) square( [ft-2*eps, slot[1]] );
+        if (HINTS) {
+            for ( slot = CARD_SLOTS ) {
+                translate( [eps, slot[0], 0] ) square( [ft-2*eps, slot[1]] );
+            }
         }
     }    
 }
@@ -242,7 +256,7 @@ module card_set() {
     translate( [cw+1*ft+2*pad,0,0]) card_side_set();
 }
 
-// ----- Money / Token Trays --------------------------------------------------
+// ----- Money / Token Trays ----------------------------------------------------------------------
 
 module money_base() {
     mw = MONEY_WIDTH;
@@ -253,9 +267,11 @@ module money_base() {
     
     difference() {
         square( [ mw, md ] );
-        translate( [th,        th,0] ) square( [xw-th,md-2*th] );
-        translate( [xw+th,     th,0] ) square( [tw-2*th,ts] );
-        translate( [xw+th,ts+2*th,0] ) square( [tw-2*th,md-ts-3*th] );
+        if (HINTS) {
+            translate( [th,        th,0] ) square( [xw-th,md-2*th] );
+            translate( [xw+th,     th,0] ) square( [tw-2*th,ts] );
+            translate( [xw+th,ts+2*th,0] ) square( [tw-2*th,md-ts-3*th] );
+        }
     }
 }
 
@@ -284,8 +300,10 @@ module token_base() {
     
     difference() {
         square( [TOKEN_WIDTH, TOKEN_DEPTH] );
-        translate( [th,      th,0] ) square( [tw-2*th,ts] );
-        translate( [th, ts+2*th,0] ) square( [tw-2*th,td-ts-3*th] );
+        if (HINTS) {
+            translate( [th,      th,0] ) square( [tw-2*th,ts] );
+            translate( [th, ts+2*th,0] ) square( [tw-2*th,td-ts-3*th] );
+        }
     }
 }
 
@@ -324,7 +342,7 @@ module money_set() {
 }
 
 
-// ----- Cut Parts View -------------------------------------------------------
+// ----- Cut Parts View ---------------------------------------------------------------------------
 
 card_y = CARD_WIDTH;
 card_s = 5 * CARD_SIDE + 5*pad;
@@ -376,7 +394,7 @@ place( [  0,450,0] ) sheet_3();
 place( [525,450,0] ) sheet_4();
 }
 
-// ----------------------------------------------------------------------------
-// ----- Rendered PART --------------------------------------------------------
-// ----------------------------------------------------------------------------
-sheet_4();
+// ------------------------------------------------------------------------------------------------
+// ----- Rendered PART ----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+all_sheets();
