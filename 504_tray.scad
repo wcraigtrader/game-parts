@@ -22,7 +22,7 @@ SMV_SHEET = [ 11*in, 14*in ];
 LGV_SHEET = [ 16*in, 20*in ];
 LGH_SHEET = [ 20*in, 16*in ];
 
-BOX_WIDTH = 35.4*cm;
+BOX_WIDTH = 36.4*cm;
 BOX_DEPTH = 26.4*cm;
 
 FULL_HEIGHT = 5.0*cm;
