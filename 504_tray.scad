@@ -1,7 +1,11 @@
-// 504 PART tray 
+// 504 PART tray
+//
 // by W. Craig Trader is dual-licensed under 
 // Creative Commons Attribution-ShareAlike 3.0 Unported License and
 // GNU Lesser GPL 3.0 or later.
+//
+// Props to Keith Hunt (https://www.boardgamegeek.com/user/keith%20hunt) for the original design, 
+// and Ultra Bithalver (https://www.boardgamegeek.com/user/bithalver) for his PDF design 
 
 include <functions.scad>;
 
@@ -253,7 +257,6 @@ module card_set() {
     
     card_base();
     translate( [cw+0*ft+1*pad,0,0]) card_back();
-    translate( [cw+1*ft+2*pad,0,0]) card_side_set();
 }
 
 // ----- Money / Token Trays ----------------------------------------------------------------------
@@ -329,29 +332,36 @@ module money_set() {
     translate( [0,md+0*ft+1*pad,0] ) money_side();
     translate( [0,md+1*ft+2*pad,0] ) money_side();
     translate( [xw+th,md+2*ft+3*pad,0] ) token_side();
-    
     translate( [mw+pad,md+pad,0] ) money_back();
-
-    translate( [mw+2*ht+5*pad,0,0] ) token_base();
-    translate( [mw+tw+2*ht+6*pad,0,0] ) token_back();
-    translate( [mw+tw+3*ht+7*pad,0,0] ) token_back();
-
-    translate( [mw+2*ht+5*pad+th,md+0*ht+1*pad,0] ) token_side();
-    translate( [mw+2*ht+5*pad+th,md+1*ht+2*pad,0] ) token_side();
-    translate( [mw+2*ht+5*pad+th,md+2*ht+3*pad,0] ) token_side();    
 }
 
+module token_set() {
+    mw = MONEY_WIDTH;
+    md = MONEY_DEPTH;
+    tw = TOKEN_WIDTH;
+    ts = TOKEN_SHORT;
+    xw = mw-tw;
+    
+    token_base();
+    translate( [tw+0*ht+1*pad,0,0] ) token_back();
+    translate( [tw+1*ht+2*pad,0,0] ) token_back();
+
+    translate( [th,md+0*ht+1*pad,0] ) token_side();
+    translate( [th,md+1*ht+2*pad,0] ) token_side();
+    translate( [th,md+2*ht+3*pad,0] ) token_side();    
+}
 
 // ----- Cut Parts View ---------------------------------------------------------------------------
 
-card_y = CARD_WIDTH;
-card_s = 5 * CARD_SIDE + 5*pad;
 play_x = PLAYER_WIDTH + 4*ht + 6*pad;
 play_y = PLAYER_DEPTH + 2*ht + 4*pad;
+
 good_x = plain_tray_x( GOOD_WIDTH, GOOD_DEPTH );
 good_y = plain_tray_y( GOOD_WIDTH, GOOD_DEPTH );
+
 fact_x = plain_tray_x( FACT_WIDTH, FACT_DEPTH );
 fact_y = plain_tray_y( FACT_WIDTH, FACT_DEPTH );
+
 dice_x = plain_tray_x( DICE_WIDTH, DICE_DEPTH );
 dice_y = plain_tray_y( DICE_WIDTH, DICE_DEPTH );
 
@@ -363,13 +373,14 @@ module sheet_1() {
     place( [bd+1*play_x,bd+1*play_y,0], 0, "tan" )    player_set();
     
     place( [bd+0*play_x,bd+2*play_y,0], 0, "coral" )          card_side_set();
-    place( [bd+1*card_s,bd+2*play_y+card_y,0], -90, "coral" ) card_base();
+//  place( [bd+1*card_s,bd+2*play_y+card_y,0], -90, "coral" ) card_base();
 }
 
 module sheet_2() {
     % square( SMV_SHEET );
-    place( [bd+0*play_x,bd+0*play_y,0], 0, "orange" ) player_set( true );
-    place( [bd+0*play_x,bd+1*play_y,0], 0, "red" ) plain_tray( DICE_WIDTH, DICE_DEPTH );
+    place( [bd+0*play_x+0*pad,bd+0*play_y,0], 0, "orange" ) player_set( true );
+    place( [bd+0*dice_x+0*pad,bd+1*play_y,0], 0, "red" ) plain_tray( DICE_WIDTH, DICE_DEPTH );
+    place( [bd+1*dice_x+1*pad,bd+1*play_y,0], 0, "coral" ) card_set();
 }
 
 module sheet_3() {
@@ -379,12 +390,13 @@ module sheet_3() {
     place( [bd+1*fact_x,bd+1*map_x+0*pad,0], 0, "plum" ) plain_tray( FACT_WIDTH, FACT_DEPTH );
     place( [bd+2*fact_x,bd+1*map_x+0*pad,0], 0, "pink" ) plain_tray( GOOD_WIDTH, GOOD_DEPTH );
     place( [bd+3*fact_x,bd+1*map_x+0*pad,0], 0, "pink" ) plain_tray( GOOD_WIDTH, GOOD_DEPTH );
-    place( [bd+MAP_DEPTH+4*pad,bd+ft,0], -90, "coral" ) card_back();
+//  place( [bd+MAP_DEPTH+4*pad,bd+ft,0], -90, "coral" ) card_back();
 }
 
 module sheet_4() {
     % square( SMV_SHEET );
     place( [bd,bd,0], 0, "navy" ) money_set();
+    place( [bd+140,bd,0], 0, "blue" ) token_set();
 }
 
 module all_sheets() {
