@@ -1,0 +1,4 @@
+BUILDDIR = build
+SRCDIR = src
+
+
