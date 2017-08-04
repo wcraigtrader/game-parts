@@ -12,7 +12,7 @@ $fn=90; // Fine-grained corners
 
 FILAMENT = 0.8 * mm; // Thickness of a line of filament
 
-LID   = 1 * mm;
+LID   = 2 * mm;
 OUTER = 2 * FILAMENT;
 INNER = 2 * FILAMENT;
 SEP   = 2 * FILAMENT;
@@ -91,10 +91,17 @@ module box_lid() {
     }
 }
 
-chit_tray();
-translate( [ 0, BY+5, 0] ) card_tray();
-translate( [ BX+5, 0, 0] ) box_lid();
+show=4;
 
-//chit_tray();
-//card_tray();
-//box_lid();
+if (show == 1) {
+    chit_tray();
+} else if (show == 2) {
+    card_tray();
+} else if (show == 3) {
+    box_lid();
+} else if (show == 4) {
+    chit_tray();
+    translate( [ 0, BY+5, 0] ) card_tray();
+    translate( [ BX+5, 0, 0] ) box_lid();
+}
+
