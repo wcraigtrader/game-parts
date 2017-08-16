@@ -10,8 +10,8 @@ CARD_HEIGHT = 100 * mm;
 CARD_WIDTH  = 176/3 * mm; 
 LABEL_HEIGHT =  9 * mm;
 LABEL_WIDTH  = 40 * mm;
-PAGE_HEIGHT = 11 * inch;
-PAGE_WIDTH  = 8.5 * inch;
+PAGE_HEIGHT = 280.5 * mm; // 11 * inch;
+PAGE_WIDTH  = 217 * mm; // 8.5 * inch;
 
 // --------------------------------------------------------------------------------
 
