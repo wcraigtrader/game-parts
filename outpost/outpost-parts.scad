@@ -14,7 +14,7 @@ TILE_COUNT = 10;
 // Physical dimensions
 WALL = 0.8 * mm;  // Slicing filament thickness
 GAP  = 0.2 * mm;  // Size differential between box and lid, for snug fit
-SPACING = 1.5 * mm; // Space around tiles to make them easier to insert / extract
+SPACING = 2 * mm; // Space around tiles to make them easier to insert / extract
 LID = 1 * mm;
 BOTTOM = 1 * mm;
 
@@ -23,6 +23,10 @@ OUTER = 2 * WALL;
 INNER = 2 * WALL;
 
 OVERLAP = 0.1 * mm; // Ensures that there are no vertical artifacts leftover
+
+// Command Line Arguments
+PART = 1;           // Which part to output
+VERBOSE = 1;        // Set to non-zero to see more data
 
 $fn=45;
 
@@ -36,7 +40,9 @@ module parts_dividers() {
     dy = inside( 3 );
     dx = inside( 2 );
     
-    echo (InsideLength=row_x, InsideDepth=col_y, InsideHeight=div_z);
+    if (VERBOSE) {
+        echo (InsideLength=row_x, InsideDepth=col_y, InsideHeight=div_z);
+    }
 
     union() {
         translate( [0,dy,0] ) cube( [row_x, INNER, div_z ] );
@@ -112,14 +118,10 @@ module parts_lid() {
     }
 }
 
+// ----- Choose which part to output ------------------------------------------
 
-module placement() {
-    translate( [0,0,0] ) parts_bottom();
-    translate( [105,0,0] ) parts_lid();
+if (PART == 1) {
+    parts_bottom();
+} else if (PART == 2) {
+    parts_lid();
 }
-
-// parts_dividers();
-// parts_bottom();
-// parts_top();
-
-placement();

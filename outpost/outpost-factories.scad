@@ -16,13 +16,17 @@ TILE_COUNT = max( 6, 9, 10 );
 // Physical dimensions
 WALL = 0.8 * mm;  // Slicing filament thickness
 GAP  = 0.2 * mm;  // Size differential between box and lid, for snug fit
-SPACING = 1.5 * mm; // Space around tiles to make them easier to insert / extract
+SPACING = 2 * mm; // Space around tiles to make them easier to insert / extract
 LID = 1 * mm;
 BOTTOM = 1 * mm;
 
 // Wall dimensions
 OUTER = 2 * WALL;
 INNER = 2 * WALL;
+
+// Command Line Arguments
+PART = 1;           // Which part to output
+VERBOSE = 1;        // Set to non-zero to see more data
 
 OVERLAP = 0.1 * mm; // Ensures that there are no vertical artifacts leftover
 
@@ -52,7 +56,9 @@ module box_dividers(tiles, rows, smalls, larges, extras=40, notched=true) {
     col_y = inside_depth( rows );
     div_z = inside_height( tiles );
     
-    echo (InsideLength=row_x, InsideDepth=col_y, InsideHeight=div_z);
+    if (VERBOSE) {
+        echo (InsideLength=row_x, InsideDepth=col_y, InsideHeight=div_z);
+    }
 
     row_cuts   = [ [0,1*tw/3], [0,2*tw/3],  [div_z+OVERLAP,2*tw/3],  [div_z+OVERLAP,1*tw/3] ];
     small_cuts = [ [0,1*sth/3], [0,2*sth/3], [div_z+OVERLAP,2*sth/3], [div_z+OVERLAP,1*sth/3] ];
@@ -189,28 +195,10 @@ module box_lid(tiles, rows, smalls, larges, extras=40) {
     
 }
 
+// ----- Choose which part to output ------------------------------------------
 
-module placement(tiles, rows, smalls, larges, extras=40, notches=true) {
-    offset = inside_depth( rows );
-    x1 = 1 * (offset + 4 * INNER);
-    x2 = 2 * (offset + 4 * INNER) + 5 * mm;
-    
-    translate( [x1,0,0] ) 
-        rotate( [0,0,90] ) 
-            box_bottom( tiles, rows, smalls, larges, extras, notches );
-    translate( [x2,0,0] ) 
-        rotate( [0,0,90] ) 
-            box_lid( tiles, rows, smalls, larges, extras );
+if (PART == 1) {
+    box_bottom( TILE_COUNT, 5, 4, 1, 0 );
+} else if (PART == 2) {
+    box_lid( TILE_COUNT, 5, 4, 1, 0 );
 }
-
-// box_dividers(5, 3, 2, 1, notched=true);
-// box_dividers(10, 5, 4, 1, extras=0);
-
-// box_bottom( 5, 2, 2, 1, 20 );
-// box_lid( 5, 3, 2, 1, 20 );
-
-box_bottom( TILE_COUNT, 5, 4, 1, 0 );
-// box_lid( TILE_COUNT, 5, 4, 1, 0 );
-
-// placement(5,3,2,1,20);
-// placement(10,5,4,1,0);
