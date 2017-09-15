@@ -2,92 +2,110 @@ OPENSCAD=/usr/bin/openscad
 
 VERBOSE=0
 
+STL=stl
+PNG=png
+
 models:	\
-	outpost-card-tray-large-box.stl outpost-card-tray-large-lid.stl \
-	outpost-card-tray-1-box.stl outpost-card-tray-1-lid.stl \
-	outpost-card-tray-2-box.stl outpost-card-tray-2-lid.stl \
-	outpost-factories-box.stl outpost-factories-lid.stl outpost-tile-pick.stl \
-	outpost-parts-box.stl outpost-parts-lid.stl
+	$(STL)/outpost-card-tray-large-box.stl \
+	$(STL)/outpost-card-tray-large-lid.stl \
+	$(STL)/outpost-card-tray-1-box.stl \
+	$(STL)/outpost-card-tray-1-lid.stl \
+	$(STL)/outpost-card-tray-2-box.stl \
+	$(STL)/outpost-card-tray-2-lid.stl \
+	$(STL)/outpost-factories-box.stl \
+	$(STL)/outpost-factories-lid.stl \
+	$(STL)/outpost-tile-pick.stl \
+	$(STL)/outpost-parts-box.stl \
+	$(STL)/outpost-parts-lid.stl
 
 pictures: \
-	outpost-card-tray-large-box.png outpost-card-tray-large-lid.png \
-        outpost-card-tray-1-box.png outpost-card-tray-1-lid.png \
-        outpost-card-tray-2-box.png outpost-card-tray-2-lid.png \
-        outpost-factories-box.png outpost-factories-lid.png outpost-tile-pick.png \
-        outpost-parts-box.png outpost-parts-lid.png
+	$(PNG)/outpost-card-tray-large-box.png \
+	$(PNG)/outpost-card-tray-large-lid.png \
+        $(PNG)/outpost-card-tray-1-box.png \
+	$(PNG)/outpost-card-tray-1-lid.png \
+        $(PNG)/outpost-card-tray-2-box.png \
+	$(PNG)/outpost-card-tray-2-lid.png \
+        $(PNG)/outpost-factories-box.png \
+	$(PNG)/outpost-factories-lid.png \
+	$(PNG)/outpost-tile-pick.png \
+        $(PNG)/outpost-parts-box.png \
+	$(PNG)/outpost-parts-lid.png
 
-all:	models pictures
+all:	directories models pictures
+
+directories:
+	mkdir -p $(STL) $(PNG)
 
 clean:
-	rm -f *.stl *.gcode *.png
+	rm -rf $(PNG) $(STL) *.stl *.gcode *.png
 
 # Dependencies for models
 
-outpost-card-tray-large-box.stl: outpost-card-tray.scad
+$(STL)/outpost-card-tray-large-box.stl: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-large-lid.stl: outpost-card-tray.scad
+$(STL)/outpost-card-tray-large-lid.stl: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-1-box.stl: outpost-card-tray.scad
+$(STL)/outpost-card-tray-1-box.stl: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-1-lid.stl: outpost-card-tray.scad
+$(STL)/outpost-card-tray-1-lid.stl: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=4 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-2-box.stl: outpost-card-tray.scad
+$(STL)/outpost-card-tray-2-box.stl: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=5 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-2-lid.stl: outpost-card-tray.scad
+$(STL)/outpost-card-tray-2-lid.stl: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=6 -DVERBOSE=$(VERBOSE) $<
 
-outpost-factories-box.stl: outpost-factories.scad
+$(STL)/outpost-factories-box.stl: outpost-factories.scad
 	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
 
-outpost-factories-lid.stl: outpost-factories.scad
+$(STL)/outpost-factories-lid.stl: outpost-factories.scad
 	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
 
-outpost-tile-pick.stl: outpost-factories.scad
+$(STL)/outpost-tile-pick.stl: outpost-factories.scad
 	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
 
-outpost-parts-box.stl: outpost-parts.scad
+$(STL)/outpost-parts-box.stl: outpost-parts.scad
 	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
 
-outpost-parts-lid.stl: outpost-parts.scad
+$(STL)/outpost-parts-lid.stl: outpost-parts.scad
 	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
 
 # Dependencies for pictures
 
-outpost-card-tray-large-box.png: outpost-card-tray.scad
+$(PNG)/outpost-card-tray-large-box.png: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-large-lid.png: outpost-card-tray.scad
+$(PNG)/outpost-card-tray-large-lid.png: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-1-box.png: outpost-card-tray.scad
+$(PNG)/outpost-card-tray-1-box.png: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-1-lid.png: outpost-card-tray.scad
+$(PNG)/outpost-card-tray-1-lid.png: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=4 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-2-box.png: outpost-card-tray.scad
+$(PNG)/outpost-card-tray-2-box.png: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=5 -DVERBOSE=$(VERBOSE) $<
 
-outpost-card-tray-2-lid.png: outpost-card-tray.scad
+$(PNG)/outpost-card-tray-2-lid.png: outpost-card-tray.scad
 	$(OPENSCAD) -o $@ -DPART=6 -DVERBOSE=$(VERBOSE) $<
 
-outpost-factories-box.png: outpost-factories.scad
+$(PNG)/outpost-factories-box.png: outpost-factories.scad
 	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
 
-outpost-factories-lid.png: outpost-factories.scad
+$(PNG)/outpost-factories-lid.png: outpost-factories.scad
 	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
 
-outpost-tile-pick.png: outpost-factories.scad
+$(PNG)/outpost-tile-pick.png: outpost-factories.scad
 	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
 
-outpost-parts-box.png: outpost-parts.scad
+$(PNG)/outpost-parts-box.png: outpost-parts.scad
 	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
 
-outpost-parts-lid.png: outpost-parts.scad
+$(PNG)/outpost-parts-lid.png: outpost-parts.scad
 	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
 
