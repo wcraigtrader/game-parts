@@ -25,7 +25,7 @@ OUTER = 2 * WALL;
 INNER = 2 * WALL;
 
 // Command Line Arguments
-PART = 1;           // Which part to output
+PART = 3;           // Which part to output
 VERBOSE = 1;        // Set to non-zero to see more data
 
 OVERLAP = 0.1 * mm; // Ensures that there are no vertical artifacts leftover
@@ -195,10 +195,35 @@ module box_lid(tiles, rows, smalls, larges, extras=40) {
     
 }
 
+module box_pick() {
+    outline = [ 
+        [0,2], 
+        [40,3], 
+        [46,6], 
+        [98,6], 
+        [100,4], 
+        [100,-4], 
+        [98,-6], 
+        [46,-6], 
+        [40,-3], 
+        [0,-2] 
+    ];
+    difference() {
+        linear_extrude( height=2 ) 
+            polygon( outline );
+    
+        rotate( [0,-5,0] )
+            translate( [0,-10,0] )
+                cube( [50,20,10] );
+    }
+}
+
 // ----- Choose which part to output ------------------------------------------
 
 if (PART == 1) {
     box_bottom( TILE_COUNT, 5, 4, 1, 0 );
 } else if (PART == 2) {
     box_lid( TILE_COUNT, 5, 4, 1, 0 );
+} else if (PART == 3) {
+    box_pick();
 }
