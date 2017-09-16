@@ -6,18 +6,22 @@
 
 include <functions.scad>;
 
-$fn=90; // Fine-grained corners
+// Command Line Arguments
+PART = 0;           // Which part to output
+VERBOSE = 1;        // Set to non-zero to see more data
 
 // Box
 
 FILAMENT = 0.8 * mm; // Thickness of a line of filament
 
 LID   = 2 * mm;
-OUTER = 2 * FILAMENT;
-INNER = 2 * FILAMENT;
-SEP   = 2 * FILAMENT;
+OUTER = 2.5 * FILAMENT;
+INNER = 2.5 * FILAMENT;
+SEP   = 2.5 * FILAMENT;
 
 GAP = FILAMENT/4;
+
+$fn=90; // Fine-grained corners
 
 CW = 69 * mm;           // (X) Width of card
 CH = 96 * mm;           // (Y) Height of card
@@ -25,7 +29,7 @@ CZ = 36 * mm;           // (Z) Thickness of card stack
 
 P1 = 35 * mm;           // (Y) Space for 5's and Explore Tiles
 P2 = CH - P1 - SEP;     // (Y) Space for 1's and 10's
-PZ = 15 * mm;           // (Z) Inner height of chit box
+PZ = 20 * mm;           // (Z) Inner height of chit box
 
 LZ = PZ/2 + LID;
 
@@ -91,15 +95,13 @@ module box_lid() {
     }
 }
 
-show=4;
-
-if (show == 1) {
+if (PART == 1) {
     chit_tray();
-} else if (show == 2) {
+} else if (PART == 2) {
     card_tray();
-} else if (show == 3) {
+} else if (PART == 3) {
     box_lid();
-} else if (show == 4) {
+} else if (PART == 0) {
     chit_tray();
     translate( [ 0, BY+5, 0] ) card_tray();
     translate( [ BX+5, 0, 0] ) box_lid();
