@@ -5,7 +5,12 @@ VERBOSE=0
 STL=stl
 PNG=png
 
-models:	\
+all:	directories models pictures
+
+directories:
+	mkdir -p $(STL) $(PNG)
+
+models: \
 	$(STL)/outpost-card-tray-large-box.stl \
 	$(STL)/outpost-card-tray-large-lid.stl \
 	$(STL)/outpost-card-tray-1-box.stl \
@@ -31,13 +36,9 @@ pictures: \
         $(PNG)/outpost-parts-box.png \
 	$(PNG)/outpost-parts-lid.png
 
-all:	directories models pictures
-
-directories:
-	mkdir -p $(STL) $(PNG)
-
 clean:
-	rm -rf $(PNG) $(STL) *.stl *.gcode *.png
+	rm -f $(STL)/*.stl *.stl $(STL)/*.gcode *.gcode 
+	rm -f $(PNG)/*.png *.png
 
 # Dependencies for models
 
