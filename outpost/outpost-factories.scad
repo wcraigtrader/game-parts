@@ -25,7 +25,7 @@ OUTER = 2 * WALL;
 INNER = 2 * WALL;
 
 // Command Line Arguments
-PART = 3;           // Which part to output
+PART = "box";       // Which part to output
 VERBOSE = 1;        // Set to non-zero to see more data
 
 OVERLAP = 0.1 * mm; // Ensures that there are no vertical artifacts leftover
@@ -220,10 +220,10 @@ module box_pick() {
 
 // ----- Choose which part to output ------------------------------------------
 
-if (PART == 1) {
+if (PART == "box") {
     box_bottom( TILE_COUNT, 5, 4, 1, 0 );
-} else if (PART == 2) {
+} else if (PART == "lid") {
     box_lid( TILE_COUNT, 5, 4, 1, 0 );
-} else if (PART == 3) {
+} else if (PART == "pick") {
     box_pick();
 }

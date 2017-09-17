@@ -46,7 +46,7 @@ OUTER = 2.5 * WALL;
 INNER = 2.5 * WALL;
 
 // Command Line Arguments
-PART = 2;           // Which part to output
+PART = "large-box";	// Which part to output
 VERBOSE = 1;        // Set to non-zero to see more data
 
 if (VERBOSE) echo (Bottom=BOTTOM, Lid=LID, InnerWall=INNER, OuterWall=OUTER);
@@ -161,16 +161,16 @@ module tray_lid(trayz) {
 
 // ----- Choose which part to output ------------------------------------------
  
-if (PART == 1) {
+if (PART == "large-box") {
     tray_bottom(large_tray);
-} else if (PART == 2) {
+} else if (PART == "large-lid") {
     tray_lid(large_tray);
-} else if (PART == 3) {
+} else if (PART == "1-box") {
     tray_bottom(tray1);
-} else if (PART == 4) {
+} else if (PART == "1-lid") {
     tray_lid(tray1);
-} else if (PART == 5) {
+} else if (PART == "2-box") {
     tray_bottom(tray2);
-} else if (PART == 6) {
+} else if (PART == "2-lid") {
     tray_lid(tray2);
 }

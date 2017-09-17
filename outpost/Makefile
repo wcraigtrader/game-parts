@@ -1,112 +1,69 @@
 OPENSCAD=/usr/bin/openscad
+OPENSCAD_OPTIONS=-DVERBOSE=0
 
-VERBOSE=0
+SLIC3R=/opt/Slic3r/Slic3r-1.36.2-prusa3d-linux64-full-201707281217/slic3r
+SLIC3R_OPTIONS=--load slic3r.ini --print-center 125,105
 
 STL=stl
-PNG=png
+IMAGE=png
+GCODE=gcode
 
-all:	directories models pictures
+PREFIX=outpost
+
+CPARTS=1-box 1-lid 2-box 2-lid large-box large-lid
+FPARTS=box lid pick
+PPARTS=box lid
+
+FMODELS=$(patsubst %,$(STL)/$(PREFIX)-factories-%.stl,$(FPARTS))
+CMODELS=$(patsubst %,$(STL)/$(PREFIX)-card-tray-%.stl,$(CPARTS))
+PMODELS=$(patsubst %,$(STL)/$(PREFIX)-parts-%.stl,$(PPARTS))
+
+FIMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-factories-%.png,$(FPARTS))
+CIMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-card-tray-%.png,$(CPARTS))
+PIMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-parts-%.png,$(PPARTS))
+
+GCODES=$(patsubst %,$(GCODE)/$(PREFIX)-factories-%.gcode,$(FPARTS))
+GCODES+=$(patsubst %,$(GCODE)/$(PREFIX)-card-tray-%.gcode,$(CPARTS))
+GCODES+=$(patsubst %,$(GCODE)/$(PREFIX)-parts-%.gcode,$(PPARTS))
+
+all:	models gcodes images
 
 directories:
-	mkdir -p $(STL) $(PNG)
+	@mkdir -p $(STL) $(IMAGE) $(GCODE)
 
-models: \
-	$(STL)/outpost-card-tray-large-box.stl \
-	$(STL)/outpost-card-tray-large-lid.stl \
-	$(STL)/outpost-card-tray-1-box.stl \
-	$(STL)/outpost-card-tray-1-lid.stl \
-	$(STL)/outpost-card-tray-2-box.stl \
-	$(STL)/outpost-card-tray-2-lid.stl \
-	$(STL)/outpost-factories-box.stl \
-	$(STL)/outpost-factories-lid.stl \
-	$(STL)/outpost-tile-pick.stl \
-	$(STL)/outpost-parts-box.stl \
-	$(STL)/outpost-parts-lid.stl
+models: directories $(MODELS)
 
-pictures: \
-	$(PNG)/outpost-card-tray-large-box.png \
-	$(PNG)/outpost-card-tray-large-lid.png \
-        $(PNG)/outpost-card-tray-1-box.png \
-	$(PNG)/outpost-card-tray-1-lid.png \
-        $(PNG)/outpost-card-tray-2-box.png \
-	$(PNG)/outpost-card-tray-2-lid.png \
-        $(PNG)/outpost-factories-box.png \
-	$(PNG)/outpost-factories-lid.png \
-	$(PNG)/outpost-tile-pick.png \
-        $(PNG)/outpost-parts-box.png \
-	$(PNG)/outpost-parts-lid.png
+gcodes: directories $(GCODES)
+
+images: directories $(IMAGES)
 
 clean:
-	rm -f $(STL)/*.stl *.stl $(STL)/*.gcode *.gcode 
-	rm -f $(PNG)/*.png *.png
+	rm -rf $(STL) $(GCODE) $(IMAGE)
 
 # Dependencies for models
 
-$(STL)/outpost-card-tray-large-box.stl: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
+$(FMODELS) : $(STL)/$(PREFIX)-factories-%.stl : $(PREFIX)-factories.scad
+	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-factories-,,$(subst .stl,,$(@F)))\" $<
 
-$(STL)/outpost-card-tray-large-lid.stl: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
+$(CMODELS) : $(STL)/$(PREFIX)-card-tray-%.stl : $(PREFIX)-card-tray.scad
+	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-card-tray-,,$(subst .stl,,$(@F)))\" $<
 
-$(STL)/outpost-card-tray-1-box.stl: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
+$(PMODELS) : $(STL)/$(PREFIX)-parts-%.stl : $(PREFIX)-parts.scad
+	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-parts-,,$(subst .stl,,$(@F)))\" $<
 
-$(STL)/outpost-card-tray-1-lid.stl: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=4 -DVERBOSE=$(VERBOSE) $<
+# Dependencies for images
 
-$(STL)/outpost-card-tray-2-box.stl: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=5 -DVERBOSE=$(VERBOSE) $<
+$(FIMAGES) : $(IMAGE)/$(PREFIX)-factories-%.png : $(PREFIX)-factories.scad
+	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-factories-,,$(subst .png,,$(@F)))\" $<
 
-$(STL)/outpost-card-tray-2-lid.stl: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=6 -DVERBOSE=$(VERBOSE) $<
+$(CIMAGES) : $(IMAGE)/$(PREFIX)-card-tray-%.png : $(PREFIX)-card-tray.scad
+	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-card-tray-,,$(subst .png,,$(@F)))\" $<
 
-$(STL)/outpost-factories-box.stl: outpost-factories.scad
-	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
+$(PIMAGES) : $(IMAGE)/$(PREFIX)-parts-%.png : $(PREFIX)-parts.scad
+	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-parts-,,$(subst .png,,$(@F)))\" $<
 
-$(STL)/outpost-factories-lid.stl: outpost-factories.scad
-	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
+# Dependencies for slicing
 
-$(STL)/outpost-tile-pick.stl: outpost-factories.scad
-	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
-
-$(STL)/outpost-parts-box.stl: outpost-parts.scad
-	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
-
-$(STL)/outpost-parts-lid.stl: outpost-parts.scad
-	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
-
-# Dependencies for pictures
-
-$(PNG)/outpost-card-tray-large-box.png: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-card-tray-large-lid.png: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-card-tray-1-box.png: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-card-tray-1-lid.png: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=4 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-card-tray-2-box.png: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=5 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-card-tray-2-lid.png: outpost-card-tray.scad
-	$(OPENSCAD) -o $@ -DPART=6 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-factories-box.png: outpost-factories.scad
-	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-factories-lid.png: outpost-factories.scad
-	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-tile-pick.png: outpost-factories.scad
-	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-parts-box.png: outpost-parts.scad
-	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/outpost-parts-lid.png: outpost-parts.scad
-	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
+$(GCODES) : $(GCODE)/%.gcode : $(STL)/%.stl
+	$(SLIC3R) -o $@ $(SLIC3R_OPTIONS) $<
 

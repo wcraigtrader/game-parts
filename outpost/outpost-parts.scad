@@ -25,7 +25,7 @@ INNER = 2 * WALL;
 OVERLAP = 0.1 * mm; // Ensures that there are no vertical artifacts leftover
 
 // Command Line Arguments
-PART = 1;           // Which part to output
+PART = "box";       // Which part to output
 VERBOSE = 1;        // Set to non-zero to see more data
 
 $fn=45;
@@ -120,8 +120,8 @@ module parts_lid() {
 
 // ----- Choose which part to output ------------------------------------------
 
-if (PART == 1) {
+if (PART == "box") {
     parts_bottom();
-} else if (PART == 2) {
+} else if (PART == "lid") {
     parts_lid();
 }
