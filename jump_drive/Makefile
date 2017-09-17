@@ -1,48 +1,47 @@
 OPENSCAD=/usr/bin/openscad
+OPENSCAD_OPTIONS=-DVERBOSE=0
 
-VERBOSE=0
+SLIC3R=/opt/Slic3r/Slic3r-1.36.2-prusa3d-linux64-full-201707281217/slic3r
+SLIC3R_OPTIONS=--load slic3r.ini --print-center 125,105
 
 STL=stl
-PNG=png
+IMAGE=png
+GCODE=gcode
 
-all:	directories models pictures
+PREFIX=jump-drive
+
+PARTS=card-tray chit-tray box-lid
+
+MODELS=$(patsubst %,$(STL)/$(PREFIX)-%.stl,$(PARTS))
+IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-%.png,$(PARTS))
+GCODES=$(patsubst %,$(GCODE)/$(PREFIX)-%.gcode,$(PARTS))
+
+all:	models gcodes images
 
 directories:
-	mkdir -p $(STL) $(PNG)
+	@mkdir -p $(STL) $(IMAGE) $(GCODE)
 
-models: \
-	$(STL)/jump-drive-card-tray.stl \
-	$(STL)/jump-drive-chit-tray.stl \
-	$(STL)/jump-drive-box-lid.stl
+models: directories $(MODELS)
 
-pictures: \
-	$(PNG)/jump-drive-card-tray.png \
-	$(PNG)/jump-drive-chit-tray.png \
-	$(PNG)/jump-drive-box-lid.png
+gcodes: directories $(GCODES)
+
+images: directories $(IMAGES)
 
 clean:
-	rm -f $(STL)/*.stl *.stl $(STL)/*.gcode *.gcode 
-	rm -f $(PNG)/*.png *.png
+	rm -rf $(STL) $(GCODE) $(IMAGE)
 
 # Dependencies for models
 
-$(STL)/jump-drive-card-tray.stl: jump-drive.scad
-	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
+$(MODELS) : $(STL)/$(PREFIX)-%.stl : $(PREFIX).scad
+	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .stl,,$(@F)))\" $<
 
-$(STL)/jump-drive-chit-tray.stl: jump-drive.scad
-	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
+# Dependencies for images
 
-$(STL)/jump-drive-box-lid.stl: jump-drive.scad
-	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
+$(IMAGES) : $(IMAGE)/$(PREFIX)-%.png : $(PREFIX).scad
+	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .png,,$(@F)))\" $<
 
-# Dependencies for pictures
+# Dependencies for slicing
 
-$(PNG)/jump-drive-card-tray.png: jump-drive.scad
-	$(OPENSCAD) -o $@ -DPART=1 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/jump-drive-chit-tray.png: jump-drive.scad
-	$(OPENSCAD) -o $@ -DPART=2 -DVERBOSE=$(VERBOSE) $<
-
-$(PNG)/jump-drive-box-lid.png: jump-drive.scad
-	$(OPENSCAD) -o $@ -DPART=3 -DVERBOSE=$(VERBOSE) $<
+$(GCODES) : $(GCODE)/%.gcode : $(STL)/%.stl
+	$(SLIC3R) -o $@ $(SLIC3R_OPTIONS) $<
 

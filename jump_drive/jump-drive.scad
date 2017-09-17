@@ -7,8 +7,12 @@
 include <functions.scad>;
 
 // Command Line Arguments
-PART = 0;           // Which part to output
+PART = "all";           // Which part to output
 VERBOSE = 1;        // Set to non-zero to see more data
+
+if (VERBOSE) {
+	echo (Part=PART);
+}
 
 // Box
 
@@ -27,7 +31,7 @@ CW = 69 * mm;           // (X) Width of card
 CH = 96 * mm;           // (Y) Height of card
 CZ = 36 * mm;           // (Z) Thickness of card stack
 
-P1 = 35 * mm;           // (Y) Space for 5's and Explore Tiles
+P1 = 37 * mm;           // (Y) Space for 5's and Explore Tiles
 P2 = CH - P1 - SEP;     // (Y) Space for 1's and 10's
 PZ = 20 * mm;           // (Z) Inner height of chit box
 
@@ -37,6 +41,11 @@ BX = 2*CW + 2*INNER + SEP;
 BY = CH + 2*INNER;
 BZ = LID + CZ + LID + PZ/2;
 
+
+if (VERBOSE) {
+    echo (OUTER=OUTER, INNER=INNER, SEP=SEP, GAP=GAP);
+    echo (CW=CW, BX=BX, CH=CH, BY=BY, P1=P1, P2=P2);
+}
 
 module card_tray() {
     difference() {
@@ -67,18 +76,32 @@ module card_tray() {
 }
 
 module chit_tray() {
+    
+    bx = BX-2*GAP; by = BY-2*GAP;
+    dx1 = INNER; dx2 = INNER + CW-GAP + SEP;
+    dy1 = INNER; dy2 = INNER + P1-GAP + SEP;
+    
+    hx = CW-GAP; hy1 = P1-GAP; hy2 = P2-GAP;
+    
+    if (VERBOSE) {
+        echo (bx=bx, by=by);
+        echo (dx1=dx1, dy1=dy1, dx2=dx2, dy2=dy2);
+        echo (hx=hx, hy1=hy1, hy2=hy2);
+        echo (query=by-dy2-hy2);
+    }
+    
     difference() {
         // Outside of box
-        cube( [ BX-2*GAP, BY-2*GAP, PZ ] );
+        cube( [ bx, by, PZ ] );
         
-        translate( [ INNER+GAP, INNER+GAP, LID ] )
-            cube( [ CW-2*GAP, P1-GAP, PZ ] );
-        translate( [ INNER+GAP+CW+SEP, INNER+GAP, LID ] )
-            cube( [ CW-2*GAP, P1-GAP, PZ ] );
-        translate( [ INNER+GAP, INNER+GAP+P1+SEP, LID ] )
-            cube( [ CW-2*GAP, P2-GAP, PZ ] );
-        translate( [ INNER+GAP+CW+SEP, INNER+GAP+P1+SEP, LID ] )
-            cube( [ CW-2*GAP, P2-GAP, PZ ] );
+        translate( [ dx1, dy1, LID ] )
+            cube( [ hx, hy1, PZ ] );
+        translate( [ dx2, dy1, LID ] )
+            cube( [ hx, hy1, PZ ] );
+        translate( [ dx1, dy2, LID ] )
+            cube( [ hx, hy2, PZ ] );
+        translate( [ dx2, dy2, LID ] )
+            cube( [ hx, hy2, PZ ] );
     }
 }
 
@@ -95,13 +118,13 @@ module box_lid() {
     }
 }
 
-if (PART == 1) {
-    chit_tray();
-} else if (PART == 2) {
+if (PART == "card-tray") {
     card_tray();
-} else if (PART == 3) {
+} else if (PART == "chit-tray") {
+    chit_tray();
+} else if (PART == "box-lid") {
     box_lid();
-} else if (PART == 0) {
+} else if (PART == "all") {
     chit_tray();
     translate( [ 0, BY+5, 0] ) card_tray();
     translate( [ BX+5, 0, 0] ) box_lid();
