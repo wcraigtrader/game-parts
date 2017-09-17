@@ -26,16 +26,18 @@ GCODES=$(patsubst %,$(GCODE)/$(PREFIX)-factories-%.gcode,$(FPARTS))
 GCODES+=$(patsubst %,$(GCODE)/$(PREFIX)-card-tray-%.gcode,$(CPARTS))
 GCODES+=$(patsubst %,$(GCODE)/$(PREFIX)-parts-%.gcode,$(PPARTS))
 
+
+
 all:	models gcodes images
 
 directories:
 	@mkdir -p $(STL) $(IMAGE) $(GCODE)
 
-models: directories $(MODELS)
+models: directories $(FMODELS) $(CMODELS) $(PMODELS)
 
 gcodes: directories $(GCODES)
 
-images: directories $(IMAGES)
+images: directories $(FIMAGES) $(CIMAGES) $(PIMAGES)
 
 clean:
 	rm -rf $(STL) $(GCODE) $(IMAGE)
