@@ -6,6 +6,10 @@
 
 include <MCAD/units.scad>;
 
+// Command Line Arguments
+PART = "other";           // Which part to output
+VERBOSE = 1;        // Set to non-zero to see more data
+
 // Physical dimensions
 WALL = 0.8 * mm; // Slicing filament thickness
 GAP  = 0.2 * mm; // Size differential between box and lid, for snug fit
@@ -172,19 +176,25 @@ module deluxe_top() {
     }
 }
 
-if (0) {
-    translate( [ 0,  0, 0 ] ) basic_bottom();
-    translate( [ 0, 70, 0 ] ) basic_top();
-}
-
-if (1) {
-    translate( [ 0,   0, 0 ] ) deluxe_bottom();
-    translate( [ 0, 100, 0 ] ) deluxe_top();
-}
-
-if (0) {
+if (VERBOSE) {
+	echo (Part=PART);
     echo( DELUXE_THICKNESS=DELUXE_THICKNESS, BASIC_THICKNESS=BASIC_THICKNESS );
     echo( TILE_WIDTH=TILE_WIDTH, SMALL_TILE_HEIGHT=SMALL_TILE_HEIGHT, LARGE_TILE_HEIGHT=LARGE_TILE_HEIGHT );
     echo( LARGE=16*DELUXE_THICKNESS, SMALL=14*DELUXE_THICKNESS, WIDTH=TILE_WIDTH );
     echo( 5*DELUXE_THICKNESS, SMALL_TILE_HEIGHT-5*DELUXE_THICKNESS );
+}
+
+if (PART == "limited-box") {
+    deluxe_bottom();
+} else if (PART == "limited-lid") {
+    deluxe_top();
+} else if (PART == "basic-box") {
+    basic_bottom();
+} else if (PART == "basic-lid") {
+    basic_top();
+} else {
+    translate( [   0,   0, 0 ] ) deluxe_bottom();
+    translate( [   0, 100, 0 ] ) deluxe_top();
+    translate( [ 110,   0, 0 ] ) basic_bottom();
+    translate( [ 110,  60, 0 ] ) basic_top();
 }
