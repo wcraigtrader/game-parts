@@ -22,11 +22,11 @@ CARD_STACK  = 35 * mm;          // (Z) Thickness of card stack
 TOKEN_RADIUS = 22 * mm;         // (R) Radius of token (chip)
 TOKEN_THICKNESS = 3.35 * mm;    // (X) Thickness of token (chip)
 
-NOBEL_WIDTH  = 60 * mm;         // (X) Width of nobel tile
-NOBEL_HEIGHT = 60 * mm;         // (Y) Height of nobel tile
+NOBLE_WIDTH  = 60 * mm;         // (X) Width of noble tile
+NOBLE_HEIGHT = 60 * mm;         // (Y) Height of noble tile
 CITY_WIDTH  = 120.5 * mm;       // (X) Width of city tile
 CITY_HEIGHT = 60.5 * mm;        // (Y) Height of city tile
-TILE_THICKNESS = 1.9 * mm;      // (Z) Thickness of nobel / city tiles
+TILE_THICKNESS = 1.9 * mm;      // (Z) Thickness of noble / city tiles
 TRADING_POSTS = 4.5 * mm;       // (Z) Thickness of folded trading post board
 
 STRONG_DIAMETER  = 21 * mm;     // Diameter of a stronghold
@@ -78,7 +78,7 @@ if (VERBOSE) {
     echo( FullHeight=FULL_HEIGHT, FullRadius=FULL_RADIUS, PartHeight=PART_HEIGHT, TileHeight=TILE_HEIGHT);
 }
 
-CELL_SIZE = max( NOBEL_WIDTH, NOBEL_HEIGHT, CITY_HEIGHT ) + SPACE;
+CELL_SIZE = max( NOBLE_WIDTH, NOBLE_HEIGHT, CITY_HEIGHT ) + SPACE;
 BOX_DEPTH = 2 * CELL_SIZE + SEP;
 BOX_WIDTH = BOX_DEPTH;
 
@@ -165,7 +165,7 @@ module card_lid() {
     }
 }
 
-module nobel_city_tray() {
+module noble_city_tray() {
     box_height = PART_HEIGHT + BOTTOM;
     lid_height = LID_OFFSET;
 
@@ -198,15 +198,15 @@ module nobel_city_tray() {
     }
 }
 
-module nobel_city_lid() {
+module noble_city_lid() {
     lid_height = LID + LID_OFFSET;
 
     length = 2*INNER + BOX_WIDTH;
     depth = 2*INNER + BOX_DEPTH;
 
     if (VERBOSE) {
-        echo( BasicInsideLength=length, BasicInsideHeight=height );
-        echo( BasicOutsideLength=length+2*OUTER, BasicOutsideHeight=height+2*OUTER );
+        echo( BasicInsideLength=length, BasicInsideHeight=depth );
+        echo( BasicOutsideLength=length+2*OUTER, BasicOutsideHeight=depth+2*OUTER );
     }
     
     difference() {
@@ -373,9 +373,9 @@ module card_plate() {
     place( [110,0,0], 90 ) card_lid();
 }
 
-module nobel_city_plate() {
-    place( [   0,0,0] ) nobel_city_tray();
-    place( [ 140,0,0] ) nobel_city_lid();
+module noble_city_plate() {
+    place( [   0,0,0] ) noble_city_tray();
+    place( [ 140,0,0] ) noble_city_lid();
 }
 
 module strongholds_plate() {
@@ -397,10 +397,10 @@ if (PART == "card-tray") {
     token_tray();
 } else if (PART == "token-lid") {
     token_lid();
-} else if (PART == "nobel-city-tray") {
-    nobel_city_tray();
-} else if (PART == "nobel-city-lid") {
-    nobel_city_lid();
+} else if (PART == "noble-city-tray") {
+    noble_city_tray();
+} else if (PART == "noble-city-lid") {
+    noble_city_lid();
 } else if (PART == "strongholds-tray") {
     strongholds_tray();
 } else if (PART == "strongholds-lid") {
@@ -409,12 +409,12 @@ if (PART == "card-tray") {
     token_plate();
 } else if (PART == "card-plate") {
     card_plate();
-} else if (PART == "nobel-city-plate") {
-    nobel_city_plate();
+} else if (PART == "noble-city-plate") {
+    noble_city_plate();
 } else if (PART == "strongholds-plate") {
     strongholds_plate();
 } else {
-    place( [0,0,0] ) nobel_city_plate();
+    place( [0,0,0] ) noble_city_plate();
     place( [0,140,0] ) strongholds_plate();
     place( [280,160,0] ) token_plate();
     place( [380,0,0] ) card_plate();
