@@ -45,9 +45,11 @@ module basic_bottom() {
     length = 2*INNER + 3*SEP + s1 + s2 + s3 + s4;
     height = 2*INNER + width;
 
-    echo( Width=width, BasicS1=s1, BasicS2=s2, BasicS3=s3, BasicS4=s4 );
-    echo( BasicInsideLength=length, BasicInsideHeight=height );
-    echo( BasicOutsideLength=length+2*OUTER, BasicOutsideHeight=height+2*OUTER );
+	if (VERBOSE) {
+        echo( Width=width, BasicS1=s1, BasicS2=s2, BasicS3=s3, BasicS4=s4 );
+        echo( BasicInsideLength=length, BasicInsideHeight=height );
+        echo( BasicOutsideLength=length+2*OUTER, BasicOutsideHeight=height+2*OUTER );
+	}
 
     difference() {
         // Outside of box
@@ -114,9 +116,11 @@ module deluxe_bottom() {
     length = 2*INNER + large + SEP + small;
     height = 2*INNER + 2*width + SEP;
 
-    echo( Width=width, DeluxeLarge=large, DeluxeSmall=small );
-    echo( DeluxeInsideLength=length, DeluxeInsideHeight=height );
-    echo( DeluxeOutsideLength=length+2*OUTER, DeluxeOutsideHeight=height+2*OUTER );
+	if (VERBOSE) {
+        echo( Width=width, DeluxeLarge=large, DeluxeSmall=small );
+        echo( DeluxeInsideLength=length, DeluxeInsideHeight=height );
+        echo( DeluxeOutsideLength=length+2*OUTER, DeluxeOutsideHeight=height+2*OUTER );
+	}
 
     difference() {
         // Outside of box
