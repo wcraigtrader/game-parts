@@ -7,7 +7,7 @@
 include <functions.scad>;
 
 // Command Line Arguments
-PART = "all";           // Which part to output
+PART = "other";           // Which part to output
 VERBOSE = 1;        // Set to non-zero to see more data
 
 if (VERBOSE) {
@@ -124,7 +124,7 @@ if (PART == "card-tray") {
     chit_tray();
 } else if (PART == "box-lid") {
     box_lid();
-} else if (PART == "all") {
+} else {
     chit_tray();
     translate( [ 0, BY+5, 0] ) card_tray();
     translate( [ BX+5, 0, 0] ) box_lid();
