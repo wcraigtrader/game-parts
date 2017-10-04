@@ -28,13 +28,13 @@ of tiles and cards. Here are the suggested arrangements.
 
 ## Card Trays
 
-1. Tray 1 (5 slots)
+* Tray 1 (5 slots)
   1. Ore
   1. Water
   1. Mega Water
   1. Titanium
   1. Mega Titanium
-1. Tray 2 (7 slots)
+* Tray 2 (7 slots)
   1. New Chemicals
   1. Mega New Chemicals
   1. Research
