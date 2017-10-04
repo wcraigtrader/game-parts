@@ -3,7 +3,7 @@
 The factories tray and the card trays were optimized for certain arrangements
 of tiles and cards. Here are the suggested arrangements.
 
-## Factories Tray
+## Factory Tiles Tray
 
 * Small Tiles
   * (HE) Heavy Equipment (5 stacks)
@@ -26,7 +26,13 @@ of tiles and cards. Here are the suggested arrangements.
 | HE | W  | L  | L  | PC |
 | HE | W  | L  | L  | MB |
 
+![photo of factory tiles in tray](photos/outpost-factories-box.jpg)
+
 ## Card Trays
+
+The production cards are stored on their sides, and rotated to vertical for play.
+I suggest alternating them left and right, to make it easier to spot the cards
+you need.
 
 * Tray 1 (5 slots)
   1. Ore
@@ -43,8 +49,12 @@ of tiles and cards. Here are the suggested arrangements.
   1. Ring Ore
   1. Moon Ore
 
+![photo of production cards](photos/outpost-card-trays-open.jpg)
+
 ## Parts Tray
 
 * Robot / Colonist Tiles (large)
 * Scorekeeping Tiles (small)
 * Dice / Marketing Tiles (small)
+
+![photo of parts tray](photos/outpost-parts-box.jpg)
