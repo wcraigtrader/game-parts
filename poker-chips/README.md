@@ -12,7 +12,5 @@ While Claysmith Gaming can sell you acrylic chip trays with lids, their trays ar
 
 Total items to print:
 
-(2) trays
-(2) lids
-
-
+(2) trays  
+(2) lids  
