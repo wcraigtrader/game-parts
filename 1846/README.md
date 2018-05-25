@@ -14,7 +14,9 @@ Total items to print:
 * (8) Card trays
 * (8) Card tray lids
 
-As an experiment, I created a tray to hold just enough poker chips to replace the paper money. This fits in the box if you remove the insert; place the money tray in the bottom of the box, with the card trays and the train cards. Place the player cards above the card trays and train cards, then add the tile trays, map board and rules as above. The tray holds:
+As an experiment, I created a tray to hold just enough poker chips to replace the paper money. This fits in the box if you remove the insert; place the money tray in the bottom of the box, with the card trays and the train cards. Place the player cards above the card trays and train cards, then add the tile trays, map board and rules as above. 
+
+The tray is sized for typical 14g / 40mm poker chips, and holds:
 
 * (50) $1 chips
 * (20) $5 chips
