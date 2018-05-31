@@ -100,7 +100,7 @@ module place( translation=[0,0,0], angle=0, hue="" ) {
 module bowl_plate(thin=false) {
     dx = OUTER_DIAMETER + 5 * mm;
     dy = OUTER_DIAMETER + 5 * mm;
-    
+
     place( [0*dx,0*dy,0], 0, "gray" ) bowl_lid( thin=thin );
     place( [1*dx,0*dy,0], 0, "gray" ) bowl_lid( thin=thin );
     place( [0*dx,1*dy,0], 0, "gray" ) bowl_lid( thin=thin );
@@ -117,6 +117,20 @@ module bowl_plate_with_names() {
     place( [1*dx,1*dy,0], 0, "yellow" ) bowl_lid("Tumeric");
 }
 
+module big_bowl_plate(thin=true) {
+    dx = (OUTER_DIAMETER + 3 * mm) / 4;
+    dy = (OUTER_DIAMETER + 3 * mm) / 3 * sin(60);
+
+    place( [ 2*dx,2*dy,0], 0, "gray" ) bowl_lid( thin=thin );
+    place( [ 6*dx,2*dy,0], 0, "gray" ) bowl_lid( thin=thin );
+    place( [10*dx,2*dy,0], 0, "gray" ) bowl_lid( thin=thin );
+    place( [ 4*dx,5*dy,0], 0, "gray" ) bowl_lid( thin=thin );
+    place( [ 8*dx,5*dy,0], 0, "gray" ) bowl_lid( thin=thin );
+    place( [ 2*dx,8*dy,0], 0, "gray" ) bowl_lid( thin=thin );
+    place( [ 6*dx,8*dy,0], 0, "gray" ) bowl_lid( thin=thin );
+    place( [10*dx,8*dy,0], 0, "gray" ) bowl_lid( thin=thin );
+}
+
 // ----- Render Logic for makefile --------------------------------------------
 
 if (VERBOSE) {
@@ -129,18 +143,20 @@ if (PART == "lid-thick") {
     bowl_lid(thin=true);
 } else if (PART == "lid-cinnamon") {
     bowl_lid("Cinnamon");
-} else if (PART == "lid-cardamon") {
-    bowl_lid("Cardamon");
+} else if (PART == "lid-cardamom") {
+    bowl_lid("Cardamom");
 } else if (PART == "lid-safran") {
     bowl_lid("Safran");
-} else if (PART == "lid-tumeric") {
-    bowl_lid("Tumeric");
+} else if (PART == "lid-turmeric") {
+    bowl_lid("Turmeric");
 } else if (PART == "named-plate") {
     bowl_plate_with_names();
 } else if (PART == "thick-blank-plate") {
     bowl_plate();
 } else if (PART == "thin-blank-plate") {
     bowl_plate(thin=true);
+} else if (PART == "big-thin-plate") {
+    big_bowl_plate();
 } else {
-    bowl_lid(thin=true);
+    big_bowl_plate();
 }
