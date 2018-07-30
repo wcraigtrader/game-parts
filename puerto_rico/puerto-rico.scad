@@ -11,7 +11,10 @@ PART = "other";           // Which part to output
 VERBOSE = 1;        // Set to non-zero to see more data
 
 // Physical dimensions
-WALL = 0.8 * mm; // Slicing filament thickness
+WALL = 0.8 * mm;        // Slicing filament thickness
+THIN_WALL = 0.86 * mm;  // Based on 0.20mm layer height
+WIDE_WALL = 1.67 * mm;  // Based on 0.20mm layer height
+
 GAP  = 0.2 * mm; // Size differential between box and lid, for snug fit
 POKE_HOLE = 20 * mm; // Diameter of poke holes in bottom
 BOTTOM = 1 * mm;
@@ -24,13 +27,13 @@ SMALL_TILE_HEIGHT = 29/32 * inch;
 LARGE_TILE_HEIGHT = (1 + 57/64) * inch;
 
 // Wall dimensions
-OUTER  = 2 * WALL;
-INNER  = 2 * WALL;
-SEP    = 2 * WALL;
+OUTER  = THIN_WALL; // 2 * WALL;
+INNER  = THIN_WALL; // 2 * WALL;
+SEP    = WIDE_WALL; // 2 * WALL;
 
 OVERLAP = 0.1 * mm; // Ensures that there are no vertical artifacts leftover
 
-$fa=4;
+$fa=4; $fn=45;
 
 module basic_bottom() {
     box_height = ceil( max( SMALL_TILE_HEIGHT/2, 5*BASIC_THICKNESS) );

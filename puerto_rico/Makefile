@@ -56,7 +56,7 @@ MODELS=$(patsubst %,$(STL)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-%.$(IMAGE),$(PARTS))
 GCODES=$(patsubst %,$(GCODE)/$(PREFIX)-%.$(GCODE),$(PARTS))
 
-all:	models gcodes images
+all:	models images # gcodes
 
 directories:
 	@mkdir -p $(STL) $(IMAGE) $(GCODE)
