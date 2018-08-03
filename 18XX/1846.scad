@@ -127,9 +127,9 @@ module card_tray_lid() {
 // ----- Rendering -------------------------------------------------------------
 
 if (PART == "short-tile-tray") {
-    fine_hex_tray( FULL_X, HALF_Y, tile_height( 2 ), WIDE_WALL );
+    hex_tray( FULL_X, HALF_Y, tile_height( 2 ), WIDE_WALL );
 } else if (PART == "tall-tile-tray") {
-    fine_hex_tray( FULL_X, HALF_Y, tile_height( 5 ), WIDE_WALL );
+    hex_tray( FULL_X, HALF_Y, tile_height( 5 ), WIDE_WALL );
 } else if (PART == "tile-tray-lid") {
     fine_hex_lid( FULL_X, HALF_Y, 6*mm, WIDE_WALL, THIN_WALL, true );
     hex_lid();

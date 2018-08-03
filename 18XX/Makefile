@@ -1,12 +1,17 @@
 # 18XX: Organizing trays for tiles and other components
 #
-# by W. Craig Trader is dual-licensed under 
+# by W. Craig Trader is dual-licensed under
 # Creative Commons Attribution-ShareAlike 3.0 Unported License and
 # GNU Lesser GPL 3.0 or later.
 
-# This makefile expects an OpenSCAD file named $(PREFIX).scad that defines 
+# Override PREFIX on the command line to select the parts to produce.
+#
+#     make all PREFIX=1830
+#     make all PREFIX=1846
+#
+# This makefile expects an OpenSCAD file named $(PREFIX).scad that defines
 # the following variables:
-# 
+#
 # PART    -- the name of a part to generate
 # VERBOSE -- logically true if you want verbose output (optional)
 #
@@ -20,7 +25,7 @@
 #     foo_bar();
 # }
 #
-# This makefile will use OpenSCAD to create individual model (STL) files and 
+# This makefile will use OpenSCAD to create individual model (STL) files and
 # image (PNG) files for each declared part
 #
 # So if PREFIX=widget, then the created files will be:
@@ -35,7 +40,7 @@ IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
 
 # Name of OpenSCAD model file
-PREFIX=1846
+PREFIX=1830
 
 # ----- Everything after this should not need modification
 
@@ -59,6 +64,9 @@ models: directories $(MODELS)
 images: directories $(IMAGES)
 
 clean:
+	rm $(STL)/$(PREFIX)-* $(IMAGE)/$(PREFIX)-*
+
+cleanall:
 	rm -rf $(STL) $(IMAGE)
 
 # Dependencies for models

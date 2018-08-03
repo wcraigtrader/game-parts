@@ -8,12 +8,14 @@ include <MCAD/units.scad>;
 
 // ----- Physical dimensions ---------------------------------------------------
 
-THIN_WALL = 0.86 * mm;  // Based on 0.20mm layer height
-WIDE_WALL = 1.67 * mm;  // Based on 0.20mm layer height
+THIN_WALL = 0.86 * mm;  	// Based on 0.20mm layer height
+WIDE_WALL = 1.67 * mm;  	// Based on 0.20mm layer height
+GAP       = 0.01 * mm;      // Gap between outer and inner walls for boxes
 
 BOTTOM    = 1.00 * mm;  // Bottom plate thickness
 TOP       = 1.00 * mm;  // Top plate thickness
 OVERLAP   = 0.01 * mm;  // Ensures that there are no vertical artifacts leftover
+THUMBS    = 10.0 * mm;  // Thumb notch for box lids
 
 $fa=4; $fn=90;
 
@@ -62,8 +64,22 @@ TILE_CENTERS = [
 
 // ----- Functions -------------------------------------------------------------
 
+function row_offset( cellz, space, r, c ) = r <= 0 ? 0 : row_offset( cellz, space, r-1, c ) + cellz[r-1][c][1] + space;
+function col_offset( cellz, space, r, c ) = c <= 0 ? 0 : col_offset( cellz, space, r, c-1 ) + cellz[r][c-1][0] + space;
+
+function row_length( cellz, space ) = col_offset( cellz, space, 0, len(cellz[0])) - space;
+function col_length( cellz, space ) = row_offset( cellz, space, len(cellz), 0) - space;
+
 // ----- Modules ---------------------------------------------------------------
 
+/*
+ * hex_corner( corner, height )
+ *
+ * This creates a short segment of the corner of a hexagonal wall
+ *
+ * corner -- 0-5, specifying which corner of the hexagon to create, clockwise
+ * height -- Height of the wall segment in millimeters
+ */
 module hex_corner( corner, height ) {
     offset = corner * -60;
     for ( angle=[210,330] ) {
@@ -74,12 +90,22 @@ module hex_corner( corner, height ) {
     cylinder( d=WIDE_WALL, h=height );
 }
 
-module fine_hex_tray( width, depth, height, thick ) {
+/*
+ * hex_tray( width, depth, height, walls )
+ *
+ * Create a tray to hold hexagonal tiles
+ *
+ * width  -- Width (X) of the tray (outside dimensions)
+ * depth  -- Depth (Y) of the tray (outside dimensions
+ * height -- Height (Z) of the stack of tiles (inside dimensions)
+ * walls  -- Thickness of outside walls
+ */
+module hex_tray( width, depth, height, walls ) {
     bx = width;
     by = depth;
     bz = height;
 
-    dx = thick;
+    dx = walls;
     dy = dx;
 
     ix = bx-2*dx;
@@ -121,15 +147,27 @@ module fine_hex_tray( width, depth, height, thick ) {
     }
 }
 
-module fine_hex_lid( width, depth, height, thick, thin, remove_corners=true ) {
+/*
+ * hex_lid( width, depth, height, outer, inner, remove_corners )
+ *
+ * Create a lid for a hexagon tile tray
+ *
+ * width          -- Width (X) of the tray (outside dimensions)
+ * depth          -- Depth (Y) of the tray (outside dimensions
+ * height         -- Height (Z) of the stack of tiles (inside dimensions)
+ * outer          -- Outer wall thickness
+ * inner          -- Inner wall thickness
+ * remove_corners -- True to remove the corners of the inner walls
+ */
+module hex_lid( width, depth, height, outer, inner, remove_corners=true ) {
     bx = width;
     by = depth;
     bz = height;
 
-    dx = thick;
+    dx = outer;
     dy = dx;
 
-    cx = thin;
+    cx = inner;
     cy = cx;
 
     ix = bx-2*dx;
@@ -142,7 +180,7 @@ module fine_hex_lid( width, depth, height, thick, thin, remove_corners=true ) {
         }
 
         // Remove inside of lip
-        translate( [dx+THIN_WALL, dy+THIN_WALL, BOTTOM] ) cube( [ix-2*THIN_WALL, iy-2*THIN_WALL, bz+OVERLAP] );
+        translate( [dx+inner, dy+inner, BOTTOM] ) cube( [ix-2*inner, iy-2*inner, bz+OVERLAP] );
 
         // Remove corners
 		if (remove_corners) {
@@ -163,4 +201,133 @@ module fine_hex_lid( width, depth, height, thick, thin, remove_corners=true ) {
     }
 }
 
+/*
+ * cell_box()
+ *
+ * Create a box with rows and columns of cells for storing small parts
+ *
+ * cells  -- Layout of cells (inside dimensions)
+ * height -- Height (Z) of cells (inside dimensions)
+ * bottom -- Thickness (mm) of base
+ * top    -- Thickness (mm) of lid
+ * outer  -- Size (mm) of outer walls
+ * inner  -- Size (mm) of inner walls
+ *
+ * cells is a vector of rows, each of which is a vector of cell dimensions [x,y]
+ * The first row will be the top row in the resulting box, for ease of layout.
+ *
+ * example = [
+ *     [ [10,10], [10,10], [10,10] ],
+ *     [ [10,10], [21,10] ],
+ *     [ [32,10] ]
+ * ]
+ *
+ * This would create a box with 3 rows of cells, with 3 cells in the first row,
+ * 2 cells in the second row, and 1 long cell in the third row. If you're
+ * rows that have differing numbers of cells, you'll want to increase the size
+ * of some cells to account for the walls that will be missing from in that row.
+ */
+module cell_box( cells, height, bottom, top, outer, inner ) {
+    inside_x = row_length( cells, inner );
+    inside_y = col_length( cells, inner );
+    inside_z = height;
 
+    box_x = inside_x + 2 * inner;
+    box_y = inside_y + 2 * inner;
+    box_z = inside_z - floor( inside_z / 2 );
+
+    lip_x = box_x;
+    lip_y = box_y;
+    lip_z = inside_z;
+
+	echo (Inside=[inside_x, inside_y, inside_z], Box=[box_x, box_y, box_z] );
+    echo (BoxLength=box_x, BoxDepth=box_y, BoxHeight=lip_z+bottom);
+
+    difference() {
+        union() {
+#            minkowski() {
+                cube( [ box_x + 2 * GAP, box_y + 2 * GAP, box_z ] );
+                cylinder( r=outer, h=1 );
+            }
+            translate( [ GAP, GAP, bottom ] )
+                cube( [ lip_x, lip_y, lip_z ] );
+
+        }
+
+        // Remove inside of box
+        for ( row = [len(cells)-1:-1:0] ) {
+            for ( col = [0:1:len(cells[row])-1 ] ) {
+                cell = cells[row][col];
+                dx = col_offset( cells, 1, row, col ) + inner + GAP;
+                dy = row_offset( cells, 1, row, col ) + inner + GAP;
+                echo( Cell=[row,col], Offset=[dx,dy,bottom], Size=cell );
+                translate( [ dx, dy, bottom ] )
+                    cube( [ cell[0], cell[1], height+top+OVERLAP ] );
+            }
+        }
+    }
+}
+
+/*
+ *
+ */
+module cell_lid( cells, height, bottom, top, outer, inner ) {
+    inside_x = row_length( cells, inner );
+    inside_y = col_length( cells, inner );
+    inside_z = height;
+
+    box_x = inside_x + 2 * inner;
+    box_y = inside_y + 2 * inner;
+    box_z = inside_z - ceil( inside_z / 2 );
+
+    lip_x = box_x;
+    lip_y = box_y;
+    lip_z = ceil( inside_z / 2 );
+    lip_r = 10 * mm;
+
+    echo (LidLength=lip_x, LidDepth=lip_y, LidHeight=lip_z+top);
+
+    difference() {
+        // Outside of lid
+        minkowski() {
+            cube( [ lip_x + 2 * GAP, lip_y + 2 * GAP, lip_z ] );
+            cylinder( r=outer, h=top );
+        }
+
+        // Remove inside of lid
+        translate( [ 0, 0, top ] )
+            cube( [ lip_x + 2 * GAP, lip_y + 2 * GAP, lip_z+OVERLAP ] );
+
+        // Remove notches to make it easier to remove the lid
+        translate( [-2*outer,lip_y/2+outer/2,lip_r-0+lip_z-2*outer] )
+            rotate( [0,90,0] )
+                cylinder( r=lip_r, h=lip_x+4*outer );
+    }
+}
+
+// ----- Testing ---------------------------------------------------------------
+
+if (0) {
+    VERBOSE = true;
+
+    // Part box dimensions
+    PART_WIDTH      = 30; // 1.25 * inch;  // X
+    PART_DEPTH      = 15; // 0.75 * inch;  // Y
+    PART_HEIGHT     = 6.00 * mm;    // Z
+
+    px = PART_WIDTH; py = PART_DEPTH;
+
+    PART_CELLS = [
+        [ [ px, py ], [ px, py ], [ px, py ] ],
+        [ [ px, py ], [ px, py ], [ px, py ] ],
+        [ [ px, py ], [ px, py ], [ px, py ] ]
+    ];
+
+    TEST_CELLS = [
+        [ [ 20, 20 ], [ 30, 20 ], [ 40, 20 ] ],
+        [ [ 20, 15 ], [ 30, 15 ], [ 40, 15 ] ],
+        [ [ 20, 10 ], [ 30, 10 ], [ 40, 10 ] ]
+    ];
+
+    cell_box( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+}
