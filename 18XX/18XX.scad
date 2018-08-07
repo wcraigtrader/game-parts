@@ -10,7 +10,7 @@ include <MCAD/units.scad>;
 
 THIN_WALL = 0.86 * mm;  	// Based on 0.20mm layer height
 WIDE_WALL = 1.67 * mm;  	// Based on 0.20mm layer height
-GAP       = 0.01 * mm;      // Gap between outer and inner walls for boxes
+GAP       = 0.10 * mm;      // Gap between outer and inner walls for boxes
 
 BOTTOM    = 1.00 * mm;  // Bottom plate thickness
 TOP       = 1.00 * mm;  // Top plate thickness
@@ -232,21 +232,22 @@ module cell_box( cells, height, bottom, top, outer, inner ) {
     inside_y = col_length( cells, inner );
     inside_z = height;
 
-    box_x = inside_x + 2 * inner;
-    box_y = inside_y + 2 * inner;
+    box_x = inside_x + 2 * inner + 2 * GAP;
+    box_y = inside_y + 2 * inner + 2 * GAP;
     box_z = inside_z - floor( inside_z / 2 );
 
-    lip_x = box_x;
-    lip_y = box_y;
+    lip_x = box_x - 2 * GAP;
+    lip_y = box_y - 2 * GAP;
     lip_z = inside_z;
 
-	echo (Inside=[inside_x, inside_y, inside_z], Box=[box_x, box_y, box_z] );
-    echo (BoxLength=box_x, BoxDepth=box_y, BoxHeight=lip_z+bottom);
+    if (VERBOSE) {
+        echo (Inside=[inside_x, inside_y, inside_z], Box=[box_x, box_y, box_z] );
+    }
 
     difference() {
         union() {
-#            minkowski() {
-                cube( [ box_x + 2 * GAP, box_y + 2 * GAP, box_z ] );
+            minkowski() {
+                cube( [ box_x, box_y, box_z ] );
                 cylinder( r=outer, h=1 );
             }
             translate( [ GAP, GAP, bottom ] )
@@ -258,9 +259,9 @@ module cell_box( cells, height, bottom, top, outer, inner ) {
         for ( row = [len(cells)-1:-1:0] ) {
             for ( col = [0:1:len(cells[row])-1 ] ) {
                 cell = cells[row][col];
-                dx = col_offset( cells, 1, row, col ) + inner + GAP;
-                dy = row_offset( cells, 1, row, col ) + inner + GAP;
-                echo( Cell=[row,col], Offset=[dx,dy,bottom], Size=cell );
+                dx = col_offset( cells, inner, row, col ) + inner + GAP;
+                dy = row_offset( cells, inner, row, col ) + inner + GAP;
+
                 translate( [ dx, dy, bottom ] )
                     cube( [ cell[0], cell[1], height+top+OVERLAP ] );
             }
@@ -276,8 +277,8 @@ module cell_lid( cells, height, bottom, top, outer, inner ) {
     inside_y = col_length( cells, inner );
     inside_z = height;
 
-    box_x = inside_x + 2 * inner;
-    box_y = inside_y + 2 * inner;
+    box_x = inside_x + 2 * inner + 2 * GAP;
+    box_y = inside_y + 2 * inner + 2 * GAP;
     box_z = inside_z - ceil( inside_z / 2 );
 
     lip_x = box_x;
@@ -285,18 +286,20 @@ module cell_lid( cells, height, bottom, top, outer, inner ) {
     lip_z = ceil( inside_z / 2 );
     lip_r = 10 * mm;
 
-    echo (LidLength=lip_x, LidDepth=lip_y, LidHeight=lip_z+top);
+    if (VERBOSE) {
+        echo (Inside=[inside_x, inside_y, inside_z], Box=[box_x, box_y, box_z] );
+    }
 
     difference() {
         // Outside of lid
         minkowski() {
-            cube( [ lip_x + 2 * GAP, lip_y + 2 * GAP, lip_z ] );
+            cube( [ box_x, box_y, lip_z ] );
             cylinder( r=outer, h=top );
         }
 
         // Remove inside of lid
         translate( [ 0, 0, top ] )
-            cube( [ lip_x + 2 * GAP, lip_y + 2 * GAP, lip_z+OVERLAP ] );
+            cube( [ box_x, box_y, lip_z+OVERLAP ] );
 
         // Remove notches to make it easier to remove the lid
         translate( [-2*outer,lip_y/2+outer/2,lip_r-0+lip_z-2*outer] )
@@ -311,8 +314,8 @@ if (0) {
     VERBOSE = true;
 
     // Part box dimensions
-    PART_WIDTH      = 30; // 1.25 * inch;  // X
-    PART_DEPTH      = 15; // 0.75 * inch;  // Y
+    PART_WIDTH      = 35.0; // 1.25 * inch;  // X
+    PART_DEPTH      = 17.5; // 0.75 * inch;  // Y
     PART_HEIGHT     = 6.00 * mm;    // Z
 
     px = PART_WIDTH; py = PART_DEPTH;
@@ -330,4 +333,6 @@ if (0) {
     ];
 
     cell_box( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    translate( [0, 70, 0] )
+    cell_lid( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
 }

@@ -21,20 +21,20 @@ TILE_THICKNESS  =  0.5 * mm;
 POKE_HOLE       = 35.0 * mm;    // Diameter of poke holes in bottom
 
 // Part box dimensions
-PART_WIDTH      = 40; // 1.25 * inch;  // X
-PART_DEPTH      = 20; // 0.75 * inch;  // Y
-PART_HEIGHT     = 6.00 * mm;    // Z
+TOKEN_WIDTH      = 35.0 * mm;   // X
+TOKEN_DEPTH      = 17.5 * mm;   // Y
+TOKEN_HEIGHT     = 6.00 * mm;   // Z
 
 include <18XX.scad>;
 
 // ----- Data ------------------------------------------------------------------
 
-px = PART_WIDTH; py = PART_DEPTH;
+tx = TOKEN_WIDTH; ty = TOKEN_DEPTH;
 
-PART_CELLS = [
-    [ [ px, py ], [ px, py ], [ px, py ] ],
-    [ [ px, py ], [ px, py ], [ px, py ] ],
-    [ [ px, py ], [ px, py ], [ px, py ] ]
+TOKEN_CELLS = [
+    [ [ tx, ty ], [ tx, ty ], [ tx, ty ] ],
+    [ [ tx, ty ], [ tx, ty ], [ tx, ty ] ],
+    [ [ tx, ty ], [ tx, ty ], [ tx, ty ] ]
 ];
 
 // ----- Functions -------------------------------------------------------------
@@ -47,12 +47,12 @@ if (PART == "tile-tray") {
     hex_tray( FULL_X, HALF_Y, 12*TILE_THICKNESS, WIDE_WALL );
 } else if (PART == "tile-lid") {
     hex_lid( FULL_X, HALF_Y, 4*mm, WIDE_WALL, THIN_WALL, false );
-} else if (PART == "part-box") {
-    cell_box( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
-} else if (PART == "part-box-lid") {
-    cell_lid( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+} else if (PART == "token-box") {
+    cell_box( TOKEN_CELLS, TOKEN_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+} else if (PART == "token-box-lid") {
+    cell_lid( TOKEN_CELLS, TOKEN_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
 } else {
-    cell_box( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    cell_box( TOKEN_CELLS, TOKEN_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
     translate( [0, 70, 0] )
-    cell_lid( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    cell_lid( TOKEN_CELLS, TOKEN_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
 }
