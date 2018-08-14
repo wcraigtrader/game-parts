@@ -72,24 +72,24 @@ function tile_height( count ) = (count + 0.5) * TILE_THICKNESS;
  *
  * Produces a box that is sized to fit the large Brass insert bay,
  * with corner cuts to match the insert. It will always use the full
- * depth of the space, 
+ * depth of the space,
  */
 module brass_box( length, height, bottom, wall, hollow=true ) {
-    bx = length+4*wall; 
-    by = COMPARTMENT_DEPTH; 
-    bz = height/2+bottom; 
+    bx = length + 4*wall + 2*GAP;
+    by = COMPARTMENT_DEPTH;
+    bz = height/2 + bottom;
     br = COMPARTMENT_CORNER;
-    
-    lx = bx - 2*wall;
-    ly = by - 2*wall;
+
+    lx = bx - 2*wall - 2*GAP;
+    ly = by - 2*wall - 2*GAP;
     lz = height+bottom;
-    lr = br + wall;
-    
+    lr = br + wall + GAP;
+
     if (VERBOSE) {
         echo( BrassBoxOut=[ bx, by, bz, br ] );
     }
-    
-    translate( [-2*wall, -2*wall, -bottom] ) difference() {
+
+    translate( [-2*wall-GAP, -2*wall-GAP, -bottom] ) difference() {
         union() {
             color( "tan" ) difference() {
                 cube( [bx, by, bz] );
@@ -98,49 +98,49 @@ module brass_box( length, height, bottom, wall, hollow=true ) {
                 translate( [ 00, by, -OVERLAP ] ) cylinder( r=br, h=bz+2*OVERLAP );
                 translate( [ bx, by, -OVERLAP ] ) cylinder( r=br, h=bz+2*OVERLAP );
             }
-            
+
             color( "plum" ) difference() {
-                translate( [ wall, wall, 0 ] ) cube( [lx, ly, lz] );
+                translate( [ wall+GAP, wall+GAP, 0 ] ) cube( [lx, ly, lz] );
                 translate( [ 00, 00, -OVERLAP ] ) cylinder( r=lr, h=lz+2*OVERLAP );
                 translate( [ bx, 00, -OVERLAP ] ) cylinder( r=lr, h=lz+2*OVERLAP );
                 translate( [ 00, by, -OVERLAP ] ) cylinder( r=lr, h=lz+2*OVERLAP );
                 translate( [ bx, by, -OVERLAP ] ) cylinder( r=lr, h=lz+2*OVERLAP );
             }
         }
-        
+
         if (hollow) {
             ix = lx - 2*wall;
             iy = ly - 2*wall;
             iz = lz;
             ir = lr + wall;
-            
+
             difference() {
-                translate( [ 2*wall, 2*wall, bottom ] ) cube( [ix, iy, iz] );
+                translate( [ 2*wall+GAP, 2*wall+GAP, bottom ] ) cube( [ix, iy, iz] );
                 translate( [ 00, 00, -OVERLAP ] ) cylinder( r=ir, h=iz+2*OVERLAP );
                 translate( [ bx, 00, -OVERLAP ] ) cylinder( r=ir, h=iz+2*OVERLAP );
                 translate( [ 00, by, -OVERLAP ] ) cylinder( r=ir, h=iz+2*OVERLAP );
-                translate( [ bx, by, -OVERLAP ] ) cylinder( r=ir, h=iz+2*OVERLAP );                
+                translate( [ bx, by, -OVERLAP ] ) cylinder( r=ir, h=iz+2*OVERLAP );
             }
         }
     }
 }
 
 module brass_lid( length, height, top, wall ) {
-    bx = length+2*wall; 
-    by = COMPARTMENT_DEPTH; 
-    bz = height/2+top; 
+    bx = length + 2*wall + 2*GAP;
+    by = COMPARTMENT_DEPTH;
+    bz = height/2+top;
     br = COMPARTMENT_CORNER;
-    
+
     lx = length;
-    ly = by - 2*wall;
+    ly = by - 2*wall - 2*GAP;
     lz = bz;
-    lr = br + wall;
-    
+    lr = br + wall + GAP;
+
     if (VERBOSE) {
         echo( BrassLidOut=[ bx, by, bz, br ] );
     }
-    
-    translate( [-2*wall, -2*wall, -top] ) difference() {
+
+    translate( [-2*wall-GAP, -2*wall-GAP, -top] ) difference() {
         color( "tan" ) difference() {
             cube( [bx, by, bz] );
             translate( [ 00, 00, -OVERLAP ] ) cylinder( r=br, h=bz+2*OVERLAP );
@@ -148,7 +148,7 @@ module brass_lid( length, height, top, wall ) {
             translate( [ 00, by, -OVERLAP ] ) cylinder( r=br, h=bz+2*OVERLAP );
             translate( [ bx, by, -OVERLAP ] ) cylinder( r=br, h=bz+2*OVERLAP );
         }
-        
+
         color( "plum" ) difference() {
             translate( [ wall, wall, top ] ) cube( [lx, ly, lz] );
             translate( [ 00, 00, -OVERLAP ] ) cylinder( r=lr, h=lz+2*OVERLAP );
@@ -166,14 +166,14 @@ module brass_lid( length, height, top, wall ) {
  * The actual width and depth will be 2*SPACING more than asked.
  */
 module tile_hole( width, depth, height ) {
-    
+
     w1 = (width-SPACING) / 2;
     d1 = (depth-SPACING) / 2;
     h1 = 0;
     w2 = width / 2;
     d2 = depth / 2;
     h2 = height + OVERLAP;
-    
+
     points = [
         [ -w1, -d1, h1 ],   // p0
         [ +w1, -d1, h1 ],   // p1
@@ -184,7 +184,7 @@ module tile_hole( width, depth, height ) {
         [ +w2, +d2, h2 ],   // p6
         [ -w2, +d2, h2 ],   // p7
     ];
-    
+
     faces = [
         [0,1,2,3],  // bottom
         [4,5,1,0],  // front
@@ -193,7 +193,7 @@ module tile_hole( width, depth, height ) {
         [6,7,3,2],  // back
         [7,4,0,3],  // left
     ];
-    
+
     minkowski() {
         polyhedron( points, faces );
         cylinder( r=SPACING, h=OVERLAP );
@@ -204,35 +204,35 @@ module tile_box( tiles ) {
     tx = TILE_SIZE   + 2*SPACING;
     ty = TILE_SIZE   + 2*SPACING;
     lx = LINK_WIDTH  + 2*SPACING;
-    ly = LINK_LENGTH + 2*SPACING;    
+    ly = LINK_LENGTH + 2*SPACING;
     tr = (TOKEN_DIAMETER + SPACING) / 2;
-    
-    ix = 3*tx + lx + 3*THIN_WALL ;
-    iy = COMPARTMENT_DEPTH - 4*THIN_WALL;
+
+    ix = 3*tx + lx + 3*THIN_WALL;
+    iy = COMPARTMENT_DEPTH - 4*THIN_WALL - 2*GAP;
     iz = layer_height( tile_height( max( tiles ) ) );
 
     tw = THIN_WALL;
     ww = WIDE_WALL;
-    
+
     cx = ix/2;
     cy = iy/2;
-    
+
     hx1 = tx/2;
     hx2 = tx + tw + lx/2;
     hx3 = tx + tw + tx/2;
     hx4 = tx + tw + lx + tw + tx/2;
     hx5 = tx + tw + tx + tw + lx/2;
     hx6 = tx + tw + lx + tw + tx + tw + tx/2;
-    
+
     hy1 = ty/2;
     hy2 = ly/2;
     hy3 = cy - tw - ty/2;
-    hy4 = ty + tr - tw;
-    hy5 = iy - ty - tr + tw;
+    hy4 = ty + tr - tw/2;
+    hy5 = iy - ty - tr + tw/2;
     hy6 = cy + tw + ty/2;
     hy7 = iy - ly/2;
     hy8 = iy - ty/2;
-    
+
     difference() {
         brass_box( ix, iz, BOTTOM, THIN_WALL, false );
 
@@ -248,11 +248,11 @@ module tile_box( tiles ) {
         th8 = tile_height( 8 );
         translate( [hx5, hy7, iz-th8] ) tile_hole( LINK_WIDTH, LINK_LENGTH, th8 );
         translate( [hx2, hy2, iz-th8] ) tile_hole( LINK_WIDTH, LINK_LENGTH, th8 );
-        
+
         // Remove hole for the character tile
         th1 = tile_height( 1 );
-        translate( [cx, cy, iz-th1] ) cylinder( d=CHARACTER+SPACING, h=th1+OVERLAP );
-        
+%       translate( [cx, cy, iz-th1] ) cylinder( d=CHARACTER+SPACING, h=th1+OVERLAP );
+
         // Remove holes for the VP and Income tokens
         th3 = tile_height( 3 );
 #       translate( [hx3, hy5, iz-th3] ) cylinder( d=TOKEN_DIAMETER+SPACING, h=th3+OVERLAP );
@@ -264,16 +264,16 @@ module tile_lid( tiles ) {
     tx = TILE_SIZE   + 2*SPACING;
     ty = TILE_SIZE   + 2*SPACING;
     lx = LINK_WIDTH  + 2*SPACING;
-    ly = LINK_LENGTH + 2*SPACING;    
+    ly = LINK_LENGTH + 2*SPACING;
     tr = (TOKEN_DIAMETER + SPACING) / 2;
-    
+
     ix = 3*tx + lx + 3*THIN_WALL;
     iy = COMPARTMENT_DEPTH - 4*THIN_WALL;
     iz = layer_height( tile_height( max( tiles ) ) );
-    
+
     cx = ix/2;
     cy = iy/2;
-    
+
     difference() {
         brass_lid( ix+2*THIN_WALL, iz, TOP, THIN_WALL );
         translate( [ cx, cy, -TOP-OVERLAP ] ) cylinder( d=CHARACTER-4*SPACING, h=TOP+2*OVERLAP );
@@ -298,7 +298,7 @@ if (PART == "lancashire-tile-box") {
     thin_deck_box( FFS_STANDARD, LANCASHIRE_CARDS, THIN_WALL );
 } else {
     translate( [  0,  0, 0] ) tile_box( LANCASHIRE_TILES );
-    translate( [  0, 80, 0] ) tile_lid( LANCASHIRE_TILES );
+    translate( [  0, 90, 0] ) tile_lid( LANCASHIRE_TILES );
     translate( [110,  0, 0] ) tile_box( BIRMINGHAM_TILES );
-    translate( [110, 80, 0] ) tile_lid( BIRMINGHAM_TILES );
+    translate( [110, 90, 0] ) tile_lid( BIRMINGHAM_TILES );
 }

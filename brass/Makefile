@@ -30,7 +30,7 @@
 
 # OpenSCAD binary and options
 OPENSCAD=/usr/bin/openscad
-OPENSCAD_OPTIONS=-DVERBOSE=true
+OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
 
