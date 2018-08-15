@@ -34,7 +34,7 @@ BOTTOM    = 0.60 * mm;  // Bottom plate thickness
 TOP       = 0.60 * mm;  // Top plate thickness
 SPACING   = 1.00 * mm;  // Additional play in compartments
 OVERLAP   = 0.10 * mm;
-GAP       = 0.20 * mm;  // Gap between outer and inner walls for boxes
+GAP       = 0.25 * mm;  // Gap between outer and inner walls for boxes
 
 // 3D Printer
 LAYER_HEIGHT = 0.20 * mm;
@@ -45,18 +45,6 @@ WIDE_WALL    = 1.67 * mm;  	// Based on 0.20mm layer height
 
 LANCASHIRE_CARDS = 70;
 BIRMINGHAM_CARDS = 76;
-
-/*
- * [0] = Cotten or half Cotten
- * [1] = Coal
- * [2] = Iron
- * [3] = Manufacturers or half Cotten
- * [4] = Beer or Shipyards
- * [5] = Pottery or Ports
- */
-
-LANCASHIRE_TILES = [  6, 7, 4,  6, 6, 8 ];
-BIRMINGHAM_TILES = [ 11, 7, 4, 11, 7, 5 ];
 
 lpx = 35; lpy = 60;
 LANCASHIRE_PARTS = [ [ [ lpx, lpy ], [ lpx, lpy ], [ lpx, lpy ] ] ];
@@ -125,6 +113,10 @@ module brass_box( length, height, bottom, wall, hollow=true ) {
     }
 }
 
+/* brass_lid( length, height, top, wall, hollow )
+ *
+ * Produces a matching lid for a brass box with the same parameters,
+ */
 module brass_lid( length, height, top, wall ) {
     bx = length + 2*wall + 2*GAP;
     by = COMPARTMENT_DEPTH;
@@ -150,12 +142,17 @@ module brass_lid( length, height, top, wall ) {
         }
 
         color( "plum" ) difference() {
-            translate( [ wall, wall, top ] ) cube( [lx, ly, lz] );
+            translate( [ wall+GAP, wall+GAP, top ] ) cube( [lx, ly, lz] );
             translate( [ 00, 00, -OVERLAP ] ) cylinder( r=lr, h=lz+2*OVERLAP );
             translate( [ bx, 00, -OVERLAP ] ) cylinder( r=lr, h=lz+2*OVERLAP );
             translate( [ 00, by, -OVERLAP ] ) cylinder( r=lr, h=lz+2*OVERLAP );
             translate( [ bx, by, -OVERLAP ] ) cylinder( r=lr, h=lz+2*OVERLAP );
         }
+
+        // Remove notches to make it easier to remove the lid
+        color( "lime" ) translate( [-OVERLAP,by/2,bz/2+NOTCH] )
+            rotate( [0,90,0] ) cylinder( r=NOTCH, h=bx+2*OVERLAP );
+
     }
 }
 
@@ -199,6 +196,22 @@ module tile_hole( width, depth, height ) {
         cylinder( r=SPACING, h=OVERLAP );
     }
 }
+
+/* tile_box( tiles )
+ *
+ * Produces a box to hold all the tiles,
+ * with adjustable tile heights for the different game variants.
+ *
+ * [0] = Cotten or half Cotten (L)
+ * [1] = Coal
+ * [2] = Iron
+ * [3] = Manufacturers or half Cotten (L)
+ * [4] = Beer or Shipyards
+ * [5] = Pottery or Ports
+ */
+
+LANCASHIRE_TILES = [  6, 7, 4,  6, 6, 8 ];
+BIRMINGHAM_TILES = [ 11, 7, 4, 11, 7, 5 ];
 
 module tile_box( tiles ) {
     tx = TILE_SIZE   + 2*SPACING;
@@ -251,15 +264,20 @@ module tile_box( tiles ) {
 
         // Remove hole for the character tile
         th1 = tile_height( 1 );
-%       translate( [cx, cy, iz-th1] ) cylinder( d=CHARACTER+SPACING, h=th1+OVERLAP );
+        translate( [cx, cy, iz-th1] ) cylinder( d=CHARACTER+SPACING, h=th1+OVERLAP );
 
         // Remove holes for the VP and Income tokens
         th3 = tile_height( 3 );
-#       translate( [hx3, hy5, iz-th3] ) cylinder( d=TOKEN_DIAMETER+SPACING, h=th3+OVERLAP );
-#       translate( [hx4, hy4, iz-th3] ) cylinder( d=TOKEN_DIAMETER+SPACING, h=th3+OVERLAP, $fn=6 );
+        translate( [hx3, hy5, iz-th3] ) cylinder( d=TOKEN_DIAMETER+SPACING, h=th3+OVERLAP );
+        translate( [hx4, hy4, iz-th3] ) cylinder( d=TOKEN_DIAMETER+3*SPACING, h=th3+OVERLAP, $fn=6 );
     }
 }
 
+/* tile_lid( tiles )
+ *
+ * Produces a lid for the matching tile_box, with a hole in the top
+ * to reveal the character / color of tiles in the box.
+ */
 module tile_lid( tiles ) {
     tx = TILE_SIZE   + 2*SPACING;
     ty = TILE_SIZE   + 2*SPACING;
@@ -276,6 +294,8 @@ module tile_lid( tiles ) {
 
     difference() {
         brass_lid( ix+2*THIN_WALL, iz, TOP, THIN_WALL );
+
+        // Remove viewport for character
         translate( [ cx, cy, -TOP-OVERLAP ] ) cylinder( d=CHARACTER-4*SPACING, h=TOP+2*OVERLAP );
     }
 }

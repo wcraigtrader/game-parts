@@ -130,9 +130,9 @@ module rounded_lid( width, depth, height, bottom, top, outer, inner ) {
             cube( [ box_x, box_y, lip_z+OVERLAP ] );
 
         // Remove notches to make it easier to remove the lid
-        translate( [-2*outer,lip_y/2+outer/2,lip_r-0+lip_z-2*outer] )
+        translate( [-2*outer, lip_y/2+outer/2, lip_r-0+lip_z-2*outer] )
             rotate( [0,90,0] )
-                cylinder( r=NOTCH, h=lip_x+4*outer );
+                cylinder( r=lip_r, h=lip_x+4*outer );
     }
 }
 
