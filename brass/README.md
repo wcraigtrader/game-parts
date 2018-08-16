@@ -21,8 +21,8 @@ Finally. there are wooden tokens that represent the different types of commoditi
 
 **Brass Birmingham BOM**
 
-| Item | Qty |
-| ---- | ---- |
+| Item | Qty | Purpose |
+| ---- | --- | ------- |
 | brass-birmingham-tile-box.stl | 4 | For each player, all industry tiles, all link tiles, VP counter, Income counter, Character tile |
 | brass-birmingham-tile-lid.stl | 4 ||
 | brass-birmingham-goods-box.stl | 1 | Iron cubes, Coal cubes, Merchant tiles |
