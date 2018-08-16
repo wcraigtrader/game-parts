@@ -10,25 +10,25 @@ Finally. there are wooden tokens that represent the different types of commoditi
 
 **Brass Lancashire BOM**
 
-| Item | Qty |
-| ---- | ---- |
-| brass-lancashire-tile-box.stl | 4 |
-| brass-lancashire-tile-lid.stl | 4 |
-| brass-lancashire-goods-box.stl | 1 |
-| brass-lancashire-goods-lid.stl | 1 |
-| brass-deck-box.stl | 1 |
-| Hugo's Amazing Tape | 12" |
+| Item | Qty | Purpose |
+| ---- | --- | ------- |
+| brass-lancashire-tile-box.stl | 4 | For each player, all industry tiles, all link tiles, VP counter, Income counter, Character tile |
+| brass-lancashire-tile-lid.stl | 4 ||
+| brass-lancashire-goods-box.stl | 1 | Iron cubes, Coal cubes, Foreign Market marker |
+| brass-lancashire-goods-lid.stl | 1 ||
+| brass-deck-box.stl | 1 | Industry cards, Location cards, Player Aid cards, Deck separator |
+| Hugo's Amazing Tape | 12" | Wrap the Foreign Market tiles |
 
 **Brass Birmingham BOM**
 
 | Item | Qty |
 | ---- | ---- |
-| brass-birmingham-tile-box.stl | 4 |
-| brass-birmingham-tile-lid.stl | 4 |
-| brass-birmingham-goods-box.stl | 1 |
-| brass-birmingham-goods-lid.stl | 1 |
-| brass-birmingham-beer-box.stl | 1 |
-| brass-birmingham-beer-lid.stl | 1 |
-| brass-deck-box.stl | 1 |
+| brass-birmingham-tile-box.stl | 4 | For each player, all industry tiles, all link tiles, VP counter, Income counter, Character tile |
+| brass-birmingham-tile-lid.stl | 4 ||
+| brass-birmingham-goods-box.stl | 1 | Iron cubes, Coal cubes, Merchant tiles |
+| brass-birmingham-goods-lid.stl | 1 ||
+| brass-birmingham-beer-box.stl | 1 | Beer barrels |
+| brass-birmingham-beer-lid.stl | 1 ||
+| brass-deck-box.stl | 1 | Industry cards, Location cards, Wild cards, Player Aid cards |
 
 Full sources are available on [GitHub](https://github.com/wcraigtrader/game-parts/tree/master/brass).
