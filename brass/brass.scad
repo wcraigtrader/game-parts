@@ -165,7 +165,7 @@ module brass_lid( length, height, top, wall ) {
         }
 
         // Remove notches to make it easier to remove the lid
-#       color( "lime" ) translate( [-OVERLAP,by/2,bz+NOTCH/2] )
+        color( "lime" ) translate( [-OVERLAP,by/2,bz+NOTCH/2] )
             rotate( [0,90,0] ) cylinder( r=NOTCH, h=bx+2*OVERLAP );
 
     }
@@ -355,7 +355,7 @@ module part_box( mode=EMPTY ) {
 }
 
 module part_lid( mode=EMPTY ) {
-    ix = (mode == LANCASHIRE ? DECK_WELL_WIDTH : COMPARTMENT_EXTRA) - 4*THIN_WALL - 2*GAP;
+    ix = (mode == LANCASHIRE ? DECK_WELL_WIDTH : COMPARTMENT_EXTRA) - 2*THIN_WALL - 2*GAP;
     iz = (mode == MARKETS ? COMPARTMENT_HEIGHT : COMPARTMENT_HEIGHT/2) - TOP - BOTTOM;
 
     brass_lid( ix, iz, TOP, THIN_WALL, true );
