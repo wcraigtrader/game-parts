@@ -16,6 +16,8 @@ BOTTOM    = 1.00 * mm;  // Bottom plate thickness
 TOP       = 1.00 * mm;  // Top plate thickness
 OVERLAP   = 0.01 * mm;  // Ensures that there are no vertical artifacts leftover
 THUMBS    = 10.0 * mm;  // Thumb notch for box lids
+STUB      = 2.00 * mm;  // Height of lid stubs
+STUB_GAP  = 0.15 * mm;  // Separation between lid stubs and tray hex corners
 
 $fa=4; $fn=90;
 
@@ -214,7 +216,7 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
                             for (corner=[0:5]) {
                                 tx = tile[0] + TILE_CORNERS[corner][0] + BORDER_X;
                                 ty = tile[1] + TILE_CORNERS[corner][1] + BORDER_Y;
-                                translate( [tx, ty, 0] ) cylinder( d=7*WIDE_WALL, h=2*TOP+OVERLAP, $fn=6 );
+                                translate( [tx, ty, 0] ) cylinder( d=7*WIDE_WALL, h=STUB+OVERLAP, $fn=6 );
                             }
                         }
                     }
@@ -224,7 +226,7 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
                             for (corner=[0:5]) {
                                 tx = tile[0] + TILE_CORNERS[corner][0] + BORDER_X;
                                 ty = tile[1] + TILE_CORNERS[corner][1] + BORDER_Y;
-                                translate( [tx, ty, 0 ] ) hex_corner( corner, height, 0.10 );
+                                translate( [tx, ty, 0 ] ) hex_corner( corner, height, STUB_GAP );
                             }
                         }
                     }

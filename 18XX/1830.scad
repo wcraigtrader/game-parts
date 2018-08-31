@@ -44,7 +44,7 @@ TOKEN_CELLS = [
 // ----- Rendering -------------------------------------------------------------
 
 if (PART == "tile-tray") {
-    hex_tray( FULL_X, HALF_Y, 12*TILE_THICKNESS, WIDE_WALL );
+    hex_tray( FULL_X, HALF_Y, 12*TILE_THICKNESS+STUB, WIDE_WALL );
 } else if (PART == "tile-lid") {
     hex_lid( FULL_X, HALF_Y, 4*mm, WIDE_WALL, THIN_WALL, false, true );
 } else if (PART == "token-box") {
