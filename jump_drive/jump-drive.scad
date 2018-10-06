@@ -1,10 +1,10 @@
 // Race for the Galaxy: Jump Drive
 //
-// by W. Craig Trader is dual-licensed under 
+// by W. Craig Trader is dual-licensed under
 // Creative Commons Attribution-ShareAlike 3.0 Unported License and
 // GNU Lesser GPL 3.0 or later.
 
-include <functions.scad>;
+include <MCAD/units.scad>;
 
 // Command Line Arguments
 PART = "other";           // Which part to output
@@ -14,16 +14,17 @@ if (VERBOSE) {
 	echo (Part=PART);
 }
 
+// Physical dimensions
+THIN_WALL = 0.86 * mm;  // Based on 0.20mm layer height
+WIDE_WALL = 1.67 * mm;  // Based on 0.20mm layer height
+
 // Box
+LID   = 1 * mm;
+OUTER = THIN_WALL;
+INNER = THIN_WALL;
+SEP   = THIN_WALL;
 
-FILAMENT = 0.8 * mm; // Thickness of a line of filament
-
-LID   = 2 * mm;
-OUTER = 2.5 * FILAMENT;
-INNER = 2.5 * FILAMENT;
-SEP   = 2.5 * FILAMENT;
-
-GAP = FILAMENT/4;
+GAP = THIN_WALL/4;
 
 $fn=90; // Fine-grained corners
 
@@ -54,54 +55,44 @@ module card_tray() {
             cube( [ BX, BY, BZ ] );
             cylinder( r=OUTER, h=1 );
         }
-        
+
         // Space for chit tray
-        translate( [ 0, 0, LID+CZ ] )
-            cube( [ BX, BY, PZ+1 ] );
-        
+        translate( [ 0, 0, LID+CZ ] ) cube( [ BX, BY, PZ+1 ] );
+
         // Space for card decks
-        translate( [ INNER, INNER, LID ] )
-            cube( [ CW, CH, CZ+1 ] );
-        translate( [ INNER+CW+SEP, INNER, LID ] )
-            cube( [ CW, CH, CZ+1 ] );
-        translate( [ INNER+CW-GAP, INNER, LID+CZ-3 ] )
-            cube( [ SEP+2*GAP, CH, 3+1 ] );
-        
+        translate( [ INNER, INNER, LID ] ) cube( [ CW, CH, CZ+1 ] );
+        translate( [ INNER+CW+SEP, INNER, LID ] ) cube( [ CW, CH, CZ+1 ] );
+        translate( [ INNER+CW-GAP, INNER, LID+CZ-3 ] ) cube( [ SEP+2*GAP, CH, 3+1 ] );
+
         // Space for finger holes
-        translate( [ INNER+CW/2, INNER+CH/2, -LID ] ) 
-            cylinder( r=10,h=CZ );
-        translate( [ INNER+CW+SEP+CW/2, INNER+CH/2, -LID ] ) 
-            cylinder( r=10,h=CZ );
+        translate( [ INNER+CW/2, INNER+CH/2, -LID ] ) cylinder( r=10,h=CZ );
+        translate( [ INNER+CW+SEP+CW/2, INNER+CH/2, -LID ] ) cylinder( r=10,h=CZ );
     }
 }
 
 module chit_tray() {
-    
+
     bx = BX-2*GAP; by = BY-2*GAP;
     dx1 = INNER; dx2 = INNER + CW-GAP + SEP;
     dy1 = INNER; dy2 = INNER + P1-GAP + SEP;
-    
+
     hx = CW-GAP; hy1 = P1-GAP; hy2 = P2-GAP;
-    
+
     if (VERBOSE) {
         echo (bx=bx, by=by);
         echo (dx1=dx1, dy1=dy1, dx2=dx2, dy2=dy2);
         echo (hx=hx, hy1=hy1, hy2=hy2);
         echo (query=by-dy2-hy2);
     }
-    
+
     difference() {
         // Outside of box
         cube( [ bx, by, PZ ] );
-        
-        translate( [ dx1, dy1, LID ] )
-            cube( [ hx, hy1, PZ ] );
-        translate( [ dx2, dy1, LID ] )
-            cube( [ hx, hy1, PZ ] );
-        translate( [ dx1, dy2, LID ] )
-            cube( [ hx, hy2, PZ ] );
-        translate( [ dx2, dy2, LID ] )
-            cube( [ hx, hy2, PZ ] );
+
+        translate( [ dx1, dy1, LID ] ) cube( [ hx, hy1, PZ ] );
+        translate( [ dx2, dy1, LID ] ) cube( [ hx, hy1, PZ ] );
+        translate( [ dx1, dy2, LID ] ) cube( [ hx, hy2, PZ ] );
+        translate( [ dx2, dy2, LID ] ) cube( [ hx, hy2, PZ ] );
     }
 }
 
@@ -112,7 +103,7 @@ module box_lid() {
             cube( [ BX, BY, LZ ] );
             cylinder( r=OUTER, h=1 );
         }
-        
+
         translate( [ 0, 0, LID ] )
             cube( [ BX, BY, LZ+1 ] );
     }

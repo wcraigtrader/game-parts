@@ -1,12 +1,12 @@
 # Race for the Galaxy: Jump Drive
 #
-# by W. Craig Trader is dual-licensed under 
+# by W. Craig Trader is dual-licensed under
 # Creative Commons Attribution-ShareAlike 3.0 Unported License and
 # GNU Lesser GPL 3.0 or later.
 
-# This makefile expects an OpenSCAD file named $(PREFIX).scad that defines 
+# This makefile expects an OpenSCAD file named $(PREFIX).scad that defines
 # the following variables:
-# 
+#
 # PART    -- the name of a part to generate
 # VERBOSE -- logically true if you want verbose output (optional)
 #
@@ -20,7 +20,7 @@
 #     foo_bar();
 # }
 #
-# This makefile will use OpenSCAD to create individual model (STL) files and 
+# This makefile will use OpenSCAD to create individual model (STL) files and
 # image (PNG) files for each declared part, and will use Slic3r to generate
 # G-Code for each declared part.
 #
@@ -50,25 +50,22 @@ PARTS=$(shell grep 'PART == ' $(PREFIX).scad | cut -d'"' -f2)
 
 STL=stl
 IMAGE=png
-GCODE=gcode
 
 MODELS=$(patsubst %,$(STL)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-%.$(IMAGE),$(PARTS))
 GCODES=$(patsubst %,$(GCODE)/$(PREFIX)-%.$(GCODE),$(PARTS))
 
-all:	models gcodes images
+all:	models images
 
 directories:
-	@mkdir -p $(STL) $(IMAGE) $(GCODE)
+	@mkdir -p $(STL) $(IMAGE)
 
 models: directories $(MODELS)
-
-gcodes: directories $(GCODES)
 
 images: directories $(IMAGES)
 
 clean:
-	rm -rf $(STL) $(GCODE) $(IMAGE)
+	rm -rf $(STL) $(IMAGE)
 
 # Dependencies for models
 
@@ -79,9 +76,4 @@ $(MODELS) : $(STL)/$(PREFIX)-%.$(STL) : $(PREFIX).scad
 
 $(IMAGES) : $(IMAGE)/$(PREFIX)-%.$(IMAGE) : $(PREFIX).scad
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(IMAGE),,$(@F)))\" $(IMAGE_OPTIONS) $<
-
-# Dependencies for slicing
-
-$(GCODES) : $(GCODE)/%.$(GCODE) : $(STL)/%.$(STL) $(SLIC3R_INI)
-	$(SLIC3R) -o $@ $(SLIC3R_OPTIONS) $<
 
