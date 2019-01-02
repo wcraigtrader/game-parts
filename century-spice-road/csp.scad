@@ -16,27 +16,40 @@ VERBOSE = true;     // Set to true to see more data
 // ----- Component measurements -----------------------------------------------
 
 BOWL_DIAMETER = 68 * mm;
-LIP_HEIGHT    =  5 * mm;
+LIP_HEIGHT    =  3 * mm;
 NOTCH_WIDTH   = 15 * mm;
 
 FONT_NAME = "Liberation Serif:style=Italic";
 FONT_SIZE = 11.0;
 
+LABELS = [
+    [ "Cinnamon", "brown"  ],
+    [ "Cardamom", "lime"   ],
+    [ "Safran",   "red"    ],
+    [ "Turmeric", "yellow" ],
+    [ "Saffron",  "red"    ],
+];
+
 // ----- Assembly details -----------------------------------------------------
 
-FILAMENT = 0.8 * mm; // Thickness of a line of filament
+// 3D Printer
+LAYER_HEIGHT = 0.20 * mm;
+THIN_WALL    = 0.86 * mm;  	// Based on 0.20mm layer height
+WIDE_WALL    = 1.67 * mm;  	// Based on 0.20mm layer height
+
+THICK = false;
+THIN  = true;
 
 BOTTOM = 2 * mm;
 LID    = 2 * mm;
-OUTER  = 2.5 * FILAMENT;
-INNER  = 2.5 * FILAMENT;
+OUTER  = WIDE_WALL;
 SPACE  = 1 * mm;
 
-GAP = FILAMENT/4;
+GAP = THIN_WALL/4;
 SEP = 2 * mm;
-OVERLAP = 0.1 * mm; // Ensures that there are no vertical artifacts leftover
+OVERLAP = 0.01 * mm; // Ensures that there are no vertical artifacts leftover
 
-$fn=90;             // Fine-grained corners
+$fn=180;             // Fine-grained corners
 
 // ----- Calculated Measurements ----------------------------------------------
 
@@ -56,6 +69,13 @@ module label(message) {
 
 // ----- Components -----------------------------------------------------------
 
+module bowl_names(name) {
+    thickness = LID/2;
+    translate( [0,0,thickness/2] )
+        linear_extrude( height=thickness+OVERLAP, center=true ) 
+            label(name);
+}
+
 module bowl_lid(name="", thin=false) {
     thickness = thin ? (LID/2) : LID;
 
@@ -67,18 +87,18 @@ module bowl_lid(name="", thin=false) {
     
     difference() {
         cylinder( d=OUTER_DIAMETER, h=OUTER_HEIGHT );
-        translate( [0,0,thickness] ) 
-            cylinder( d1=INNER_DIAMETER, d2=INNER_DIAMETER, h=OUTER_HEIGHT );
         
-        for (angle=[-60,0,60]) {
+        translate( [0,0,thickness] ) 
+            cylinder( d1=INNER_DIAMETER, d2=INNER_DIAMETER-2*GAP, h=OUTER_HEIGHT );
+        
+        for (angle=[0,45,90,135]) {
             rotate( [0,0,angle] )
                 translate( [-notchx/2, -notchy/2, thickness] )
                     cube( [notchx,notchy,OUTER_HEIGHT] );
         }
         
-        if (name != "" && !thin) {
-#            linear_extrude( height=LID, center=true ) 
-                label(name);
+        if (name != "") {
+            bowl_names( name );
         }
     }
 }
@@ -111,10 +131,12 @@ module bowl_plate_with_names() {
     dx = OUTER_DIAMETER + 5 * mm;
     dy = OUTER_DIAMETER + 5 * mm;
     
-    place( [0*dx,0*dy,0], 0, "brown" ) bowl_lid("Cinnamon");
-    place( [1*dx,0*dy,0], 0, "green" ) bowl_lid("Cardamon");
-    place( [0*dx,1*dy,0], 0, "red" ) bowl_lid("Safran");
-    place( [1*dx,1*dy,0], 0, "yellow" ) bowl_lid("Tumeric");
+    for( i = [0:len( LABELS )-1] ) {
+        x = floor( i/2 );
+        y = i%2;
+        place( [x*dx,y*dy,0], 0, "white" ) bowl_lid( LABELS[i][0], true );
+        place( [x*dx,y*dy,0], 0, LABELS[i][1] ) bowl_names( LABELS[i][0] );
+    }
 }
 
 module big_bowl_plate(thin=true) {
@@ -141,22 +163,40 @@ if (PART == "lid-thick") {
     bowl_lid();
 } else if (PART == "lid-thin") {
     bowl_lid(thin=true);
+
 } else if (PART == "lid-cinnamon") {
-    bowl_lid("Cinnamon");
+    bowl_lid("Cinnamon", THICK);
 } else if (PART == "lid-cardamom") {
-    bowl_lid("Cardamom");
+    bowl_lid("Cardamom", THICK);
 } else if (PART == "lid-safran") {
-    bowl_lid("Safran");
+    bowl_lid("Safran", THICK);
 } else if (PART == "lid-turmeric") {
-    bowl_lid("Turmeric");
-} else if (PART == "named-plate") {
-    bowl_plate_with_names();
-} else if (PART == "thick-blank-plate") {
-    bowl_plate();
-} else if (PART == "thin-blank-plate") {
-    bowl_plate(thin=true);
-} else if (PART == "big-thin-plate") {
-    big_bowl_plate();
+    bowl_lid("Turmeric", THICK);
+} else if (PART == "lid-saffron") {
+    bowl_lid("Saffron", THICK);
+
+} else if (PART == "multi-cinnamon") {
+    bowl_lid("Cinnamon", THIN);
+} else if (PART == "multi-cardamom") {
+    bowl_lid("Cardamom", THIN);
+} else if (PART == "multi-safran") {
+    bowl_lid("Safran", THIN);
+} else if (PART == "multi-turmeric") {
+    bowl_lid("Turmeric", THIN);
+} else if (PART == "multi-saffron") {
+    bowl_lid("Saffron", THIN);
+
+} else if (PART == "names-cinnamon") {
+    bowl_names("Cinnamon");
+} else if (PART == "names-cardamom") {
+    bowl_names("Cardamom");
+} else if (PART == "names-safran") {
+    bowl_names("Safran");
+} else if (PART == "names-turmeric") {
+    bowl_names("Turmeric");
+} else if (PART == "names-saffron") {
+    bowl_names("Saffron");
+
 } else {
-    big_bowl_plate();
+    bowl_plate_with_names();
 }
