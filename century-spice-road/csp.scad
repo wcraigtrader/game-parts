@@ -160,9 +160,9 @@ if (VERBOSE) {
 }
 
 if (PART == "lid-thick") {
-    bowl_lid();
+    bowl_lid("", THICK);
 } else if (PART == "lid-thin") {
-    bowl_lid(thin=true);
+    bowl_lid("", THIN);
 
 } else if (PART == "lid-cinnamon") {
     bowl_lid("Cinnamon", THICK);
@@ -198,5 +198,6 @@ if (PART == "lid-thick") {
     bowl_names("Saffron");
 
 } else {
-    bowl_plate_with_names();
+   // bowl_plate_with_names();
+    bowl_lid("", THIN);
 }
