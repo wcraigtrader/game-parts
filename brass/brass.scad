@@ -37,12 +37,13 @@ DECK_BOX_SPACING =  1.00 * mm;
 DECK_BOK_OVERLAP = 20.00 * mm;
 
 // Physical dimensions
-BOTTOM    = 0.60 * mm;  // Bottom plate thickness
+BOTTOM    = 1.00 * mm;  // Bottom plate thickness
 TOP       = 0.60 * mm;  // Top plate thickness
 SPACING   = 1.00 * mm;  // Additional play in compartments
 OVERLAP   = 0.10 * mm;
 GAP       = 0.20 * mm;  // Gap between outer and inner walls for boxes
 NOTCH     = 10.0 * mm;  // Radius of notches
+TEXT      = 0.40 * mm;  // Depth of engraved text in tile holes
 
 // 3D Printer
 LAYER_HEIGHT = 0.20 * mm;
@@ -52,19 +53,21 @@ WIDE_WALL    = 1.67 * mm;  	// Based on 0.20mm layer height
 // ----- Card Sleeves ----------------------------------------------------------
 
 /*
- * [0] = (X) width of sleeved card (mm)
- * [1] = (Z) height of sleeved card (mm)
+ * [0] = (X) outside width of sleeved card (mm)
+ * [1] = (Z) outside height of sleeved card (mm)
  * [2] = (Y) average thickness of sleeved card (mm)
  */
 
 // ----- Data ------------------------------------------------------------------
 
 FFS_STANDARD = [ 66.70, 94.60, 0.625 ];
+ULP_STANDARD = [ 67.00, 95.00, 0.625 ];
 
 // ----- Functions -------------------------------------------------------------
 
 function layer_height( height ) = ceil( height / LAYER_HEIGHT ) * LAYER_HEIGHT;
 function tile_height( count ) = (count + 0.5) * TILE_THICKNESS;
+function max_tile_height( tiles ) = layer_height( tile_height( max( tiles[0][0], tiles[1][0], tiles[2][0], tiles[3][0], tiles[4][0], tiles[5][0] ) ) + TEXT );
 
 // ----- Modules ---------------------------------------------------------------
 
@@ -128,7 +131,7 @@ module brass_box( length, height, bottom, wall, hollow=HOLLOW ) {
     }
 }
 
-/* brass_lid( length, height, top, wall, hollow )
+/* brass_lid( length, height, top, wall )
  *
  * Produces a matching lid for a brass box with the same parameters,
  */
@@ -177,7 +180,7 @@ module brass_lid( length, height, top, wall ) {
  * that is width (X) x depth (Y)  x height (Z) and centered at [0,0].
  * The actual width and depth will be 2*SPACING more than asked.
  */
-module tile_hole( width, depth, height ) {
+module tile_hole( width, depth, height, name="" ) {
 
     w1 = (width-SPACING) / 2;
     d1 = (depth-SPACING) / 2;
@@ -185,6 +188,8 @@ module tile_hole( width, depth, height ) {
     w2 = width / 2;
     d2 = depth / 2;
     h2 = height + OVERLAP;
+
+    rotation = width == depth ? [0,0,45] : [0,0,90];
 
     points = [
         [ -w1, -d1, h1 ],   // p0
@@ -206,9 +211,16 @@ module tile_hole( width, depth, height ) {
         [7,4,0,3],  // left
     ];
 
-    minkowski() {
-        polyhedron( points, faces );
-        cylinder( r=SPACING, h=OVERLAP );
+    union() {
+        minkowski() {
+            polyhedron( points, faces );
+            cylinder( r=SPACING, h=OVERLAP );
+        }
+        
+        translate( [0,0,-TEXT] ) rotate( rotation )
+            linear_extrude( height=2*TEXT+OVERLAP, center=true )
+                mirror( [0,0,0] )
+                    text( name, font="Liberation Sans", size=8, halign="center", valign="center" );
     }
 }
 
@@ -217,16 +229,19 @@ module tile_hole( width, depth, height ) {
  * Produces a box to hold all the tiles,
  * with adjustable tile heights for the different game variants.
  *
- * [0] = Cotten or half Cotten (L)
+ * [0] = Cotton or half Cotton (L)
  * [1] = Coal
  * [2] = Iron
- * [3] = Manufacturers or half Cotten (L)
+ * [3] = Manufacturers or half Cotton (L)
  * [4] = Beer or Shipyards
  * [5] = Pottery or Ports
  */
 
 LANCASHIRE_TILES = [  6, 7, 4,  6, 6, 8 ];
 BIRMINGHAM_TILES = [ 11, 7, 4, 11, 7, 5 ];
+
+LANCASHIRE_TILES = [ [ 6, "Cotton"], [7, "Coal"], [4, "Iron"], [ 6, "Cotton"], [6, "Ships"], [8, "Ports"] ];
+BIRMINGHAM_TILES = [ [11, "Cotton"], [7, "Coal"], [4, "Iron"], [11, "Goods" ], [7, "Beer" ], [5, "Pots" ] ]; 
 
 module tile_box( tiles ) {
     tx = TILE_SIZE   + 2*SPACING;
@@ -239,7 +254,7 @@ module tile_box( tiles ) {
     iy = COMPARTMENT_DEPTH - 4*THIN_WALL - 2*GAP;
 
     // If the height of the box is close to half height, use that instead
-    mth = layer_height( tile_height( max( tiles ) ) );
+    mth = max_tile_height( tiles );
     hch = COMPARTMENT_HEIGHT/2 - TOP - BOTTOM;
     iz = (hch-mth < 3) ? hch : mth;
 
@@ -273,17 +288,17 @@ module tile_box( tiles ) {
         brass_box( ix, iz, BOTTOM, THIN_WALL, SOLID );
 
         // Remove holes for industry tiles, removing extra space for tiles under the character tile
-        translate( [hx1, hy6, iz-tile_height( tiles[0] )] )   tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[0] ) );
-        translate( [hx3, hy8, iz-tile_height( tiles[1]+1 )] ) tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[1]+1 ) );
-        translate( [hx6, hy6, iz-tile_height( tiles[2] )] )   tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[2] ) );
-        translate( [hx6, hy3, iz-tile_height( tiles[3] )] )   tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[3] ) );
-        translate( [hx4, hy1, iz-tile_height( tiles[4]+1 )] ) tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[4]+1 ) );
-        translate( [hx1, hy3, iz-tile_height( tiles[5] )] )   tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[5] ) );
+        translate( [hx1, hy6, iz-tile_height( tiles[0][0] )] )   tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[0][0] ),   tiles[0][1] );
+        translate( [hx3, hy8, iz-tile_height( tiles[1][0]+1 )] ) tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[1][0]+1 ), tiles[1][1] );
+        translate( [hx6, hy6, iz-tile_height( tiles[2][0] )] )   tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[2][0] ),   tiles[2][1] );
+        translate( [hx6, hy3, iz-tile_height( tiles[3][0] )] )   tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[3][0] ),   tiles[3][1] );
+        translate( [hx4, hy1, iz-tile_height( tiles[4][0]+1 )] ) tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[4][0]+1 ), tiles[4][1] );
+        translate( [hx1, hy3, iz-tile_height( tiles[5][0] )] )   tile_hole( TILE_SIZE, TILE_SIZE, tile_height( tiles[5][0] ),   tiles[5][1] );
 
         // Remove holes for canal / rail links
         thl = tile_height( 7+1 );
-        translate( [hx5, hy7, iz-thl] ) tile_hole( LINK_WIDTH, LINK_LENGTH, thl );
-        translate( [hx2, hy2, iz-thl] ) tile_hole( LINK_WIDTH, LINK_LENGTH, thl );
+        translate( [hx5, hy7, iz-thl] ) tile_hole( LINK_WIDTH, LINK_LENGTH, thl, "Links" );
+        translate( [hx2, hy2, iz-thl] ) tile_hole( LINK_WIDTH, LINK_LENGTH, thl, "Links" );
 
         // Remove hole for the character tile
         th1 = tile_height( 1 );
@@ -312,7 +327,7 @@ module tile_lid( tiles ) {
     iy = COMPARTMENT_DEPTH - 4*THIN_WALL;
 
     // If the height of the box is close to half height, use that instead
-    mth = layer_height( tile_height( max( tiles ) ) );
+    mth = max_tile_height( tiles );
     hch = COMPARTMENT_HEIGHT/2 - TOP - BOTTOM;
     iz = (hch-mth < 3) ? hch : mth;
 
@@ -430,10 +445,13 @@ if (PART == "lancashire-tile-box") {
     translate( [50, 0,0] ) part_box( EMPTY );
     translate( [50,90,0] ) part_lid( EMPTY );
 
-} else if (PART == "deck-box" ) {
+} else if (PART == "deck-box-ffs" ) {
     thin_deck_box( FFS_STANDARD, LANCASHIRE_CARDS, THIN_WALL );
-
+} else if (PART == "deck-box-ulp" ) {
+    thin_deck_box( ULP_STANDARD, LANCASHIRE_CARDS, THIN_WALL );
+    
 } else {
+    /*
     translate( [  0, 0,0] ) part_box( BIRMINGHAM );
     translate( [  0,90,0] ) part_lid( BIRMINGHAM );
     translate( [ 50, 0,0] ) part_box( EMPTY );
@@ -441,5 +459,8 @@ if (PART == "lancashire-tile-box") {
     translate( [100, 0,0] ) part_box( MARKETS );
     translate( [100,90,0] ) part_lid( MARKETS );
     translate( [150, 0,0] ) part_box( LANCASHIRE );
-    translate( [150,90,0] ) part_lid( LANCASHIRE );
+    translate( [150,90,0] ) part_lid( LANCASHIRE );}
+    */
+    // tile_box( LANCASHIRE_TILES );
+    tile_box( BIRMINGHAM_TILES );
 }
