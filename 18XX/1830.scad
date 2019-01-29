@@ -25,6 +25,12 @@ TOKEN_WIDTH      = 35.0 * mm;   // X
 TOKEN_DEPTH      = 17.5 * mm;   // Y
 TOKEN_HEIGHT     = 6.00 * mm;   // Z
 
+TILE_CENTERS = [
+    [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ],
+    [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ],
+    [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ],
+];
+
 include <18XX.scad>;
 
 // ----- Data ------------------------------------------------------------------
@@ -52,5 +58,6 @@ if (PART == "tile-tray") {
 } else if (PART == "token-box-lid") {
     cell_lid( TOKEN_CELLS, TOKEN_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
 } else {
+    // hex_tray( FULL_X, HALF_Y, 12*TILE_THICKNESS+STUB, WIDE_WALL );
     hex_lid( FULL_X, HALF_Y, 4*mm, WIDE_WALL, THIN_WALL, false, true );
 }

@@ -32,21 +32,20 @@ HALF_X = BOX_WIDTH / 2;
 HALF_Y = BOX_HEIGHT / 2;
 
 HEX_DIAMETER = TILE_DIAMETER + 2*WIDE_WALL;
-HEX_EDGE  = HEX_DIAMETER / 2;
+HEX_EDGE   = HEX_DIAMETER / 2;
 HEX_RADIUS = HEX_DIAMETER / 2;
 HEX_WIDTH = HEX_DIAMETER * S60;
 
-BORDER_X = (FULL_X - 4.5 * HEX_WIDTH) / 2;
-BORDER_Y = (HALF_Y - 2.5 * HEX_DIAMETER) / 2;
-GAP_X = (BORDER_X - WIDE_WALL) / 2;
-GAP_Y = (BORDER_Y - WIDE_WALL) / 2;
+HEXES = len( TILE_CENTERS );
+
+// Assume only 12 or 15 hexes
+HEX_COLS = (HEXES == 20 || HEXES == 15) ? 5 : 4;
+HEX_ROWS = (HEXES == 20 || HEXES == 16) ? 4 : 3;
 
 if (VERBOSE) {
     echo( TrayLength=FULL_X, TrayWidth=HALF_Y );
     echo( HexDiameter=HEX_DIAMETER, HexEdge=HEX_EDGE, HexRadius=HEX_RADIUS, HexWidth=HEX_WIDTH );
-    echo( BorderX=BORDER_X, GapX=GAP_X, BorderY=BORDER_Y, GapY=GAP_Y );
 }
-
 
 // ----- Offsets for positioning hex tiles -------------------------------------
 
@@ -54,17 +53,14 @@ TDX = HEX_WIDTH / 4;
 TDY = HEX_DIAMETER / 4;
 
 TILE_CORNERS = [
-    [ 0*TDX, 2*TDY ], [ 2*TDX, 1*TDY ], [ 2*TDX,-1*TDY ],
-    [ 0*TDX,-2*TDY ], [-2*TDX,-1*TDY ], [-2*TDX, 1*TDY ],
-];
-
-TILE_CENTERS = [
-    [ 2*TDX, 2*TDY ], [ 6*TDX, 2*TDY ], [ 10*TDX, 2*TDY ], [ 14*TDX, 2*TDY ],
-    [ 4*TDX, 5*TDY ], [ 8*TDX, 5*TDY ], [ 12*TDX, 5*TDY ], [ 16*TDX, 5*TDY ],
-    [ 2*TDX, 8*TDY ], [ 6*TDX, 8*TDY ], [ 10*TDX, 8*TDY ], [ 14*TDX, 8*TDY ],
+    [ 0, 2 ], [ 2, 1 ], [ 2,-1 ],
+    [ 0,-2 ], [-2,-1 ], [-2, 1 ],
 ];
 
 // ----- Functions -------------------------------------------------------------
+
+function border_size_x( x ) = (x - (HEX_COLS + 0.5) * HEX_WIDTH) / 2;
+function border_size_y( y ) = (y - (HEX_ROWS * 3+1) / 4 * HEX_DIAMETER) / 2;
 
 function row_offset( cellz, space, r, c ) = r <= 0 ? 0 : row_offset( cellz, space, r-1, c ) + cellz[r-1][c][1] + space;
 function col_offset( cellz, space, r, c ) = c <= 0 ? 0 : col_offset( cellz, space, r, c-1 ) + cellz[r][c-1][0] + space;
@@ -117,6 +113,9 @@ module hex_tray( width, depth, height, walls ) {
     cx = 10 * mm;
     cy = cx;
 
+    border_x = border_size_x( width );
+    border_y = border_size_y( depth );
+
     difference() {
         union() {
             // Add bottom plate
@@ -130,8 +129,8 @@ module hex_tray( width, depth, height, walls ) {
                 union() { // add corners
                     for (tile=TILE_CENTERS) {
                         for (corner=[0:5]) {
-                            tx = tile[0] + TILE_CORNERS[corner][0] + BORDER_X;
-                            ty = tile[1] + TILE_CORNERS[corner][1] + BORDER_Y;
+                            tx = tile[0]*TDX + TILE_CORNERS[corner][0]*TDX + border_x;
+                            ty = tile[1]*TDY + TILE_CORNERS[corner][1]*TDY + border_y;
                             translate( [tx, ty, 0 ] ) hex_corner( corner, height );
                         }
                     }
@@ -141,8 +140,8 @@ module hex_tray( width, depth, height, walls ) {
 
         // Remove finger holes
         for (tile=TILE_CENTERS) {
-            tx = tile[0] + BORDER_X;
-            ty = tile[1] + BORDER_Y;
+            tx = tile[0]*TDX + border_x;
+            ty = tile[1]*TDY + border_y;
             translate( [tx, ty, -OVERLAP] )
                 rotate( [0,0,90] )
                     cylinder( h=BOTTOM+bz+OVERLAP, d=POKE_HOLE, $fn=6 );
@@ -177,7 +176,10 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
     ix = bx-2*dx;
     iy = by-2*dy;
 
-    union() {
+    border_x = border_size_x( width );
+    border_y = border_size_y( depth );
+
+    mirror( [0,1,0] ) union() {
         difference() {
             union() {
                 cube( [bx, by, TOP] );
@@ -197,8 +199,8 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
 
             // Remove finger holes
             for (tile=TILE_CENTERS) {
-                tx = tile[0] + BORDER_X;
-                ty = tile[1] + BORDER_Y;
+                tx = tile[0]*TDX + border_x;
+                ty = tile[1] *TDY+ border_y;
                 translate( [tx, ty, -OVERLAP] )
                     rotate( [0,0,90] )
                         cylinder( h=BOTTOM+bz+2*OVERLAP, d=POKE_HOLE, $fn=6 );
@@ -214,8 +216,8 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
                     union() {
                         for (tile=TILE_CENTERS) {
                             for (corner=[0:5]) {
-                                tx = tile[0] + TILE_CORNERS[corner][0] + BORDER_X;
-                                ty = tile[1] + TILE_CORNERS[corner][1] + BORDER_Y;
+                                tx = tile[0]*TDX + TILE_CORNERS[corner][0]*TDX + border_x;
+                                ty = tile[1]*TDY + TILE_CORNERS[corner][1]*TDY + border_y;
                                 translate( [tx, ty, 0] ) cylinder( d=7*WIDE_WALL, h=STUB+OVERLAP, $fn=6 );
                             }
                         }
@@ -224,8 +226,8 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
                     union() { // add corners
                         for (tile=TILE_CENTERS) {
                             for (corner=[0:5]) {
-                                tx = tile[0] + TILE_CORNERS[corner][0] + BORDER_X;
-                                ty = tile[1] + TILE_CORNERS[corner][1] + BORDER_Y;
+                                tx = tile[0]*TDX + TILE_CORNERS[corner][0]*TDX + border_x;
+                                ty = tile[1]*TDY + TILE_CORNERS[corner][1]*TDY + border_y;
                                 translate( [tx, ty, 0 ] ) hex_corner( corner, height, STUB_GAP );
                             }
                         }
