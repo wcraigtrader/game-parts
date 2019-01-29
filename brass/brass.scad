@@ -37,7 +37,7 @@ DECK_BOX_SPACING =  1.00 * mm;
 DECK_BOK_OVERLAP = 20.00 * mm;
 
 // Physical dimensions
-BOTTOM    = 1.00 * mm;  // Bottom plate thickness
+BOTTOM    = 0.60 * mm;  // Bottom plate thickness
 TOP       = 0.60 * mm;  // Top plate thickness
 SPACING   = 1.00 * mm;  // Additional play in compartments
 OVERLAP   = 0.10 * mm;
@@ -451,6 +451,8 @@ if (PART == "lancashire-tile-box") {
     thin_deck_box( ULP_STANDARD, LANCASHIRE_CARDS, THIN_WALL );
     
 } else {
+    translate( [0, 0,0] ) tile_box( BIRMINGHAM_TILES );
+    translate( [0,90,0] ) tile_lid( BIRMINGHAM_TILES );
     /*
     translate( [  0, 0,0] ) part_box( BIRMINGHAM );
     translate( [  0,90,0] ) part_lid( BIRMINGHAM );
@@ -461,6 +463,4 @@ if (PART == "lancashire-tile-box") {
     translate( [150, 0,0] ) part_box( LANCASHIRE );
     translate( [150,90,0] ) part_lid( LANCASHIRE );}
     */
-    // tile_box( LANCASHIRE_TILES );
-    tile_box( BIRMINGHAM_TILES );
 }
