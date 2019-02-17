@@ -23,10 +23,16 @@ FONT_NAME = "Liberation Serif:style=Italic";
 FONT_SIZE = 11.0;
 
 LABELS = [
+    [ "Cloves",   "brown"  ],
+    [ "Tea",      "lime"   ],
+    [ "Chili",    "red"    ],
+    [ "Ginger",   "yellow" ],
+
     [ "Cinnamon", "brown"  ],
     [ "Cardamom", "lime"   ],
     [ "Safran",   "red"    ],
     [ "Turmeric", "yellow" ],
+
     [ "Saffron",  "red"    ],
 ];
 
@@ -132,8 +138,8 @@ module bowl_plate_with_names() {
     dy = OUTER_DIAMETER + 5 * mm;
     
     for( i = [0:len( LABELS )-1] ) {
-        x = floor( i/2 );
-        y = i%2;
+        x = floor( i/4 );
+        y = i%4;
         place( [x*dx,y*dy,0], 0, "white" ) bowl_lid( LABELS[i][0], true );
         place( [x*dx,y*dy,0], 0, LABELS[i][1] ) bowl_names( LABELS[i][0] );
     }
@@ -164,6 +170,15 @@ if (PART == "lid-thick") {
 } else if (PART == "lid-thin") {
     bowl_lid("", THIN);
 
+} else if (PART == "lid-cloves") {
+    bowl_lid("Cloves", THICK);
+} else if (PART == "lid-tea") {
+    bowl_lid("Tea", THICK);
+} else if (PART == "lid-chili") {
+    bowl_lid("Chili", THICK);
+} else if (PART == "lid-ginger") {
+    bowl_lid("Ginger", THICK);
+
 } else if (PART == "lid-cinnamon") {
     bowl_lid("Cinnamon", THICK);
 } else if (PART == "lid-cardamom") {
@@ -172,8 +187,18 @@ if (PART == "lid-thick") {
     bowl_lid("Safran", THICK);
 } else if (PART == "lid-turmeric") {
     bowl_lid("Turmeric", THICK);
+
 } else if (PART == "lid-saffron") {
     bowl_lid("Saffron", THICK);
+
+} else if (PART == "multi-cloves") {
+    bowl_lid("Cloves", THIN);
+} else if (PART == "multi-tea") {
+    bowl_lid("Tea", THIN);
+} else if (PART == "multi-chili") {
+    bowl_lid("Chili", THIN);
+} else if (PART == "multi-ginger") {
+    bowl_lid("Ginger", THIN);
 
 } else if (PART == "multi-cinnamon") {
     bowl_lid("Cinnamon", THIN);
@@ -183,8 +208,18 @@ if (PART == "lid-thick") {
     bowl_lid("Safran", THIN);
 } else if (PART == "multi-turmeric") {
     bowl_lid("Turmeric", THIN);
+
 } else if (PART == "multi-saffron") {
     bowl_lid("Saffron", THIN);
+
+} else if (PART == "names-cloves") {
+    bowl_names("Cloves");
+} else if (PART == "names-tea") {
+    bowl_names("Tea");
+} else if (PART == "names-chili") {
+    bowl_names("Chili");
+} else if (PART == "names-ginger") {
+    bowl_names("Ginger");
 
 } else if (PART == "names-cinnamon") {
     bowl_names("Cinnamon");
@@ -194,10 +229,11 @@ if (PART == "lid-thick") {
     bowl_names("Safran");
 } else if (PART == "names-turmeric") {
     bowl_names("Turmeric");
+
 } else if (PART == "names-saffron") {
     bowl_names("Saffron");
 
 } else {
-   // bowl_plate_with_names();
-    bowl_lid("", THIN);
+    bowl_plate_with_names();
+    // bowl_lid("", THIN);
 }
