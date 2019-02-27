@@ -36,24 +36,37 @@ LABELS = [
     [ "Saffron",  "red"    ],
 ];
 
+WELL_LENGTH = 72 * mm;      // (X)
+WELL_RECESS = 17 * mm;      // (X)
+WELL_DEPTH  = 45 * mm;      // (Y)
+WELL_EXTRA  = 35 * mm;      // (Y)
+WELL_HEIGHT = 39 * mm;      // (Z)
+
 // ----- Assembly details -----------------------------------------------------
 
-// 3D Printer
+// ----- 3D Printer -----------------------------------------------------------
+
 LAYER_HEIGHT = 0.20 * mm;
-THIN_WALL    = 0.86 * mm;  	// Based on 0.20mm layer height
-WIDE_WALL    = 1.67 * mm;  	// Based on 0.20mm layer height
+WALL_WIDTH = [ 0.00, 0.43, 0.86, 1.26, 1.67, 2.08, 2.49, 2.89, 3.30 ];
+
+THIN_WALL  = WALL_WIDTH[2];
+WIDE_WALL  = WALL_WIDTH[4];
+
+function layers( count ) = count * LAYER_HEIGHT;
+function layer_height( height ) = ceil( height / LAYER_HEIGHT ) * LAYER_HEIGHT;
+function tile_height( count ) = /* layer_height */ ( count * TILE_THICKNESS );
 
 THICK = false;
 THIN  = true;
 
-BOTTOM = 2 * mm;
-LID    = 2 * mm;
+BOTTOM = 1 * mm;
+LID    = 1 * mm;
 OUTER  = WIDE_WALL;
 SPACE  = 1 * mm;
 
-GAP = THIN_WALL/4;
-SEP = 2 * mm;
-OVERLAP = 0.01 * mm; // Ensures that there are no vertical artifacts leftover
+GAP     = 0.25 * mm;
+NOTCH   = 10.0 * mm;    // Radius of notches
+OVERLAP = 0.01 * mm;    // Ensures that there are no vertical artifacts leftover
 
 $fn=180;             // Fine-grained corners
 
@@ -106,6 +119,72 @@ module bowl_lid(name="", thin=false) {
         if (name != "") {
             bowl_names( name );
         }
+    }
+}
+
+module ew_player_box( mirrored=false, box=true  ) {
+    
+    orientation = mirrored ? [1,0,0] : [0,0,0];
+    
+    tw = WALL_WIDTH[2];
+    gap = GAP;
+    
+    x1 = 2*tw + gap;
+    x2 = WELL_LENGTH/2 - 2*tw - gap;
+    x3 = WELL_LENGTH/2 + WELL_RECESS - 2*tw - gap;
+    
+    y1 = 2*tw + gap;
+    y2 = WELL_DEPTH - 2*tw - gap;
+
+    depth = WELL_HEIGHT - BOTTOM - LID;
+    
+    outline = [ [ x1, y1 ], [ x1, y2 ], [ x2, y2 ], [ x3, y1 ] ];
+    
+    mirror( orientation ) {
+        difference() {
+            minkowski() {
+                linear_extrude( BOTTOM+depth ) polygon( outline );
+                cylinder( r=tw, h=OVERLAP );
+            }
+            
+            if (box) {
+                translate( [0, 0, BOTTOM] ) linear_extrude( depth+3*OVERLAP ) polygon( outline );
+            }
+        }
+    }
+}
+
+module ew_player_lid( mirrored=false ) {
+    
+    orientation = mirrored ? [1,0,0] : [0,0,0];
+    
+    tw = WALL_WIDTH[2];
+    gap = GAP;
+    
+    depth = WELL_HEIGHT/2 - LID;
+
+    difference() {
+        minkowski() {
+            minkowski() {
+                difference() {
+                    ew_player_box( !mirrored, false );
+                    mirror( orientation ) translate( [OVERLAP-WELL_LENGTH,0,depth+LID] ) cube( [WELL_LENGTH,WELL_DEPTH,WELL_HEIGHT] );
+                }
+                cylinder( r=gap, h=OVERLAP );
+            }
+            cylinder( r=tw, h=OVERLAP );
+        }
+
+        // Remove insides
+        translate( [0,0,LID] ) 
+            minkowski() {
+                ew_player_box( !mirrored, false );
+                cylinder( r=gap, h=OVERLAP );
+            }
+
+        // Remove notch
+        mirror( orientation ) translate( [-WELL_LENGTH/4,-2*OVERLAP,depth+NOTCH/2] ) 
+            rotate( [-90,0,0] ) cylinder( r=NOTCH, h=WELL_DEPTH+4*OVERLAP );        
     }
 }
 
@@ -233,7 +312,30 @@ if (PART == "lid-thick") {
 } else if (PART == "names-saffron") {
     bowl_names("Saffron");
 
+} else if (PART == "ew-player-box-right") {
+    ew_player_box();
+} else if (PART == "ew-player-lid-right") {
+    ew_player_lid();
+} else if (PART == "ew-player-box-left") {
+    ew_player_box( true );
+} else if (PART == "ew-player-lid-left") {
+    ew_player_lid( true );
+
+} else if (PART == "ew-player-plate") {
+    translate( [+3,+3,0] ) ew_player_box();
+    translate( [-3,+3,0] ) ew_player_lid();
+    
+    translate( [+3,-3,0] ) rotate( 180 ) ew_player_box( true );
+    translate( [-3,-3,0] ) rotate( 180 ) ew_player_lid( true );
+
 } else {
-    bowl_plate_with_names();
+    // bowl_plate_with_names();
     // bowl_lid("", THIN);
+    
+    translate( [+3,+3,0] ) ew_player_box();
+    translate( [-3,+3,0] ) ew_player_lid();
+    
+    translate( [+3,-3,0] ) rotate( 180 ) ew_player_box( true );
+    translate( [-3,-3,0] ) rotate( 180 ) ew_player_lid( true );
+    
 }
