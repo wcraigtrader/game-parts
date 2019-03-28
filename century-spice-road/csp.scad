@@ -18,6 +18,7 @@ VERBOSE = true;     // Set to true to see more data
 BOWL_DIAMETER = 68 * mm;
 LIP_HEIGHT    =  3 * mm;
 NOTCH_WIDTH   = 15 * mm;
+BOWL_FRAGMENTS = 180;
 
 FONT_NAME = "Liberation Serif:style=Italic";
 FONT_SIZE = 11.0;
@@ -41,6 +42,8 @@ WELL_RECESS = 17 * mm;      // (X)
 WELL_DEPTH  = 45 * mm;      // (Y)
 WELL_EXTRA  = 35 * mm;      // (Y)
 WELL_HEIGHT = 39 * mm;      // (Z)
+
+BOX_FRAGMENTS = 30;
 
 // ----- Assembly details -----------------------------------------------------
 
@@ -66,9 +69,8 @@ SPACE  = 1 * mm;
 
 GAP     = 0.25 * mm;
 NOTCH   = 10.0 * mm;    // Radius of notches
+NOTCH_FRAGMENTS = 60;
 OVERLAP = 0.01 * mm;    // Ensures that there are no vertical artifacts leftover
-
-$fn=180;             // Fine-grained corners
 
 // ----- Calculated Measurements ----------------------------------------------
 
@@ -103,6 +105,8 @@ module bowl_lid(name="", thin=false) {
     
     notchx = OUTER_DIAMETER + 2*OVERLAP;
     notchy = NOTCH_WIDTH;
+
+    $fn=BOWL_FRAGMENTS;
     
     difference() {
         cylinder( d=OUTER_DIAMETER, h=OUTER_HEIGHT );
@@ -140,15 +144,17 @@ module ew_player_box( mirrored=false, box=true  ) {
     
     outline = [ [ x1, y1 ], [ x1, y2 ], [ x2, y2 ], [ x3, y1 ] ];
     
+    $fn=BOX_FRAGMENTS;
+    
     mirror( orientation ) {
         difference() {
             minkowski() {
                 linear_extrude( BOTTOM+depth ) polygon( outline );
-                cylinder( r=tw, h=OVERLAP );
+                sphere( r=tw );
             }
             
             if (box) {
-                translate( [0, 0, BOTTOM] ) linear_extrude( depth+3*OVERLAP ) polygon( outline );
+                translate( [0, 0, BOTTOM] ) linear_extrude( depth+BOTTOM+3*OVERLAP ) polygon( outline );
             }
         }
     }
@@ -163,7 +169,9 @@ module ew_player_lid( mirrored=false ) {
     
     depth = WELL_HEIGHT/2 - LID;
 
-    difference() {
+    $fn=BOX_FRAGMENTS;
+    
+    translate( [0,0,tw] ) difference() {
         minkowski() {
             minkowski() {
                 difference() {
@@ -172,7 +180,7 @@ module ew_player_lid( mirrored=false ) {
                 }
                 cylinder( r=gap, h=OVERLAP );
             }
-            cylinder( r=tw, h=OVERLAP );
+            sphere( r=tw );
         }
 
         // Remove insides
@@ -184,7 +192,7 @@ module ew_player_lid( mirrored=false ) {
 
         // Remove notch
         mirror( orientation ) translate( [-WELL_LENGTH/4,-2*OVERLAP,depth+NOTCH/2] ) 
-            rotate( [-90,0,0] ) cylinder( r=NOTCH, h=WELL_DEPTH+4*OVERLAP );        
+            rotate( [-90,0,0] ) cylinder( r=NOTCH, h=WELL_DEPTH+4*OVERLAP, $fn=NOTCH_FRAGMENTS );        
     }
 }
 
@@ -237,6 +245,14 @@ module big_bowl_plate(thin=true) {
     place( [ 6*dx,8*dy,0], 0, "gray" ) bowl_lid( thin=thin );
     place( [10*dx,8*dy,0], 0, "gray" ) bowl_lid( thin=thin );
 }
+
+module ew_player_plate() {
+    translate( [+3,+3,0] ) ew_player_box();
+    translate( [-3,+3,0] ) ew_player_lid();
+    
+    translate( [+3,-3,0] ) rotate( 180 ) ew_player_box( true );
+    translate( [-3,-3,0] ) rotate( 180 ) ew_player_lid( true );
+}    
 
 // ----- Render Logic for makefile --------------------------------------------
 
@@ -322,20 +338,11 @@ if (PART == "lid-thick") {
     ew_player_lid( true );
 
 } else if (PART == "ew-player-plate") {
-    translate( [+3,+3,0] ) ew_player_box();
-    translate( [-3,+3,0] ) ew_player_lid();
-    
-    translate( [+3,-3,0] ) rotate( 180 ) ew_player_box( true );
-    translate( [-3,-3,0] ) rotate( 180 ) ew_player_lid( true );
+    ew_player_plate();
 
 } else {
     // bowl_plate_with_names();
     // bowl_lid("", THIN);
     
-    translate( [+3,+3,0] ) ew_player_box();
-    translate( [-3,+3,0] ) ew_player_lid();
-    
-    translate( [+3,-3,0] ) rotate( 180 ) ew_player_box( true );
-    translate( [-3,-3,0] ) rotate( 180 ) ew_player_lid( true );
-    
+    ew_player_plate();
 }
