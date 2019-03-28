@@ -173,6 +173,20 @@ CHIP_EDGES = [
     CHIP_CENTERS[ 1] + CHIP_CORNERS[4] + C1,
 ];
 
+BIG_EDGES = [
+    CHIP_CENTERS[ 0] + CHIP_CORNERS[3] + C1,
+    CHIP_CENTERS[ 0] + CHIP_CORNERS[4] + C2,
+    CHIP_CENTERS[ 9] + CHIP_CORNERS[5] + C3,
+    CHIP_CENTERS[14] + CHIP_CORNERS[5] + C3,
+    CHIP_CENTERS[14] + CHIP_CORNERS[0] + C4,
+    CHIP_CENTERS[17] + CHIP_CORNERS[0] + C4,
+    CHIP_CENTERS[17] + CHIP_CORNERS[1] + C5,
+    CHIP_CENTERS[13] + CHIP_CORNERS[1] + C5,
+    CHIP_CENTERS[ 4] + CHIP_CORNERS[2] + C6,
+    CHIP_CENTERS[ 4] + CHIP_CORNERS[3] + C1,
+];
+
+
 // ----- Functions -------------------------------------------------------------
 
 function post_height( count ) = count * TILE_THICKNESS;
@@ -379,39 +393,43 @@ module card_tray_lid() {
 }
 
 
-module money_base() {
+module money_base( holes=true, jagged=true ) {
     difference() {
         // Bottom
-        linear_extrude( BOTTOM ) polygon( CHIP_EDGES );
+        linear_extrude( BOTTOM ) polygon( jagged ? CHIP_EDGES : BIG_EDGES );
 
         // Remove finger holes
-        for (chip=CHIP_CENTERS) {
-            cx = chip[0] + CHIP_X;
-            cy = chip[1] + CHIP_Y;
-            translate( [ cx, cy, -OVERLAP ] )
-                rotate( [0,0,90] )
-                    cylinder( h=BOTTOM+2*OVERLAP, d=CHIP_DIAMETER-10, $fn=6 );
+        if (holes) {
+            for (chip=CHIP_CENTERS) {
+                cx = chip[0] + CHIP_X;
+                cy = chip[1] + CHIP_Y;
+                translate( [ cx, cy, -OVERLAP ] )
+                    rotate( [0,0,90] )
+                        cylinder( h=BOTTOM+2*OVERLAP, d=CHIP_DIAMETER-10, $fn=6 );
+            }
         }
     }
 }
 
-module money_tray() {
+module money_tray( count, holes=true, jagged=true, debug=false ) {
 
-    money_base();
+    money_base( holes, jagged );
 
     translate( [0, 0, BOTTOM] ) {
         for (chip=CHIP_CENTERS) {
             for (corner=[0:5]) {
                 cx = chip[0] + CHIP_CORNERS[corner][0] + CHIP_X;
                 cy = chip[1] + CHIP_CORNERS[corner][1] + CHIP_Y;
-                translate( [cx, cy, 0 ] ) hex_corner( corner, 10*CHIP_THICKNESS );
+                translate( [cx, cy, 0 ] ) hex_corner( corner, count*CHIP_THICKNESS );
             }
         }
 
-%       for (chip=CHIP_CENTERS) {
-            cx = chip[0] + CHIP_X;
-            cy = chip[1] + CHIP_Y;
-            translate( [ cx, cy, 5*CHIP_THICKNESS ] ) cylinder( h=10*CHIP_THICKNESS, d=CHIP_DIAMETER, center=true );
+        if (debug) {
+%          for (chip=CHIP_CENTERS) {
+                cx = chip[0] + CHIP_X;
+                cy = chip[1] + CHIP_Y;
+                translate( [ cx, cy, 0 ] ) cylinder( h=count*CHIP_THICKNESS, d=CHIP_DIAMETER, center=false );
+            }
         }
     }
 }
@@ -435,9 +453,10 @@ if (PART == "short-tile-tray") {
 } else if (PART == "card-tray-plate") {
     translate( [ 0, 88, 0] ) rotate( [0, 0, -90] ) card_tray();
     translate( [58, 88, 0] ) rotate( [0, 0, -90] ) card_tray_lid();
-} else if (PART == "money-tray") {
-    money_tray();
+} else if (PART == "small-money-tray") {
+    money_tray( 5, false, false );
+} else if (PART == "large-money-tray") {
+    money_tray( 10 );
 } else {
-    money_lid();
-    translate( [0,160,0] ) money_tray();
+    money_tray( 5, false, false, true );
 }
