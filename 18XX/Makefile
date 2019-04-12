@@ -8,6 +8,12 @@
 #
 #     make all PREFIX=1830
 #     make all PREFIX=1846
+#     make all PREFIX=1867
+#     make all PREFIX=steam
+#
+# To build all for every model:
+#
+#     make everything
 #
 # This makefile expects an OpenSCAD file named $(PREFIX).scad that defines
 # the following variables:
@@ -38,7 +44,6 @@ OPENSCAD=/usr/bin/openscad
 OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
-
 # Name of OpenSCAD model file
 PREFIX=1830
 
@@ -52,9 +57,18 @@ IMAGE=png
 
 MODELS=$(patsubst %,$(STL)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-%.$(IMAGE),$(PARTS))
-EXTRAS=18XX.scad
+COMMON=18XX.scad
+
+# Name of all model prefixes
+PREFIXES=$(shell ls *.scad | egrep -v $(COMMON) | sed "s/.scad//" | tr "\n" " ")
+
 
 all:	models images
+
+everything:
+	@for prefix in $(PREFIXES) ; do \
+		$(MAKE) all PREFIX=$${prefix} ; \
+	done
 
 directories:
 	@mkdir -p $(STL) $(IMAGE)
@@ -71,11 +85,11 @@ cleanall:
 
 # Dependencies for models
 
-$(MODELS) : $(STL)/$(PREFIX)-%.$(STL) : $(PREFIX).scad $(EXTRAS)
+$(MODELS) : $(STL)/$(PREFIX)-%.$(STL) : $(PREFIX).scad $(COMMON)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(STL),,$(@F)))\" $<
 
 # Dependencies for images
 
-$(IMAGES) : $(IMAGE)/$(PREFIX)-%.$(IMAGE) : $(PREFIX).scad $(EXTRAS)
+$(IMAGES) : $(IMAGE)/$(PREFIX)-%.$(IMAGE) : $(PREFIX).scad $(COMMON)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(IMAGE),,$(@F)))\" $(IMAGE_OPTIONS) $<
 

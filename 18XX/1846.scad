@@ -35,7 +35,7 @@ OTHER_CARDS     =  5.9 * mm; // (10 + 5 + 1)
 
 // Marker dimensions
 MARK_DIAMETER   = 9/16 * inch;
-MARK_THICKNESS  =  3.0 * mm;
+MARK_THICKNESS  = 3.0 * mm;
 MARK_MAX        = 10;
 
 // Poker chip dimensions
@@ -46,12 +46,6 @@ CHIP_THICKNESS  = 3.31 * mm;
 GAP     = 0.25 * mm;    // Size differential between box and lid, for snug fit
 LIP     = 5.00 * mm;
 SPACING = 1.00 * mm;    // Room for tiles to shift
-
-TILE_CENTERS = [
-    [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ],
-    [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ],
-    [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ],
-];
 
 include <18XX.scad>;
 
@@ -133,11 +127,11 @@ module card_tray_lid() {
 // ----- Rendering -------------------------------------------------------------
 
 if (PART == "short-tile-tray") {
-    hex_tray( FULL_X, HALF_Y, tile_height( 2 ), WIDE_WALL );
+    hex_tray( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, tile_height( 2 ), WIDE_WALL );
 } else if (PART == "tall-tile-tray") {
-    hex_tray( FULL_X, HALF_Y, tile_height( 5 ), WIDE_WALL );
+    hex_tray( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, tile_height( 5 ), WIDE_WALL );
 } else if (PART == "tile-tray-lid") {
-    hex_lid( FULL_X, HALF_Y, 6*mm, WIDE_WALL, THIN_WALL, true );
+    hex_lid( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, 6*mm, WIDE_WALL, THIN_WALL, true );
 } else if (PART == "card-tray") {
     card_tray();
 } else if (PART == "card-tray-lid") {
@@ -146,7 +140,6 @@ if (PART == "short-tile-tray") {
     translate( [ 0, 88, 0] ) rotate( [0, 0, -90] ) card_tray();
     translate( [58, 88, 0] ) rotate( [0, 0, -90] ) card_tray_lid();
 } else {
-    // hex_tray( FULL_X, HALF_Y, tile_height( 5 ), WIDE_WALL );
-    hex_lid( FULL_X, HALF_Y, 6*mm, WIDE_WALL, THIN_WALL, true );
-    // card_tray();
+    hex_tray( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, tile_height( 2 ), WIDE_WALL );
+    // hex_lid( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, 6*mm, WIDE_WALL, THIN_WALL, true )
 }

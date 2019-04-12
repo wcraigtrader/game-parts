@@ -19,6 +19,10 @@ THUMBS    = 10.0 * mm;  // Thumb notch for box lids
 STUB      = 2.00 * mm;  // Height of lid stubs
 STUB_GAP  = 0.15 * mm;  // Separation between lid stubs and tray hex corners
 
+FONT_NAME   = "helvetica:style=Bold";
+FONT_SIZE   = 7.0;
+FONT_HEIGHT = 0.6 * mm;
+
 $fa=4; $fn=90;
 
 // ----- Calculated dimensions -------------------------------------------------
@@ -36,12 +40,6 @@ HEX_EDGE   = HEX_DIAMETER / 2;
 HEX_RADIUS = HEX_DIAMETER / 2;
 HEX_WIDTH = HEX_DIAMETER * S60;
 
-HEXES = len( TILE_CENTERS );
-
-// Assume only 12 or 15 hexes
-HEX_COLS = (HEXES == 20 || HEXES == 15) ? 5 : 4;
-HEX_ROWS = (HEXES == 20 || HEXES == 16) ? 4 : 3;
-
 if (VERBOSE) {
     echo( TrayLength=FULL_X, TrayWidth=HALF_Y );
     echo( HexDiameter=HEX_DIAMETER, HexEdge=HEX_EDGE, HexRadius=HEX_RADIUS, HexWidth=HEX_WIDTH );
@@ -57,10 +55,83 @@ TILE_CORNERS = [
     [ 0,-2 ], [-2,-1 ], [-2, 1 ],
 ];
 
+TILE_CENTERS_3X4 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ] ],
+];
+
+TILE_CENTERS_3X5 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ], [18, 2] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ], [20, 5] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ], [18, 8] ],
+];
+
+TILE_CENTERS_4X5 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ], [18, 2] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ], [20, 5] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ], [18, 8] ],
+    [ [ 4,11 ], [ 8,11 ], [ 12,11 ], [ 16,11 ], [20,11] ],
+];
+
+TILE_CENTERS_5X3 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ] ],
+    [ [ 4,11 ], [ 8,11 ], [ 12,11 ] ],
+    [ [ 2,14 ], [ 6,14 ], [ 10,14 ] ],
+];
+
+TILE_CENTERS_5X4 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ] ],
+    [ [ 4,11 ], [ 8,11 ], [ 12,11 ], [ 16,11 ] ],
+    [ [ 2,14 ], [ 6,14 ], [ 10,14 ], [ 14,14 ] ],
+];
+
+TILE_CENTERS_5X5 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ], [18, 2] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ], [20, 5] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ], [18, 8] ],
+    [ [ 4,11 ], [ 8,11 ], [ 12,11 ], [ 16,11 ], [20,11] ],
+    [ [ 2,14 ], [ 6,14 ], [ 10,14 ], [ 14,14 ], [18,14] ],
+];
+
+TILE_CENTERS_6X3 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ] ],
+    [ [ 4,11 ], [ 8,11 ], [ 12,11 ] ],
+    [ [ 2,14 ], [ 6,14 ], [ 10,14 ] ],
+    [ [ 4,17 ], [ 8,17 ], [ 12,17 ] ],
+];
+
+TILE_CENTERS_6X4 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ] ],
+    [ [ 4,11 ], [ 8,11 ], [ 12,11 ], [ 16,11 ] ],
+    [ [ 2,14 ], [ 6,14 ], [ 10,14 ], [ 14,14 ] ],
+    [ [ 4,17 ], [ 8,17 ], [ 12,17 ], [ 16,17 ] ],
+];
+
+TILE_CENTERS_6X5 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ], [18, 2] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ], [20, 5] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ], [18, 8] ],
+    [ [ 4,11 ], [ 8,11 ], [ 12,11 ], [ 16,11 ], [20,11] ],
+    [ [ 2,14 ], [ 6,14 ], [ 10,14 ], [ 14,14 ], [18,14] ],
+    [ [ 4,17 ], [ 8,17 ], [ 12,17 ], [ 16,17 ], [20,17] ],
+];
+
 // ----- Functions -------------------------------------------------------------
 
-function border_size_x( x ) = (x - (HEX_COLS + 0.5) * HEX_WIDTH) / 2;
-function border_size_y( y ) = (y - (HEX_ROWS * 3+1) / 4 * HEX_DIAMETER) / 2;
+function hex_rows( centerz ) = len( centerz );
+function hex_cols( centerz ) = len( centerz[0] );
+
+function border_size_x( centerz, x ) = (x - (hex_cols( centerz ) + 0.5) * HEX_WIDTH) / 2;
+function border_size_y( centerz, y ) = (y - (hex_rows( centerz ) * 3+1) / 4 * HEX_DIAMETER) / 2;
 
 function row_offset( cellz, space, r, c ) = r <= 0 ? 0 : row_offset( cellz, space, r-1, c ) + cellz[r-1][c][1] + space;
 function col_offset( cellz, space, r, c ) = c <= 0 ? 0 : col_offset( cellz, space, r, c-1 ) + cellz[r][c-1][0] + space;
@@ -99,7 +170,7 @@ module hex_corner( corner, height, gap=0 ) {
  * height -- Height (Z) of the stack of tiles (inside dimensions)
  * walls  -- Thickness of outside walls
  */
-module hex_tray( width, depth, height, walls ) {
+module hex_tray( tile_centers, width, depth, height, walls, label="", version="" ) {
     bx = width;
     by = depth;
     bz = height;
@@ -110,11 +181,12 @@ module hex_tray( width, depth, height, walls ) {
     ix = bx-2*dx;
     iy = by-2*dy;
 
-    cx = 10 * mm;
-    cy = cx;
+    border_x = border_size_x( tile_centers, width );
+    border_y = border_size_y( tile_centers, depth );
 
-    border_x = border_size_x( width );
-    border_y = border_size_y( depth );
+    if (VERBOSE) {
+        echo( "hex_tray: ", w=width, d=depth, h=height, w=walls );
+    }
 
     difference() {
         union() {
@@ -127,24 +199,44 @@ module hex_tray( width, depth, height, walls ) {
             // Add tile corners
             translate( [0, 0, BOTTOM-OVERLAP] ) difference() {
                 union() { // add corners
-                    for (tile=TILE_CENTERS) {
-                        for (corner=[0:5]) {
-                            tx = tile[0]*TDX + TILE_CORNERS[corner][0]*TDX + border_x;
-                            ty = tile[1]*TDY + TILE_CORNERS[corner][1]*TDY + border_y;
-                            translate( [tx, ty, 0 ] ) hex_corner( corner, height );
+                    for (row=tile_centers) {
+                        for (tile=row) {
+                            for (corner=[0:5]) {
+                                tx = tile[0]*TDX + TILE_CORNERS[corner][0]*TDX + border_x;
+                                ty = tile[1]*TDY + TILE_CORNERS[corner][1]*TDY + border_y;
+                                translate( [tx, ty, 0 ] ) hex_corner( corner, height );
+                            }
                         }
                     }
                 }
             }
+            
+            // If a label was specified
+            if (label != "") {
+                translate( [border_x-1, depth / 2, BOTTOM-OVERLAP] )
+                    rotate( [0,0,-90] )
+                        linear_extrude( height=FONT_HEIGHT+OVERLAP )
+                            text( label, font=FONT_NAME, size=FONT_SIZE, halign="center", valign="bottom" );
+            }
+            
+            // If a version was specified
+            if (version != "") {
+                translate( [border_x-1, walls+1, BOTTOM-OVERLAP] )
+                    rotate( [0,0,-90] )
+                        linear_extrude( height=FONT_HEIGHT+OVERLAP )
+                            text( version, font=FONT_NAME, size=FONT_SIZE, halign="right", valign="bottom" );
+            }
         }
 
         // Remove finger holes
-        for (tile=TILE_CENTERS) {
-            tx = tile[0]*TDX + border_x;
-            ty = tile[1]*TDY + border_y;
-            translate( [tx, ty, -OVERLAP] )
-                rotate( [0,0,90] )
-                    cylinder( h=BOTTOM+bz+OVERLAP, d=POKE_HOLE, $fn=6 );
+        for (row=tile_centers) {
+            for (tile=row) {
+                tx = tile[0]*TDX + border_x;
+                ty = tile[1]*TDY + border_y;
+                translate( [tx, ty, -OVERLAP] )
+                    rotate( [0,0,90] )
+                        cylinder( h=BOTTOM+bz+OVERLAP, d=POKE_HOLE, $fn=6 );
+            }
         }
     }
 }
@@ -162,7 +254,7 @@ module hex_tray( width, depth, height, walls ) {
  * remove_corners -- True to remove the corners of the inner walls
  * add_stubs      -- True to add stubs that fit with the hex corners from the tray
  */
-module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stubs=false ) {
+module hex_lid( tile_centers, width, depth, height, outer, inner, remove_corners=true, add_stubs=false, remove_holes=true, label="" ) {
     bx = width;
     by = depth;
     bz = height;
@@ -176,8 +268,8 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
     ix = bx-2*dx;
     iy = by-2*dy;
 
-    border_x = border_size_x( width );
-    border_y = border_size_y( depth );
+    border_x = border_size_x( tile_centers, width );
+    border_y = border_size_y( tile_centers, depth );
 
     mirror( [0,1,0] ) union() {
         difference() {
@@ -191,19 +283,23 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
 
             // Remove corners
             if (remove_corners) {
-                translate( [cx,cy,TOP] ) cube( [2*dx, 2*dy, bz+OVERLAP] );
-                translate( [ix-cx,cy,TOP] ) cube( [2*dx, 2*dy, bz+OVERLAP] );
-                translate( [cx,iy-cy,TOP] ) cube( [2*dx, 2*dy, bz+OVERLAP] );
+                translate( [   cx,   cy,TOP] ) cube( [2*dx, 2*dy, bz+OVERLAP] );
+                translate( [ix-cx,   cy,TOP] ) cube( [2*dx, 2*dy, bz+OVERLAP] );
+                translate( [   cx,iy-cy,TOP] ) cube( [2*dx, 2*dy, bz+OVERLAP] );
                 translate( [ix-cx,iy-cy,TOP] ) cube( [2*dx, 2*dy, bz+OVERLAP] );
             }
 
             // Remove finger holes
-            for (tile=TILE_CENTERS) {
-                tx = tile[0]*TDX + border_x;
-                ty = tile[1] *TDY+ border_y;
-                translate( [tx, ty, -OVERLAP] )
-                    rotate( [0,0,90] )
-                        cylinder( h=BOTTOM+bz+2*OVERLAP, d=POKE_HOLE, $fn=6 );
+            if (remove_holes) {
+                for (row=tile_centers) {
+                    for (tile=row) {
+                        tx = tile[0]*TDX + border_x;
+                        ty = tile[1] *TDY+ border_y;
+                        translate( [tx, ty, -OVERLAP] )
+                            rotate( [0,0,90] )
+                                cylinder( h=BOTTOM+bz+2*OVERLAP, d=POKE_HOLE, $fn=6 );
+                    }
+                }
             }
         }
         
@@ -214,21 +310,25 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
                 
                 difference() {
                     union() {
-                        for (tile=TILE_CENTERS) {
-                            for (corner=[0:5]) {
-                                tx = tile[0]*TDX + TILE_CORNERS[corner][0]*TDX + border_x;
-                                ty = tile[1]*TDY + TILE_CORNERS[corner][1]*TDY + border_y;
-                                translate( [tx, ty, 0] ) cylinder( d=7*WIDE_WALL, h=STUB+OVERLAP, $fn=6 );
+                        for (row=tile_centers) {
+                            for (tile=row) {
+                                for (corner=[0:5]) {
+                                    tx = tile[0]*TDX + TILE_CORNERS[corner][0]*TDX + border_x;
+                                    ty = tile[1]*TDY + TILE_CORNERS[corner][1]*TDY + border_y;
+                                    translate( [tx, ty, 0] ) cylinder( d=7*WIDE_WALL, h=STUB+OVERLAP, $fn=6 );
+                                }
                             }
                         }
                     }
                     
                     union() { // add corners
-                        for (tile=TILE_CENTERS) {
-                            for (corner=[0:5]) {
-                                tx = tile[0]*TDX + TILE_CORNERS[corner][0]*TDX + border_x;
-                                ty = tile[1]*TDY + TILE_CORNERS[corner][1]*TDY + border_y;
-                                translate( [tx, ty, 0 ] ) hex_corner( corner, height, STUB_GAP );
+                        for (row=tile_centers) {
+                            for (tile=row) {
+                                for (corner=[0:5]) {
+                                    tx = tile[0]*TDX + TILE_CORNERS[corner][0]*TDX + border_x;
+                                    ty = tile[1]*TDY + TILE_CORNERS[corner][1]*TDY + border_y;
+                                    translate( [tx, ty, 0 ] ) hex_corner( corner, height, STUB_GAP );
+                                }
                             }
                         }
                     }
@@ -264,7 +364,7 @@ module hex_lid( width, depth, height, outer, inner, remove_corners=true, add_stu
  * rows that have differing numbers of cells, you'll want to increase the size
  * of some cells to account for the walls that will be missing from in that row.
  */
-module cell_box( cells, height, bottom, top, outer, inner ) {
+module cell_box( cells, height, bottom, top, outer, inner, holes=false ) {
     inside_x = row_length( cells, inner );
     inside_y = col_length( cells, inner );
     inside_z = height;
@@ -294,6 +394,9 @@ module cell_box( cells, height, bottom, top, outer, inner ) {
 
         // Remove inside of box
         for ( row = [len(cells)-1:-1:0] ) {
+            if (VERBOSE) {
+                echo( CellRow=row, Cells=cells[row] );
+            }
             for ( col = [0:1:len(cells[row])-1 ] ) {
                 cell = cells[row][col];
                 dx = col_offset( cells, inner, row, col ) + inner + GAP;
@@ -301,6 +404,11 @@ module cell_box( cells, height, bottom, top, outer, inner ) {
 
                 translate( [ dx, dy, bottom ] )
                     cube( [ cell[0], cell[1], height+top+OVERLAP ] );
+                
+                if (holes) {
+                    translate( [ dx+cell[0]/4, dy+cell[1]/4, -OVERLAP ] )
+                        cube( [ cell[0]/2, cell[1]/2, bottom+2*OVERLAP ] );
+                }
             }
         }
     }
@@ -369,7 +477,7 @@ if (0) {
         [ [ 20, 10 ], [ 30, 10 ], [ 40, 10 ] ]
     ];
 
-    cell_box( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    cell_box( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL, true );
     translate( [0, 70, 0] )
     cell_lid( PART_CELLS, PART_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
 }
@@ -377,7 +485,7 @@ if (0) {
 if (0) {
     VERBOSE = true;
     
-    hex_tray( FULL_X, HALF_Y, 12*TILE_THICKNESS, WIDE_WALL );
+    hex_tray( FULL_X, HALF_Y, 12*TILE_THICKNESS, WIDE_WALL, "18XXv1" );
     translate( [0, HALF_Y + 10, 0] )
     hex_lid( FULL_X, HALF_Y, 4*mm, WIDE_WALL, THIN_WALL, false, true );
 }
