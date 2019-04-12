@@ -105,17 +105,6 @@ if (PART == "tile-lid") {
 } else if (PART == "token-lid") {
     token_lid();
 } else {
-    tile_lid( false );
-    
-    /*
-    translate( [-3, -3, 0] ) rotate( [0,0,180] )
-    hex_tray( TILE_CENTERS_3X5, 9.5*inch, 5.75*inch, 12*TILE_THICKNESS+STUB, WIDE_WALL, "1867" );
-    
-    translate( [-3,  3, 0] ) rotate( [0,0,180] )
-    hex_lid( TILE_CENTERS_3X5, 9.5*inch, 5.75*inch, 4*mm, WIDE_WALL, THIN_WALL, false, true, false );
-    */
-    
-    /*
     translate( [-3,  -3, 0] ) rotate( [0,0,180] ) tile_box();
     translate( [-3,   3, 0] ) rotate( [0,0,180] ) tile_lid();
 
@@ -124,5 +113,4 @@ if (PART == "tile-lid") {
     
     translate( [ 170,    3, 0] ) card_box();
     translate( [ 170, -132, 0] ) card_lid();
-    */
 }
