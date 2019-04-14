@@ -15,6 +15,9 @@ BOX_WIDTH       = 11.500 * inch;    // (X)
 BOX_HEIGHT      =  9.625 * inch;    // (Y)
 BOX_DEPTH       =  2.250 * inch;    // (Z)
 
+ALT_WIDTH       = 8.000 * inch;
+ALT_HEIGHT      = 7.000 * inch;
+
 // Tokens
 TOKEN_DIAMETER  = 14.0 * mm;
 TOKEN_HEIGHT    =  5.0 * mm;
@@ -64,12 +67,20 @@ CARD_CELLS = [
 
 // ----- Modules ---------------------------------------------------------------
 
-module tile_box( count ) {
+module tile_box( count=5 ) {
     hex_tray( TILE_CENTERS_3X5, BOX_HEIGHT, BOX_WIDTH/2, count*TILE_THICKNESS+STUB, WIDE_WALL, "1867", "V1" );
 }
 
 module tile_lid( holes=true ) {
     hex_lid( TILE_CENTERS_3X5, BOX_HEIGHT, BOX_WIDTH/2, 4*mm, WIDE_WALL, THIN_WALL, false, true, holes );
+}
+
+module alt_tile_box( count=5 ) {
+    hex_tray( TILE_CENTERS_4X4, ALT_WIDTH, ALT_HEIGHT, count*TILE_THICKNESS+STUB, WIDE_WALL, "1867", "V2" );
+}
+
+module alt_tile_lid( holes=true ) {
+    hex_lid( TILE_CENTERS_4X4, ALT_WIDTH, ALT_HEIGHT, 4*mm, WIDE_WALL, THIN_WALL, false, true, holes );
 }
 
 module token_box() {
@@ -88,6 +99,21 @@ module card_lid() {
     cell_lid( CARD_CELLS, SHARE_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL );
 }
 
+module card_rack( count, thickness, width ) {
+    
+    height = 10 * mm;
+    length = C60 * count * thickness + (count+1) * 2 * mm + 5 *mm;
+    dx = 2*mm + C60 * thickness;
+    
+    difference() {
+        cube( [ length, width, height ] );
+        
+        for (x=[0:1:count-1]) {
+#            translate( [x*dx+2,-OVERLAP,3] ) rotate( [0,0,-60] ) cube( [ thickness, width+2*OVERLAP, CARD_HEIGHT ] );
+        }
+    }
+}
+
 // ----- Rendering -------------------------------------------------------------
 
 if (PART == "tile-lid") {
@@ -96,6 +122,12 @@ if (PART == "tile-lid") {
     tile_box(5);
 } else if (PART == "tile-tray-10") {
     tile_box(10);
+} else if (PART == "alt-tile-lid") {
+    alt_tile_lid();
+} else if (PART == "alt-tile-tray-05") {
+    alt_tile_box(5);
+} else if (PART == "alt-tile-tray-10") {
+    alt_tile_box(10);
 } else if (PART == "card-box") {
     card_box();
 } else if (PART == "card-lid") {
@@ -105,12 +137,19 @@ if (PART == "tile-lid") {
 } else if (PART == "token-lid") {
     token_lid();
 } else {
-    translate( [-3,  -3, 0] ) rotate( [0,0,180] ) tile_box();
-    translate( [-3,   3, 0] ) rotate( [0,0,180] ) tile_lid();
-
+    
+    card_rack( 9, 10*SHARE_THICKNESS, 2 * inch );
+    
+/*    
+    translate( [-3,  -3, 0] ) rotate( [0,0,180] ) alt_tile_box();
+    translate( [-3,   3, 0] ) rotate( [0,0,180] ) alt_tile_lid();
+*/
+    
+/*
     translate( [ 3,   3, 0] ) token_box();
     translate( [ 3,-138, 0] ) token_lid();
     
     translate( [ 170,    3, 0] ) card_box();
     translate( [ 170, -132, 0] ) card_lid();
+*/
 }

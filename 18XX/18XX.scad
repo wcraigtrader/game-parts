@@ -67,6 +67,13 @@ TILE_CENTERS_3X5 = [
     [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ], [18, 8] ],
 ];
 
+TILE_CENTERS_4X4 = [
+    [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ] ],
+    [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ] ],
+    [ [ 2, 8 ], [ 6, 8 ], [ 10, 8 ], [ 14, 8 ] ],
+    [ [ 4,11 ], [ 8,11 ], [ 12,11 ], [ 16,11 ] ],
+];
+
 TILE_CENTERS_4X5 = [
     [ [ 2, 2 ], [ 6, 2 ], [ 10, 2 ], [ 14, 2 ], [18, 2] ],
     [ [ 4, 5 ], [ 8, 5 ], [ 12, 5 ], [ 16, 5 ], [20, 5] ],
@@ -184,6 +191,9 @@ module hex_tray( tile_centers, width, depth, height, walls, label="", version=""
     border_x = border_size_x( tile_centers, width );
     border_y = border_size_y( tile_centers, depth );
 
+    ly1 = tile_centers[0][0][1]*TDY + border_y;
+    ly2 = tile_centers[2][0][1]*TDY + border_y;
+
     if (VERBOSE) {
         echo( "hex_tray: ", w=width, d=depth, h=height, w=walls );
     }
@@ -213,18 +223,18 @@ module hex_tray( tile_centers, width, depth, height, walls, label="", version=""
             
             // If a label was specified
             if (label != "") {
-                translate( [border_x-1, depth / 2, BOTTOM-OVERLAP] )
+                translate( [bx-border_x+1, ly2, BOTTOM-OVERLAP] )
                     rotate( [0,0,-90] )
                         linear_extrude( height=FONT_HEIGHT+OVERLAP )
-                            text( label, font=FONT_NAME, size=FONT_SIZE, halign="center", valign="bottom" );
+                            text( label, font=FONT_NAME, size=FONT_SIZE, halign="center", valign="top" );
             }
             
             // If a version was specified
             if (version != "") {
-                translate( [border_x-1, walls+1, BOTTOM-OVERLAP] )
+                translate( [bx-border_x+1, ly1, BOTTOM-OVERLAP] )
                     rotate( [0,0,-90] )
                         linear_extrude( height=FONT_HEIGHT+OVERLAP )
-                            text( version, font=FONT_NAME, size=FONT_SIZE, halign="right", valign="bottom" );
+                            text( version, font=FONT_NAME, size=FONT_SIZE, halign="center", valign="top" );
             }
         }
 
@@ -485,7 +495,7 @@ if (0) {
 if (0) {
     VERBOSE = true;
     
-    hex_tray( FULL_X, HALF_Y, 12*TILE_THICKNESS, WIDE_WALL, "18XXv1" );
-    translate( [0, HALF_Y + 10, 0] )
-    hex_lid( FULL_X, HALF_Y, 4*mm, WIDE_WALL, THIN_WALL, false, true );
+    hex_tray( TILE_CENTERS_4X4, 8*inch, 8*inch, 6*mm, WIDE_WALL, "18XX", "V1" );
+    translate( [0, 8.5*inch, 0] )
+    hex_lid( TILE_CENTERS_4X4, 8*inch, 8*inch, 4*mm, WIDE_WALL, THIN_WALL, false, true );
 }
