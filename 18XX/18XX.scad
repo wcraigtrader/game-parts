@@ -8,10 +8,6 @@ include <MCAD/units.scad>;
 
 // ----- Physical dimensions ---------------------------------------------------
 
-THIN_WALL = 0.86 * mm;  	// Based on 0.20mm layer height
-WIDE_WALL = 1.67 * mm;  	// Based on 0.20mm layer height
-GAP       = 0.10 * mm;      // Gap between outer and inner walls for boxes
-
 BOTTOM    = 1.00 * mm;  // Bottom plate thickness
 TOP       = 1.00 * mm;  // Top plate thickness
 OVERLAP   = 0.01 * mm;  // Ensures that there are no vertical artifacts leftover
@@ -25,10 +21,20 @@ FONT_HEIGHT = 0.6 * mm;
 
 $fa=4; $fn=90;
 
+// ----- 3D Printer -----------------------------------------------------------
+
+LAYER_HEIGHT = 0.20 * mm;
+WALL_WIDTH   = [ 0.00, 0.43, 0.86, 1.26, 1.67, 2.08, 2.49, 2.89, 3.30 ];
+GAP          = 0.10 * mm;      // Gap between outer and inner walls for boxes
+
+THIN_WALL = WALL_WIDTH[2];
+WIDE_WALL = WALL_WIDTH[4];
+
 // ----- Calculated dimensions -------------------------------------------------
 
-C60 = cos(60);
-S60 = sin(60);
+C30 = cos(30); C60 = cos(60);
+S30 = sin(30); S60 = sin(60);
+T30 = tan(30); T60 = tan(60);
 
 FULL_X = BOX_WIDTH;
 FULL_Y = BOX_HEIGHT;
@@ -133,6 +139,9 @@ TILE_CENTERS_6X5 = [
 ];
 
 // ----- Functions -------------------------------------------------------------
+
+function layers( count ) = count * LAYER_HEIGHT;
+function layer_height( height ) = ceil( height / LAYER_HEIGHT ) * LAYER_HEIGHT;
 
 function hex_rows( centerz ) = len( centerz );
 function hex_cols( centerz ) = len( centerz[0] );

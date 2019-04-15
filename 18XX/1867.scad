@@ -99,18 +99,33 @@ module card_lid() {
     cell_lid( CARD_CELLS, SHARE_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL );
 }
 
-module card_rack( count, thickness, width ) {
+module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=20*mm ) {
     
-    height = 10 * mm;
-    length = C60 * count * thickness + (count+1) * 2 * mm + 5 *mm;
-    dx = 2*mm + C60 * thickness;
-    
+    cz =  3 * mm;
+    cy = width/2-CARD_WIDTH/2;
+    cx = (height-cz)/T60 + WALL_WIDTH[6];
+    dx = slot_depth / S60 + WALL_WIDTH[6];
+
+    length = dx*count + cx;
+
+    rounding = 2*mm; // radius
+
     difference() {
-        cube( [ length, width, height ] );
-        
-        for (x=[0:1:count-1]) {
-#            translate( [x*dx+2,-OVERLAP,3] ) rotate( [0,0,-60] ) cube( [ thickness, width+2*OVERLAP, CARD_HEIGHT ] );
+        translate( [rounding, rounding, rounding] ) minkowski() {
+            cube( [ length-2*rounding, width-2*rounding, height-2*rounding ] );
+            sphere( r=rounding );
         }
+        
+        // Remove slots for cards
+        for (x=[0:1:count-1]) { // Extra slot bevels the front of the rack
+            translate( [cx+x*dx,cy,cz] ) 
+                rotate( [0,-30, 0] ) 
+                    cube( [ slot_depth, CARD_WIDTH, CARD_HEIGHT ] );
+        }
+        
+        // Slope the front of the rack
+        translate( [cx+count*dx,cy,cz] ) rotate( [0, -30, 0 ] )
+            cube( [3*slot_depth, CARD_WIDTH, CARD_HEIGHT] );
     }
 }
 
@@ -136,9 +151,11 @@ if (PART == "tile-lid") {
     token_box();
 } else if (PART == "token-lid") {
     token_lid();
+} else if (PART == "card-rack") {
+    card_rack();
 } else {
     
-    card_rack( 9, 10*SHARE_THICKNESS, 2 * inch );
+    card_rack();
     
 /*    
     translate( [-3,  -3, 0] ) rotate( [0,0,180] ) alt_tile_box();
