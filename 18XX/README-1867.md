@@ -6,10 +6,12 @@ The first step was to design tile trays similar to my previous 18XX trays. 1867 
 
 The second step was to design a tray to hold all of the company tokens. Since there are 8 stock companies (5 tokens each) and 16 minor companies (3 tokens each), I created a tray that has 8 rows that handle 1 stock company and 2 minor companies. Then I added one more row for the 8 tokens for the Canadian National, and the turn order token.
 
-Finally I created a tray that can handle 9 stacks of cards:
+The third step was to create a tray that can handle 9 stacks of cards:
 
 * 8 sets of shares for the stock companies, plus the private companies and the priority deal card)
 * 9 types of engines
+
+The fourth step was to design a small box to hold the loan and turn order tiles.
 
 Total items to print:
 
@@ -22,8 +24,25 @@ Total items to print:
 | 2 | 1867-card-lid.stl | Lid for card boxes |
 | 1 | 1867-token-box.stl | Box to hold all the company tokens |
 | 1 | 1867-token-lid.stl | Lid for the token box |
+| 1 | 1867-loan-box.stl | Box for loans and turn order tiles |
+| 1 | 1867-loan-lid.stl | Lid for loans box |
 
-As an experiment, I tried printing card and tile boxes with honeycomb infill and without top or bottom solid layers. This produced a nice effect, but the resulting boxes are too flimsy for my tastes. YMMV.
+Since not everyone has a printer with a 200mm x 250mm bed, I designed some alternative trays that may be more generally useful.  These trays have 4 rows of 4 stacks of tiles and are 7" x 8":
+
+| Qty | Model | Description |
+| --- | ----- | ----------- |
+| 2 | 1867-alt-tile-tray-05.stl | Tile tray that can hold up to 5 tiles per stack |
+| 2 | 1867-alt-tile-tray-10.stl | Tile tray that can hold up to 10 tiles per stack |
+| 4 | 1867-alt-tile-lid.stl | Lid for either size of tile tray |
+
+
+A friend asked me to design a card rack to hold the company stock and engine cards, so I did.
+
+| Qty | Model | Description |
+| --- | ----- | ----------- |
+| 2 | 1867-card-rack.stl | Card rack to hold the company stock shares and/or the engine cards |
+
+As an experiment, I tried printing card and tile boxes with honeycomb infill and without top or bottom solid layers. This produced a nice effect for the lids, but the resulting boxes are too flimsy for my tastes. YMMV.
 
 Full sources on [GitHub](https://github.com/wcraigtrader/game-parts/tree/master/18XX).
 
