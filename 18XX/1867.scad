@@ -25,8 +25,10 @@ TOKEN_HEIGHT    =  5.0 * mm;
 // Cards
 CARD_WIDTH      = 2.500 * inch;
 CARD_HEIGHT     = 1.625 * inch;
-SHARE_THICKNESS = 5.000 * mm;
-TRAIN_THICKNESS = 5.000 * mm;
+CARD_THICKNESS  = 5.000 * mm;
+
+LOAN_SIZE       = 1.125 * inch;
+LOAN_THICKNESS  = 8.000 * mm;
 
 // Tile dimensions
 TILE_DIAMETER   = 46.00 * mm;
@@ -63,6 +65,13 @@ CARD_CELLS = [
     [ [ cx, cy ], [ cx, cy ], [ cx, cy ] ],
 ];
 
+lx = LOAN_SIZE + 1 * mm;
+ly = LOAN_SIZE + 1 * mm;
+
+LOAN_CELLS = [
+    [ [ lx, ly ], [ lx, ly ], [ lx, ly ] ]
+];
+
 // ----- Functions -------------------------------------------------------------
 
 // ----- Modules ---------------------------------------------------------------
@@ -92,21 +101,29 @@ module token_lid() {
 }
 
 module card_box() {
-    cell_box( CARD_CELLS, SHARE_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL, true );
+    cell_box( CARD_CELLS, CARD_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL, true );
 }
 
 module card_lid() {
-    cell_lid( CARD_CELLS, SHARE_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    cell_lid( CARD_CELLS, CARD_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+}
+
+module loan_box() {
+    cell_box( LOAN_CELLS, LOAN_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL, true );
+}
+
+module loan_lid() {
+    cell_lid( LOAN_CELLS, LOAN_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL );
 }
 
 module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=20*mm ) {
     
-    cz =  3 * mm;
-    cy = width/2-CARD_WIDTH/2;
-    cx = (height-cz)/T60 + WALL_WIDTH[6];
+    oz =  3 * mm;
+    oy = width/2-CARD_WIDTH/2;
+    ox = (height-oz)/T60 + WALL_WIDTH[6];
     dx = slot_depth / S60 + WALL_WIDTH[6];
 
-    length = dx*count + cx;
+    length = dx*count + ox;
 
     rounding = 2*mm; // radius
 
@@ -118,13 +135,13 @@ module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=
         
         // Remove slots for cards
         for (x=[0:1:count-1]) { // Extra slot bevels the front of the rack
-            translate( [cx+x*dx,cy,cz] ) 
+            translate( [ox+x*dx, oy, oz] ) 
                 rotate( [0,-30, 0] ) 
                     cube( [ slot_depth, CARD_WIDTH, CARD_HEIGHT ] );
         }
         
         // Slope the front of the rack
-        translate( [cx+count*dx,cy,cz] ) rotate( [0, -30, 0 ] )
+        translate( [ox+count*dx, oy, oz] ) rotate( [0, -30, 0 ] )
             cube( [3*slot_depth, CARD_WIDTH, CARD_HEIGHT] );
     }
 }
@@ -151,6 +168,10 @@ if (PART == "tile-lid") {
     token_box();
 } else if (PART == "token-lid") {
     token_lid();
+} else if (PART == "loan-box") {
+    loan_box();
+} else if (PART == "loan-lid") {
+    loan_lid();
 } else if (PART == "card-rack") {
     card_rack();
 } else {
