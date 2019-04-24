@@ -57,10 +57,10 @@ IMAGE=png
 
 MODELS=$(patsubst %,$(STL)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-%.$(IMAGE),$(PARTS))
-COMMON=18XX.scad
+COMMON=18XX.scad 18XX-data.scad ../util/boxes.scad ../util/printers.scad ../util/units.scad
 
 # Name of all model prefixes
-PREFIXES=$(shell ls *.scad | egrep -v $(COMMON) | sed "s/.scad//" | tr "\n" " ")
+PREFIXES=$(shell ls *.scad | egrep -v 18XX | sed "s/.scad//" | tr "\n" " ")
 
 
 all:	models images

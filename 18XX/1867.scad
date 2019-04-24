@@ -1,5 +1,4 @@
-// 1830: The Game of Railroads and Robber Barons
-//
+// 1867: The Railways of Canada
 // by W. Craig Trader is dual-licensed under
 // Creative Commons Attribution-ShareAlike 3.0 Unported License and
 // GNU Lesser GPL 3.0 or later.
@@ -33,7 +32,7 @@ LOAN_THICKNESS  = 8.000 * mm;
 // Tile dimensions
 TILE_DIAMETER   = 46.00 * mm;
 TILE_THICKNESS  =  0.65 * mm;
-POKE_HOLE       = 35.00 * mm;    // Diameter of poke holes in bottom
+POKE_HOLE       = 30.00 * mm;    // Diameter of poke holes in bottom
 
 include <18XX.scad>;
 
@@ -77,43 +76,43 @@ LOAN_CELLS = [
 // ----- Modules ---------------------------------------------------------------
 
 module tile_box( count=5 ) {
-    hex_tray( TILE_CENTERS_3X5, BOX_HEIGHT, BOX_WIDTH/2, count*TILE_THICKNESS+STUB, WIDE_WALL, "1867", "V1" );
+    hex_tray( TILE_CENTERS_3X5, [BOX_HEIGHT, BOX_WIDTH/2, count*TILE_THICKNESS+STUB], [ "1867", "V1" ] );
 }
 
 module tile_lid( holes=true ) {
-    hex_lid( TILE_CENTERS_3X5, BOX_HEIGHT, BOX_WIDTH/2, 4*mm, WIDE_WALL, THIN_WALL, false, true, holes );
+    hex_lid( TILE_CENTERS_3X5, [BOX_HEIGHT, BOX_WIDTH/2, 4*mm], false, true,  holes );
 }
 
 module alt_tile_box( count=5 ) {
-    hex_tray( TILE_CENTERS_4X4, ALT_WIDTH, ALT_HEIGHT, count*TILE_THICKNESS+STUB, WIDE_WALL, "1867", "V2" );
+    hex_tray( TILE_CENTERS_4X4, [ALT_WIDTH, ALT_HEIGHT, count*TILE_THICKNESS+STUB], ["1867", "V2"] );
 }
 
 module alt_tile_lid( holes=true ) {
-    hex_lid( TILE_CENTERS_4X4, ALT_WIDTH, ALT_HEIGHT, 4*mm, WIDE_WALL, THIN_WALL, false, true, holes );
+    hex_lid( TILE_CENTERS_4X4, [ALT_WIDTH, ALT_HEIGHT, 4*mm], false, true, holes );
 }
 
 module token_box() {
-    cell_box( TOKEN_CELLS, TOKEN_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    cell_box( TOKEN_CELLS, TOKEN_HEIGHT );
 }
 
 module token_lid() {
-    cell_lid( TOKEN_CELLS, TOKEN_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    cell_lid( TOKEN_CELLS, TOKEN_HEIGHT );
 }
 
 module card_box() {
-    cell_box( CARD_CELLS, CARD_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL, true );
+    cell_box( CARD_CELLS, CARD_THICKNESS, HOLLOW, true );
 }
 
 module card_lid() {
-    cell_lid( CARD_CELLS, CARD_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    cell_lid( CARD_CELLS, CARD_THICKNESS );
 }
 
 module loan_box() {
-    cell_box( LOAN_CELLS, LOAN_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL, true );
+    cell_box( LOAN_CELLS, LOAN_THICKNESS, HOLLOW, true );
 }
 
 module loan_lid() {
-    cell_lid( LOAN_CELLS, LOAN_THICKNESS, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    cell_lid( LOAN_CELLS, LOAN_THICKNESS );
 }
 
 module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=20*mm ) {
@@ -125,7 +124,7 @@ module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=
 
     length = dx*count + ox;
 
-    rounding = 2*mm; // radius
+    rounding = 2*mm; // radius  
 
     difference() {
         translate( [rounding, rounding, rounding] ) minkowski() {
@@ -176,16 +175,15 @@ if (PART == "tile-lid") {
     card_rack();
 } else {
     
-    card_rack();
+    // large_tile_box(5);
     
+    translate( [-3,  -3, 0] ) rotate( [0,0,180] ) tile_box();
+    translate( [-3,   3, 0] ) rotate( [0,0,180] ) tile_lid();
+
 /*    
-    translate( [-3,  -3, 0] ) rotate( [0,0,180] ) alt_tile_box();
-    translate( [-3,   3, 0] ) rotate( [0,0,180] ) alt_tile_lid();
-*/
-    
-/*
     translate( [ 3,   3, 0] ) token_box();
     translate( [ 3,-138, 0] ) token_lid();
+
     
     translate( [ 170,    3, 0] ) card_box();
     translate( [ 170, -132, 0] ) card_lid();
