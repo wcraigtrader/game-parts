@@ -1,9 +1,15 @@
-// 1867: The Railways of Canada
-// by W. Craig Trader is dual-licensed under
-// Creative Commons Attribution-ShareAlike 3.0 Unported License and
-// GNU Lesser GPL 3.0 or later.
+// 1822: The Railways of Great Britain
+// by W. Craig Trader
+//
+// --------------------------------------------------------------------------------------------------------------------
+//
+// This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+// To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+// or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+//
+// --------------------------------------------------------------------------------------------------------------------
 
-include <MCAD/units.scad>;
+include <../util/units.scad>;
 
 // Command Line Arguments
 PART = "other";         // Which part to output
@@ -18,35 +24,38 @@ ALT_WIDTH       = 8.000 * inch;
 ALT_HEIGHT      = 7.000 * inch;
 
 // Tile dimensions
-TILE_DIAMETER   = 26.00 * mm;
+TILE_DIAMETER   = 25.00 * mm;
 TILE_THICKNESS  =  0.65 * mm;
 POKE_HOLE       = 18.00 * mm;    // Diameter of poke holes in bottom
 
 include <18XX.scad>;
 
-// ----- Data ------------------------------------------------------------------
+// ----- Data ---------------------------------------------------------------------------------------------------------
 
-// ----- Functions -------------------------------------------------------------
+// ----- Functions ----------------------------------------------------------------------------------------------------
 
-// ----- Modules ---------------------------------------------------------------
+function half_box_size( count ) = [BOX_HEIGHT, BOX_WIDTH/2, layer_height( count*TILE_THICKNESS+STUB ) ];
+function alt_box_size( count )  = [ALT_WIDTH,  ALT_HEIGHT,  layer_height( count*TILE_THICKNESS+STUB ) ];
+
+// ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=5 ) {
-    hex_tray( TILE_CENTERS_6X8X, BOX_HEIGHT, BOX_WIDTH/2, count*TILE_THICKNESS+STUB, WIDE_WALL, "1822", "V1" );
+    hex_box_2( TILE_CENTERS_6X8X, half_box_size( count ), TILE_DIAMETER, [ "V1", "1822", ] );
 }
 
-module tile_lid( holes=true ) {
-    hex_lid( TILE_CENTERS_6X8X, BOX_HEIGHT, BOX_WIDTH/2, 4*mm, WIDE_WALL, THIN_WALL, false, true, holes );
+module tile_lid( count=5, holes=true ) {
+    hex_lid_2( TILE_CENTERS_6X8X, half_box_size( count ), TILE_DIAMETER, true, holes );
 }
 
 module alt_tile_box( count=5 ) {
-    hex_tray( TILE_CENTERS_7X7, ALT_WIDTH, ALT_HEIGHT, count*TILE_THICKNESS+STUB, WIDE_WALL, "1822", "V2" );
+    hex_box_2( TILE_CENTERS_7X7, alt_box_size( count ), TILE_DIAMETER, [ "V2", "1822", ] );
 }
 
-module alt_tile_lid( holes=true ) {
-    hex_lid( TILE_CENTERS_7X7, ALT_WIDTH, ALT_HEIGHT, 4*mm, WIDE_WALL, THIN_WALL, false, true, holes );
+module alt_tile_lid( count=5, holes=true ) {
+    hex_lid_2( TILE_CENTERS_7X7,  alt_box_size( count ), TILE_DIAMETER, true, holes );
 }
 
-// ----- Rendering -------------------------------------------------------------
+// ----- Rendering ----------------------------------------------------------------------------------------------------
 
 if (PART == "tile-lid") {
     tile_lid();
@@ -58,6 +67,6 @@ if (PART == "tile-lid") {
     alt_tile_box(8);
 } else {
     alt_tile_box(8);
-    translate( [210,0,0] ) 
+    translate( [210,0,0] )
     tile_box(8);
 }

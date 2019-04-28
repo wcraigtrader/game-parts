@@ -12,8 +12,6 @@
 include <units.scad>;
 include <printers.scad>;
 
-VERBOSE = true;
-
 // ----- Physical dimensions ------------------------------------------------------------------------------------------
 
 NOTCH     = 10.0 * mm;  // Radius of notches
@@ -44,8 +42,9 @@ TOP    = 1;     // Top thickness
 OUTER  = 2;     // Outer box walls thickness
 INNER  = 3;     // Inside partition walls thickness
 FILLET = 4;     // Size of inside fillet
+BUMPS  = 5;     // Minimum spacing between bumps
 
-REASONABLE = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, THIN_WALL, THIN_WALL, 1*mm ];
+REASONABLE = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[3], WALL_WIDTH[2], 1*mm, 20*mm ];
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
@@ -65,12 +64,26 @@ function round_up( size, step ) = ceil( size / step ) * step;
  * d = diameter of hemisphere
  */
 module hemisphere( r=0, d=0 ) {
-    diameter = (r == 0 ) ? d : 2*r;
+    diameter = (r == 0) ? d : 2*r;
 
     difference() {
-        sphere( d=diameter, center=true );
-        translate( [0,0,diameter/2] ) cube( [diameter,diameter,diameter], center=true );
+        sphere( d=diameter );
+        translate( [0,0,diameter/2] ) cube( [diameter,diameter,diameter], true );
     }
+}
+
+/** dit -- Create a bump for a locking a lid to a box 
+ *
+ * r = radius of hemisphere (preferred)
+ * d = diameter of hemisphere
+ */
+module dit( r=0, d=0 ) {
+    s = (r == 0) ? d/2 : r;
+    
+    points = [ [0,0,s], [s,0,0], [0,s,0], [-s,0,0], [0,-s,0], [0,0,-s] ];
+    triangles = [ [0,2,1], [0,3,2], [0,4,3], [0,1,4], [5,1,2], [5,2,3], [5,3,4], [5,4,1] ];
+
+    polyhedron( points, triangles );
 }
 
 /** rounded_box -- Create an empty box with rounded corners and a lip for a lid
@@ -85,24 +98,32 @@ module rounded_box( size, type=HOLLOW, borders=REASONABLE ) {
     outer2 = borders[OUTER] + GAP;
     bottom = borders[BOTTOM];
     fillet = borders[FILLET];
+    bumps  = borders[BUMPS];
     
     lip = layer_height( size.z/2 );
     
+    midsize = [size.x+2*outer1, size.y+2*outer1, size.z];
+    gapsize = [midsize.x+2*GAP, midsize.y+2*GAP, size.z];
+    lipsize = [gapsize.x, gapsize.y, lip];
+    outsize = [lipsize.x+2*outer1, lipsize.y+2*outer1, size.z+bottom];
+    
     if (VERBOSE) {
-        echo( RoundedBox_Inside=size, Outside=[size.x+2*outer1+2*outer2, size.y+2*outer1+2*outer2, size.z+bottom], lip=lip );
+        echo( RoundedBox_InSize=size, MidSize=midsize, GapSize=gapsize, LipSize=lipsize, OutSize=outsize );
     }
     
     difference() {
         union() {
-            translate( [-outer1, -outer1, 0] ) 
-                cube( [ size.x+2*outer1, size.y+2*outer1, size.z ] );
+            // Inner wall (full height)
+            translate( [-outer1, -outer1, 0] ) cube( midsize );
 
+            // Outer wall (lip height)
             translate( [-outer2, -outer2, 0] ) minkowski() {
-                cube( [size.x+2*outer2, size.y+2*outer2, lip] );
-                scale( [outer1, outer1, bottom] ) hemisphere( r=bottom );
+                cube( lipsize );
+                scale( [outer1, outer1, bottom] ) hemisphere( r=1 );
             }
         }
         
+        // Remove inside, if necessary
         if (type == ROUNDED) {
             translate( [fillet, fillet, fillet] ) minkowski() {
                 cube( [ size.x-2*fillet, size.y-2*fillet, size.z ] );
@@ -110,6 +131,18 @@ module rounded_box( size, type=HOLLOW, borders=REASONABLE ) {
             }
         } else if (type == HOLLOW) {
             cube( [size.x, size.y, size.z+2*OVERLAP] );
+        }
+        
+        if (bumps) {
+            bump_count = floor( size.x / bumps );
+            bdx = size.x / bump_count;
+            bx  = bdx/2;
+            bz  = lipsize.z + (size.z - lipsize.z) / 2;
+            
+            for (bump=[0:bump_count-1]) {
+                translate( [bx+bdx*bump,-outer1,bz] ) dit( d=outer2 );
+                translate( [bx+bdx*bump,size.y+outer1,bz] ) dit( d=outer2 );
+            }
         }
     }
 }
@@ -122,26 +155,44 @@ module rounded_box( size, type=HOLLOW, borders=REASONABLE ) {
 module rounded_lid( size, borders=REASONABLE ) {
     outer1 = borders[OUTER];
     outer2 = borders[OUTER] + GAP;
-    top = borders[TOP];
+    top    = borders[TOP];
+    bumps  = borders[BUMPS];
+    
     lip = size.z - layer_height( size.z/2 );
+    
+    midsize = [size.x+2*outer1, size.y+2*outer1, size.z];
+    gapsize = [midsize.x+2*GAP, midsize.y+2*GAP, size.z];
+    lipsize = [gapsize.x, gapsize.y, lip];
+    outsize = [lipsize.x+2*outer1, lipsize.y+2*outer1, size.z+top];
     
     nz = (lip > NOTCH*1.5) ? lip : (lip < NOTCH/2 ? NOTCH : NOTCH/2 + lip);
 
     if (VERBOSE) {
-        echo( RoundedLid_Inside=size, Outside=[size.x+2*outer1+2*outer2, size.y+2*outer1+2*outer2, lip+top], lip=lip, nz=nz );
+        echo( RoundedLid_InSize=size, MidSize=midsize, GapSize=gapsize, LipSize=lipsize, OutSize=outsize, NotchZ=nz );
     }
 
     difference() {
        translate( [-outer2, -outer2, 0] ) minkowski() {
-            cube( [size.x+2*outer2, size.y+2*outer2, lip] );
-            scale( [outer1, outer1, top] ) hemisphere( r=top );
+            cube( lipsize );
+            scale( [outer1, outer1, top] ) hemisphere( r=1 );
         }
 
-        translate( [-outer2, -outer2, 0] ) 
-            cube( [ size.x+2*outer2, size.y+2*outer2, size.z ] );
+        difference() {
+            translate( [-outer2, -outer2, 0] ) cube( gapsize );
+            if (bumps) {
+                bump_count = floor( size.x / bumps );
+                bdx = size.x / bump_count;
+                bx  = bdx/2;
+                bz  = lipsize.z / 2;
+                
+                for (bump=[0:bump_count-1]) {
+                    translate( [bx+bdx*bump,-outer2,bz] ) dit( d=outer2 );
+                    translate( [bx+bdx*bump,size.y+outer2,bz] ) dit( d=outer2 );
+                }
+            }
+        }
         
-        translate( [-2*borders[OUTER]-GAP-OVERLAP,size.y/2,nz] ) rotate( [0,90,0] ) cylinder( r=NOTCH, h=size.x+4*borders[OUTER]+2*GAP+2*OVERLAP );
-        translate( [size.x/2,-2*borders[OUTER]-GAP-OVERLAP,nz] ) rotate( [-90,0,0] ) cylinder( r=NOTCH, h=size.y+4*borders[OUTER]+2*GAP+2*OVERLAP );
+        translate( [-outer2-outer1-OVERLAP,size.y/2,nz] ) rotate( [0,90,0] ) cylinder( r=NOTCH, h=outsize.x+2*OVERLAP );
     }
 }
 
@@ -150,6 +201,7 @@ module rounded_lid( size, borders=REASONABLE ) {
  * cells   -- Layout of cells (inside dimensions)
  * height  -- Height (Z) of cells (inside dimensions)
  * type    -- SOLID, HOLLOW, ROUNDED
+ * holes   -- if true, then add finger holes to cells
  * borders -- vector of physical characteristics (see REASONABLE)
  *
  * cells is a vector of rows, each of which is a vector of cell dimensions [x,y]
@@ -166,7 +218,7 @@ module rounded_lid( size, borders=REASONABLE ) {
  * rows that have differing numbers of cells, you'll want to increase the size
  * of some cells to account for the walls that will be missing from in that row.
  */
-module cell_box( cells, height, type=HOLLOW, borders=REASONABLE ) {
+module cell_box( cells, height, type=HOLLOW, holes=false, borders=REASONABLE ) {
     inner  = borders[INNER];
     bottom = borders[BOTTOM];
     fillet = borders[FILLET];
@@ -189,12 +241,13 @@ module cell_box( cells, height, type=HOLLOW, borders=REASONABLE ) {
                 cell = cells[row][col];
                 dx = col_offset( cells, inner, row, col );
                 dy = row_offset( cells, inner, row, 0 );
+
                 if (dx==undef || dy==undef) {
                     echo( Position=[row,col], row=cells[row], dx=dx, dy=dy );
                 }
 
                 if (type == HOLLOW) {
-                    translate( [ dx, dy, bottom ] )
+                    translate( [ dx, dy, 0 ] )
                     cube( [ cell.x, cell.y, height+OVERLAP ] );
                 } else if (type == ROUNDED) {
                     translate( [ dx, dy, OVERLAP ] ) minkowski() {
@@ -202,6 +255,12 @@ module cell_box( cells, height, type=HOLLOW, borders=REASONABLE ) {
                         cube( [ cell.x-2*fillet, cell.y-2*fillet, height+OVERLAP ] );
                         hemisphere( fillet );
                     }
+                }
+                
+                if (holes) {
+                    translate( [dx+cell.x/2, dy+cell.y/2, -bottom-OVERLAP] ) 
+                        scale( [cell.x/2, cell.y/2, 1] ) 
+                            cylinder( d=1, h=bottom+2*OVERLAP );
                 }
             }
         }
@@ -330,27 +389,25 @@ module thin_deck_box( sizes, quantity, wall ) {
 
 // ----- Testing ---------------------------------------------------------------
 
-if (0) {
-    x1 = 10;
-    x2 = 10 + THIN_WALL + 10;
-    x3 = 10 + THIN_WALL + 10 + THIN_WALL + 10;
+/*
+    
+    dx = 15; dy = 15;
+    x1 = dx;
+    x2 = dx + THIN_WALL + dx;
+    x3 = dx + THIN_WALL + dx + THIN_WALL + dx;
 
     cell_test = [ 
-        [ [x1,10], [x3,10] ], 
-        [ [x1,10], [x1,10], [x2,10] ], 
-        [ [x2,10], [x1,10], [x1,10] ], 
-        [ [x3,10], [x1,10] ], 
+        [ [x1,dy], [x3,dy] ], 
+        [ [x1,dy], [x1,dy], [x2,dy] ], 
+        [ [x2,dy], [x1,dy], [x1,dy] ], 
+        [ [x3,dy], [x1,dy] ], 
     ];
 
-    /* 
     translate( [ 0, 0, 0] ) rounded_box( [40, 40, 15], ROUNDED );
     translate( [50, 0, 0] ) rounded_lid( [40, 40, 15] );
 
-    translate( [ 0,50, 0] ) cell_box( cell_test, 20, ROUNDED );
-    translate( [50,50, 0] ) cell_lid( cell_test, 20 );
-    */
+    translate( [ 0, 50, 0] ) cell_box( cell_test, 20, ROUNDED, true );
+    translate( [75, 50, 0] ) cell_lid( cell_test, 20 );
 
-    for( i=[1:6] ) {
-        translate( [ i*50-50, 0, 0] ) cell_lid( cell_test, i*6 );
-    }
-}
+*/
+

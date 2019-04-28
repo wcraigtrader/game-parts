@@ -1,10 +1,15 @@
-// 1830: The Game of Railroads and Robber Barons
+// Steam / Steam Barons
+// by W. Craig Trader
 //
-// by W. Craig Trader is dual-licensed under
-// Creative Commons Attribution-ShareAlike 3.0 Unported License and
-// GNU Lesser GPL 3.0 or later.
+// --------------------------------------------------------------------------------------------------------------------
+//
+// This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+// To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+// or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+//
+// --------------------------------------------------------------------------------------------------------------------
 
-include <MCAD/units.scad>;
+include <../util/units.scad>;
 
 // Command Line Arguments
 PART = "other";         // Which part to output
@@ -35,15 +40,25 @@ include <18XX.scad>;
 
 // ----- Functions -------------------------------------------------------------
 
+function tray_size( count ) = [TRAY_LENGTH, TRAY_WIDTH, layer_height( count*TILE_THICKNESS ) + STUB ];
+
 // ----- Modules ---------------------------------------------------------------
+
+module tile_box( count=6 ) {
+    hex_box_2( TILE_CENTERS_4X5, tray_size( count ), TILE_DIAMETER, [ "V2", "STEAM" ] );
+}
+
+module tile_lid( count=6 ) {
+    hex_lid_2( TILE_CENTERS_4X5, tray_size( count ), TILE_DIAMETER, true, true );
+}
 
 // ----- Rendering -------------------------------------------------------------
 
-if (PART == "tile-tray") {
-    hex_tray( TILE_CENTERS_4X5, TRAY_LENGTH, TRAY_WIDTH, 6*TILE_THICKNESS+STUB, WIDE_WALL );
+if (PART == "tile-box") {
+    tile_box();
 } else if (PART == "tile-lid") {
-    hex_lid( TILE_CENTERS_4X5, TRAY_LENGTH, TRAY_WIDTH, 4*mm, WIDE_WALL, THIN_WALL, false, false );
+    tile_lid();
 } else {
-    translate( [0, 5,0] ) hex_tray( TILE_CENTERS_4X5, TRAY_LENGTH, TRAY_WIDTH, 6*TILE_THICKNESS+STUB, WIDE_WALL );
-    translate( [0,-5,0] ) hex_lid( TILE_CENTERS_4X5, TRAY_LENGTH, TRAY_WIDTH, 4*mm, WIDE_WALL, THIN_WALL, false, false );
+    translate( [5, 5,0] ) tile_box();
+    translate( [5,-5,0] ) tile_lid();
 }

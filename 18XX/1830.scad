@@ -1,14 +1,19 @@
 // 1830: The Game of Railroads and Robber Barons
+// by W. Craig Trader
 //
-// by W. Craig Trader is dual-licensed under
-// Creative Commons Attribution-ShareAlike 3.0 Unported License and
-// GNU Lesser GPL 3.0 or later.
+// --------------------------------------------------------------------------------------------------------------------
+//
+// This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+// To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+// or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+//
+// --------------------------------------------------------------------------------------------------------------------
 
-include <MCAD/units.scad>;
+include <../util/units.scad>;
 
 // Command Line Arguments
 PART = "other";         // Which part to output
-VERBOSE = 1;        	// Set to non-zero to see more data
+VERBOSE = true;        	// Set to non-zero to see more data
 
 // Game box dimensions
 BOX_HEIGHT      = 11.125 * inch;
@@ -27,7 +32,7 @@ TOKEN_HEIGHT     = 6.00 * mm;   // Z
 
 include <18XX.scad>;
 
-// ----- Data ------------------------------------------------------------------
+// ----- Data ---------------------------------------------------------------------------------------------------------
 
 tx = TOKEN_WIDTH; ty = TOKEN_DEPTH;
 
@@ -37,21 +42,42 @@ TOKEN_CELLS = [
     [ [ tx, ty ], [ tx, ty ], [ tx, ty ] ]
 ];
 
-// ----- Functions -------------------------------------------------------------
+// ----- Functions ----------------------------------------------------------------------------------------------------
 
-// ----- Modules ---------------------------------------------------------------
+function half_box_size( count ) = [BOX_WIDTH, BOX_HEIGHT/2, layer_height( count*TILE_THICKNESS+STUB ) ];
 
-// ----- Rendering -------------------------------------------------------------
+// ----- Modules ------------------------------------------------------------------------------------------------------
+
+module tile_box( count=12 ) {
+    hex_box_2( TILE_CENTERS_3X4, half_box_size( count ), TILE_DIAMETER, [ "V2", "AH 1830" ] );
+}
+
+module tile_lid( count=12, holes=true ) {
+    hex_lid_2( TILE_CENTERS_3X4, half_box_size( count ), TILE_DIAMETER, true,  holes );
+}
+
+module token_box() {
+    cell_box( TOKEN_CELLS, TOKEN_HEIGHT );
+}
+
+module token_lid() {
+    cell_lid( TOKEN_CELLS, TOKEN_HEIGHT );
+}
+
+
+// ----- Rendering ----------------------------------------------------------------------------------------------------
 
 if (PART == "tile-tray") {
-    hex_tray( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, 12*TILE_THICKNESS+STUB, WIDE_WALL );
+    tile_box();
 } else if (PART == "tile-lid") {
-    hex_lid( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, 4*mm, WIDE_WALL, THIN_WALL, false, true );
+    tile_lid();
 } else if (PART == "token-box") {
-    cell_box( TOKEN_CELLS, TOKEN_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    token_box();
 } else if (PART == "token-box-lid") {
-    cell_lid( TOKEN_CELLS, TOKEN_HEIGHT, BOTTOM, TOP, THIN_WALL, THIN_WALL );
+    token_lid();
 } else {
-    translate( [0, 3,0] ) hex_tray( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, 12*TILE_THICKNESS+STUB, WIDE_WALL );
-    translate( [0,-3,0] ) hex_lid( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, 4*mm, WIDE_WALL, THIN_WALL, false, true );
+    translate( [-5, -5,0] ) rotate( [0,0,180] ) tile_box();
+    translate( [-5,  5,0] ) rotate( [0,0,180] ) tile_lid();
+    translate( [ 5,  5,0] ) token_box();
+    translate( [ 5,-59,0] ) token_lid();
 }
