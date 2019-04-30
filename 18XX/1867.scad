@@ -79,7 +79,7 @@ LOAN_CELLS = [
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
-function half_box_size( count ) = [BOX_HEIGHT, BOX_WIDTH/2, layer_height( count*TILE_THICKNESS+STUB ) ];
+function half_box_size( count ) = [BOX_HEIGHT, 5.25*inch, layer_height( count*TILE_THICKNESS+STUB ) ];
 function alt_box_size( count ) = [ALT_WIDTH, ALT_HEIGHT, layer_height( count*TILE_THICKNESS+STUB ) ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
@@ -201,8 +201,8 @@ if (PART == "tile-lid-05") {
 
     // large_tile_box(5);
 
-    translate( [ 5,  5, 0] ) alt_tile_box(10);
-    translate( [ 5, -5, 0] ) alt_tile_lid(10);
+    translate( [ 5,  5, 0] ) tile_box(10);
+    translate( [ 5, -5, 0] ) tile_lid(10);
 
 /*
     translate( [ 3,   3, 0] ) token_box();

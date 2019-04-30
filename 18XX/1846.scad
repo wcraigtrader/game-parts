@@ -55,7 +55,7 @@ include <18XX.scad>;
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
 function tile_height( count ) = count * TILE_THICKNESS;
-function half_box_size( count ) = [BOX_WIDTH, BOX_HEIGHT/2, layer_height( count*TILE_THICKNESS ) ];
+function half_box_size( count ) = [BOX_WIDTH, 5.5*inch, layer_height( count*TILE_THICKNESS ) ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
