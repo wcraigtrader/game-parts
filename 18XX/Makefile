@@ -40,7 +40,7 @@
 # png/widget-foo.png png/widget-bar.png png/widget-foo-bar.png
 
 # OpenSCAD binary and options
-OPENSCAD=/usr/bin/openscad
+OPENSCAD=/opt/openscad
 OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
@@ -55,8 +55,8 @@ PARTS=$(shell grep 'PART == ' $(PREFIX).scad | cut -d'"' -f2)
 STL=stl
 IMAGE=png
 
-MODELS=$(patsubst %,$(STL)/$(PREFIX)-%.$(STL),$(PARTS))
-IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-%.$(IMAGE),$(PARTS))
+MODELS=$(patsubst %,$(STL)/$(PREFIX)/$(PREFIX)-%.$(STL),$(PARTS))
+IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE),$(PARTS))
 COMMON=18XX.scad 18XX-data.scad ../util/boxes.scad ../util/printers.scad ../util/units.scad
 
 # Name of all model prefixes
@@ -71,25 +71,25 @@ everything:
 	done
 
 directories:
-	@mkdir -p $(STL) $(IMAGE)
+	@mkdir -p $(STL)/$(PREFIX) $(IMAGE)/$(PREFIX)
 
 models: directories $(MODELS)
 
 images: directories $(IMAGES)
 
 clean:
-	rm $(STL)/$(PREFIX)-* $(IMAGE)/$(PREFIX)-*
+	rm $(STL)/$(PREFIX)/$(PREFIX)-* $(IMAGE)/$(PREFIX)/$(PREFIX)-*
 
 cleanall:
 	rm -rf $(STL) $(IMAGE)
 
 # Dependencies for models
 
-$(MODELS) : $(STL)/$(PREFIX)-%.$(STL) : $(PREFIX).scad $(COMMON)
+$(MODELS) : $(STL)/$(PREFIX)/$(PREFIX)-%.$(STL) : $(PREFIX).scad $(COMMON)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(STL),,$(@F)))\" $<
 
 # Dependencies for images
 
-$(IMAGES) : $(IMAGE)/$(PREFIX)-%.$(IMAGE) : $(PREFIX).scad $(COMMON)
+$(IMAGES) : $(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE) : $(PREFIX).scad $(COMMON)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(IMAGE),,$(@F)))\" $(IMAGE_OPTIONS) $<
 
