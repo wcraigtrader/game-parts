@@ -48,7 +48,7 @@ CHIP_DIAMETER   = 41 * mm;
 CHIP_THICKNESS  = 3.31 * mm;
 
 LIP     = 5.00 * mm;
-SPACING = 1.00 * mm;    // Room for tiles to shift
+SHIFTING = 1.00 * mm;    // Room for tiles to shift
 
 include <18XX.scad>;
 
@@ -70,8 +70,8 @@ module tile_lid( count=5 ) {
 module card_box_1( dimensions=REASONABLE ) {
     bottom = dimensions[BOTTOM];
     
-    x1 = ceil( MARK_DIAMETER+SPACING );
-    x2 = ceil( CARD_WIDTH + 2*SPACING );
+    x1 = ceil( MARK_DIAMETER+SHIFTING );
+    x2 = ceil( CARD_WIDTH + 2*SHIFTING );
 
     box = [
         WIDE_WALL + x1 + THIN_WALL + x2 + WIDE_WALL,
@@ -115,8 +115,8 @@ module card_box_1( dimensions=REASONABLE ) {
 }
 
 module card_lid_1() {
-    x1 = ceil( MARK_DIAMETER+SPACING );
-    x2 = ceil( CARD_WIDTH + 2*SPACING );
+    x1 = ceil( MARK_DIAMETER+SHIFTING );
+    x2 = ceil( CARD_WIDTH + 2*SHIFTING );
 
     bx = WIDE_WALL + x1 + THIN_WALL + x2 + WIDE_WALL;
     by = floor( WELL_WIDTH / 4); // AKA CARD_HEIGHT plus something
@@ -140,9 +140,9 @@ module card_lid_1() {
     }
 }
 
-cx1 = MARK_DIAMETER + SPACING;
-cx2 = CARD_WIDTH + 2*SPACING;
-cy = floor( WELL_WIDTH/4 ) - 4*WALL_WIDTH[3] - 2*GAP; // CARD_HEIGHT + 2*SPACING;
+cx1 = MARK_DIAMETER + SHIFTING;
+cx2 = CARD_WIDTH + 2*SHIFTING;
+cy = floor( WELL_WIDTH/4 ) - 4*WALL_WIDTH[3] - 2*GAP; // CARD_HEIGHT + 2*SHIFTING;
 cz = layer_height( max( COMPANY_CARDS, OTHER_CARDS, MARK_DIAMETER ) );
 
 CARD_CELLS = [ [ [cx1, cy], [cx2, cy] ] ];
@@ -192,12 +192,12 @@ module card_box_3( dimensions=REASONABLE ) {
     bottom = dimensions[BOTTOM];
     
     inside = [
-        MARK_DIAMETER + SPACING + inner + CARD_WIDTH + 2 * SPACING,
+        MARK_DIAMETER + SHIFTING + inner + CARD_WIDTH + 2 * SHIFTING,
         floor( WELL_WIDTH/4 ) - 4*WALL_WIDTH[3] - 2*GAP,
         layer_height( max( COMPANY_CARDS, OTHER_CARDS, MARK_DIAMETER ) )
     ];
             
-    marker_radius = (MARK_DIAMETER + SPACING) / 2;
+    marker_radius = (MARK_DIAMETER + SHIFTING) / 2;
     
     window = [ inside.x-20-2*marker_radius-inner, inside.y-20, bottom+2*OVERLAP ];
     
@@ -208,7 +208,7 @@ module card_box_3( dimensions=REASONABLE ) {
             
             // Add a marker rack
             difference() {
-                cube( [MARK_DIAMETER + SPACING, inside.y, marker_radius] );
+                cube( [MARK_DIAMETER + SHIFTING, inside.y, marker_radius] );
                 translate( [marker_radius, 0, marker_radius] )  rotate( [-90,0,0] ) cylinder( r=marker_radius, h = inside.y, center=false );
             }
             
@@ -227,16 +227,18 @@ module card_lid_3( dimensions=REASONABLE ) {
     top    = dimensions[TOP];
     
     inside = [
-        MARK_DIAMETER + SPACING + inner + CARD_WIDTH + 2 * SPACING,
+        MARK_DIAMETER + SHIFTING + inner + CARD_WIDTH + 2 * SHIFTING,
         floor( WELL_WIDTH/4 ) - 4*WALL_WIDTH[3] - 2*GAP,
         layer_height( max( COMPANY_CARDS, OTHER_CARDS, MARK_DIAMETER ) )
     ];
     
-    window = [ inside.x-20, inside.y-20, top+2*OVERLAP ];
+    marker_radius = (MARK_DIAMETER + SHIFTING) / 2;
+    
+    window = [ inside.x-20-2*marker_radius-inner, inside.y-20, top+2*OVERLAP ];
     
     difference() {
         rounded_lid( inside );
-        translate( [ 10, 10, -top-OVERLAP ] ) cube( window );
+        translate( [inside.x-window.x-10, 10, -top-OVERLAP] ) cube( window );
     }
 }
 
@@ -269,13 +271,6 @@ if (PART == "short-tile-tray") {
     translate( [-5, -5, 0] ) rotate( [0,0,180] ) tile_box( 5 );
     translate( [-5,  5, 0] ) rotate( [0,0,180] ) tile_lid( 5 );
     
-    translate( [55,   2.2,   0] ) rotate( [0,0,90] ) card_box_1();
-    translate( [55, -88.6,   0] ) rotate( [0,0,90] ) card_lid_1();
-
-    translate( [110,  5, 0] ) rotate( [0,0,90] ) card_box_2();
-    translate( [110,-87, 0] ) rotate( [0,0,90] ) card_lid_2();
-
-    translate( [170,  5, 0] ) rotate( [0,0,90] ) card_box_3();
-    translate( [170,-87, 0] ) rotate( [0,0,90] ) card_lid_3();
-    // card_plate();
+    translate( [55,  5, 0] ) rotate( [0,0,90] ) card_box_3();
+    translate( [55,-87, 0] ) rotate( [0,0,90] ) card_lid_3();
 }
