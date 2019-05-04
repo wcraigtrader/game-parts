@@ -52,9 +52,11 @@ PREFIX=1830
 # Names of parts to build
 PARTS=$(shell grep 'PART == ' $(PREFIX).scad | cut -d'"' -f2)
 
+BOM=bom
 STL=stl
 IMAGE=png
 
+BOMS=$(BOM)/$(PREFIX)-bom.md
 MODELS=$(patsubst %,$(STL)/$(PREFIX)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE),$(PARTS))
 COMMON=18XX.scad 18XX-data.scad ../util/boxes.scad ../util/printers.scad ../util/units.scad
@@ -63,7 +65,7 @@ COMMON=18XX.scad 18XX-data.scad ../util/boxes.scad ../util/printers.scad ../util
 PREFIXES=$(shell ls *.scad | egrep -v 18XX | sed "s/.scad//" | tr "\n" " ")
 
 
-all:	models images
+all:	models images bom
 
 everything:
 	@for prefix in $(PREFIXES) ; do \
@@ -71,17 +73,24 @@ everything:
 	done
 
 directories:
-	@mkdir -p $(STL)/$(PREFIX) $(IMAGE)/$(PREFIX)
+	@mkdir -p $(STL)/$(PREFIX) $(IMAGE)/$(PREFIX) $(BOM)
 
 models: directories $(MODELS)
 
 images: directories $(IMAGES)
+
+bom:    directories $(BOMS)
 
 clean:
 	rm $(STL)/$(PREFIX)/$(PREFIX)-* $(IMAGE)/$(PREFIX)/$(PREFIX)-*
 
 cleanall:
 	rm -rf $(STL) $(IMAGE)
+
+# Dependencies for BOM
+$(BOM)/$(PREFIX)-$(BOM).md : $(PREFIX).scad
+	@/bin/echo "| Model | Qty | Description |\n| ----- | --- | ----------- |" >> $@
+	@fgrep '// bom:' 1867.scad | tr -s '":()/' '|||||' | cut -d '|' -f3,6,7 | sed 's/|/.stl |/;s/^/| /;s/$$/|/' >> $@
 
 # Dependencies for models
 
