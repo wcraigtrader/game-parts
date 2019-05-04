@@ -79,8 +79,8 @@ LOAN_CELLS = [
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
-function half_box_size( count ) = [BOX_HEIGHT, 5.25*inch, layer_height( count*TILE_THICKNESS+STUB ) ];
-function alt_box_size( count ) = [ALT_WIDTH, ALT_HEIGHT, layer_height( count*TILE_THICKNESS+STUB ) ];
+function half_box_size( count ) = [BOX_HEIGHT, 5.25*inch, layer_height( count*TILE_THICKNESS+2*mm ) ];
+function alt_box_size( count ) = [ALT_WIDTH, ALT_HEIGHT, layer_height( count*TILE_THICKNESS+2*mm ) ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
@@ -169,13 +169,13 @@ module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "tile-lid-05") {
+if (PART == "tile-lid-05") { // bom: 2 | Lid for short tile tray |
     tile_lid(5);
-} else if (PART == "tile-lid-10") {
+} else if (PART == "tile-lid-10") { // bom: 2 | Lid for tall tile tray |
     tile_lid(10);
-} else if (PART == "tile-tray-05") {
+} else if (PART == "tile-tray-05") { // bom: 2 | Short tile tray |
     tile_box(5);
-} else if (PART == "tile-tray-10") {
+} else if (PART == "tile-tray-10") { // bom: 2 | Tall tile tray |
     tile_box(10);
 } else if (PART == "alt-tile-lid") {
     alt_tile_lid();
@@ -183,19 +183,19 @@ if (PART == "tile-lid-05") {
     alt_tile_box(5);
 } else if (PART == "alt-tile-tray-10") {
     alt_tile_box(10);
-} else if (PART == "card-box") {
+} else if (PART == "card-box") { // bom: 2 | Tray for Engines or Stock Certificates |
     card_box();
-} else if (PART == "card-lid") {
+} else if (PART == "card-lid") { // bom: 2 | Lid for card tray |
     card_lid();
-} else if (PART == "token-box") {
+} else if (PART == "token-box") { // bom: 1 | Minor and Stock Company tokens |
     token_box();
-} else if (PART == "token-lid") {
+} else if (PART == "token-lid") { // bom: 1 | Token box lid |
     token_lid();
-} else if (PART == "loan-box") {
+} else if (PART == "loan-box") { // bom: 1 | Box for Loans and Start Order |
     loan_box();
-} else if (PART == "loan-lid") {
+} else if (PART == "loan-lid") { // bom: 1 | Loan box lid |
     loan_lid();
-} else if (PART == "card-rack") {
+} else if (PART == "card-rack") { // bom: 2 | Rack for displaying Stock or Engine cards |
     card_rack();
 } else {
 

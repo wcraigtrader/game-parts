@@ -17,7 +17,7 @@ include <18XX-data.scad>;
 
 HEX_SPACING = WALL_WIDTH[4];
 
-STUB        = 2.00 * mm;  // Height of lid stubs
+STUB        = 3.00 * mm;  // Height of lid stubs
 STUB_GAP    = 0.20 * mm;  // Separation between lid stubs and tray hex corners
 
 FONT_NAME   = "helvetica:style=Bold";
@@ -251,7 +251,6 @@ module hex_lid_1( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
 module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     bottom = dimensions[BOTTOM];
     outer  = dimensions[OUTER];
-
     inside = [ size.x-4*outer-2*GAP, size.y-4*outer-2*GAP, size.z ];
 
     border = border_delta( layout, hex, inside );
@@ -341,14 +340,15 @@ module hex_lid_2( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
         }
 
         if (add_stubs) {
+            stub_z = min( size.z, STUB );   // If box is really thin, use thin stubs
             translate( [0, 0, -OVERLAP] )
                 for (row=layout) {
                     for (tile=row) {
                         for (c=[0:5]) {
                             offset = corner_offset( tile, TILE_CORNERS[c], td, border, 0 );
                             difference() {
-                                translate( offset ) hex_wall( c, td, WALL_WIDTH[8], STUB+OVERLAP );
-                                translate( offset ) hex_wall( c, td, WALL_WIDTH[3], STUB+2*OVERLAP );
+                                translate( offset ) hex_wall( c, td, WALL_WIDTH[8], stub_z+OVERLAP );
+                                translate( offset ) hex_wall( c, td, WALL_WIDTH[3], stub_z+2*OVERLAP );
                             }
                         }
                     }

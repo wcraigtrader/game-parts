@@ -44,7 +44,7 @@ TOKEN_CELLS = [
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
-function half_box_size( count ) = [BOX_WIDTH, 5.25*inch, layer_height( count*TILE_THICKNESS+STUB ) ];
+function half_box_size( count ) = [BOX_WIDTH, 5.25*inch, layer_height( count*TILE_THICKNESS+2*mm ) ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 

@@ -40,7 +40,7 @@ include <18XX.scad>;
 
 // ----- Functions -------------------------------------------------------------
 
-function tray_size( count ) = [TRAY_LENGTH, TRAY_WIDTH, layer_height( count*TILE_THICKNESS ) + STUB ];
+function tray_size( count ) = [TRAY_LENGTH, TRAY_WIDTH, layer_height( count*TILE_THICKNESS ) + 2*mm ];
 
 // ----- Modules ---------------------------------------------------------------
 
