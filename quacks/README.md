@@ -1,4 +1,4 @@
-t received my copy of [The Quacks of Quedlinburg](https://boardgamegeek.com/boardgame/244521/quacks-quedlinburg), so of course I had to design boxes to hold all of the components.
+I just received my copy of [The Quacks of Quedlinburg](https://boardgamegeek.com/boardgame/244521/quacks-quedlinburg), so of course I had to design boxes to hold all of the components.
 
 | Model | Qty | Description |
 | ----- | --- | ----------- |
