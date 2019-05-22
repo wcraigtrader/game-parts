@@ -95,17 +95,17 @@ images: directories $(IMAGES)
 boms:    directories $(BOMS)
 
 clean:
-	rm $(STL)/$(PREFIX)/$(PREFIX)-* $(IMAGE)/$(PREFIX)/$(PREFIX)-*
+	rm $(STL)/$(PREFIX)/$(PREFIX)-* $(IMAGE)/$(PREFIX)/$(PREFIX)-* $(BOM)/$(PREFIX)-bom.md
 
 cleanall:
-	rm -rf $(STL) $(IMAGE)
+	rm -rf $(STL) $(IMAGE) $(BOM)
 
 # Dependencies for BOM
 $(BOM)/$(PREFIX)-$(BOM).md : $(PREFIX).scad
 	@/bin/echo "Creating BOM for $(PREFIX)"
 	@/bin/echo "| Model | Qty | Description |" > $@
 	@/bin/echo "| ----- | --- | ----------- |" >> $@
-	@fgrep '// bom:' $(PREFIX).scad | tr -s '":()/' '|||||' | cut -d '|' -f3,6,7 | sed 's/|/.stl |/;s/^/| /;s/$$/|/' >> $@
+	@fgrep '// bom:' $(PREFIX).scad | tr -s '":()/' '|||||' | cut -d '|' -f3,6,7 | sed 's/|/.stl |/;s/^/| $(PREFIX)-/;s/$$/|/' >> $@
 
 # Dependencies for models
 

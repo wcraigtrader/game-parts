@@ -1,3 +1,16 @@
+After using my original design for several months, I decided to refactor my designs and add some features to improve the usability of the boxes:
+
+1. Rounded boxes -- All of the boxes now use rounded corners and edges that make them more comfortable to use.
+1. Locking lids -- All of the boxes now use press-fit lids that are easy to separate, but lock into place, to keep from accidently spilling the tiles.
+1. Redesigned hex boxes -- The redesigned hex boxes and lids engage to keep tiles from sliding, but don't interfere with opening or closing the boxes.
+1. Redesigned token boxes -- now with fillets in the compartments, for easier access.
+1. Smaller boxes -- the newer box designs are easier to remove from the game boxes.
+1. Refactored models -- now it's much faster and easier to create designs for new games.
+
+I will leave the old models up for posterity and comparison, but strongly suggest using the newer models.
+
+***
+
 I recently acquired a copy of [1867: The Railways of Canada](https://www.boardgamegeek.com/boardgame/227143/1867-railways-canada) from All Aboard Games. As you might expect by now, I put some effort into organizing the game components. I ended up with a set of organizing trays with lids that fit precisely in the original box. This makes for easy setup and cleanup, and keeps all of the parts organized even if the box is inverted.
 
 I believe these trays would also work for [1861: The Railways of the Russian Empire](https://www.boardgamegeek.com/boardgame/23817/1861-railways-russian-empire), since it is largely the same game, in the same size box.
@@ -15,34 +28,37 @@ The fourth step was to design a small box to hold the loan and turn order tiles.
 
 Total items to print:
 
-| Qty | Model | Description |
-| --- | ----- | ----------- |
-| 2 | 1867-tile-tray-05.stl | Tile tray that can hold up to 5 tiles per stack |
-| 2 | 1867-tile-tray-10.stl | Tile tray that can hold up to 10 tiles per stack |
-| 4 | 1867-tile-lid.stl | Lid for either size of tile tray |
-| 2 | 1867-card-box.stl | Box to hold 9 stacks of cards |
-| 2 | 1867-card-lid.stl | Lid for card boxes |
-| 1 | 1867-token-box.stl | Box to hold all the company tokens |
-| 1 | 1867-token-lid.stl | Lid for the token box |
-| 1 | 1867-loan-box.stl | Box for loans and turn order tiles |
-| 1 | 1867-loan-lid.stl | Lid for loans box |
+| Model | Qty | Description |
+| ----- | --- | ----------- |
+| 1867-tile-lid-05.stl | 2 | Lid for short tile tray |
+| 1867-tile-lid-10.stl | 2 | Lid for tall tile tray |
+| 1867-tile-tray-05.stl | 2 | Short tile tray |
+| 1867-tile-tray-10.stl | 2 | Tall tile tray |
+| 1867-card-box.stl | 2 | Tray for Engines or Stock Certificates |
+| 1867-card-lid.stl | 2 | Lid for card tray |
+| 1867-token-box.stl | 1 | Minor and Stock Company tokens |
+| 1867-token-lid.stl | 1 | Token box lid |
+| 1867-loan-box.stl | 1 | Box for Loans and Start Order |
+| 1867-loan-lid.stl | 1 | Loan box lid |
 
 Since not everyone has a printer with a 200mm x 250mm bed, I designed some alternative trays that may be more generally useful.  These trays have 4 rows of 4 stacks of tiles and are 7" x 8":
 
-| Qty | Model | Description |
-| --- | ----- | ----------- |
-| 2 | 1867-alt-tile-tray-05.stl | Tile tray that can hold up to 5 tiles per stack |
-| 2 | 1867-alt-tile-tray-10.stl | Tile tray that can hold up to 10 tiles per stack |
-| 4 | 1867-alt-tile-lid.stl | Lid for either size of tile tray |
+| Model | Qty | Description |
+| ----- | --- | ----------- |
+| 1867-alt-tile-lid-05.stl | 2 | Lid for alternate short tile tray |
+| 1867-alt-tile-lid-10.stl | 2 | Lid for alternate tall tile tray |
+| 1867-alt-tile-tray-05.stl | 2 | Alternate short tile tray |
+| 1867-alt-tile-tray-10.stl | 2 | Alternate tall tile tray |
 
 
 A friend asked me to design a card rack to hold the company stock and engine cards, so I did.
 
-| Qty | Model | Description |
-| --- | ----- | ----------- |
-| 2 | 1867-card-rack.stl | Card rack to hold the company stock shares and/or the engine cards |
-
-As an experiment, I tried printing card and tile boxes with honeycomb infill and without top or bottom solid layers. This produced a nice effect for the lids, but the resulting boxes are too flimsy for my tastes. YMMV.
+| Model | Qty | Description |
+| ----- | --- | ----------- |
+| 1867-card-rack.stl | 2 | Rack for displaying Stock or Engine cards |
 
 Full sources on [GitHub](https://github.com/wcraigtrader/game-parts/tree/master/18XX).
 
+**Revision History:**
+April 2019, Initial version.
+May 2019, Complete redesign.

@@ -67,13 +67,13 @@ module token_lid() {
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "tile-tray") {
+if (PART == "tile-tray") {          // bom: 4 | Tile tray |
     tile_box();
-} else if (PART == "tile-lid") {
+} else if (PART == "tile-lid") {    // bom: 4 | Tile tray lid |
     tile_lid();
-} else if (PART == "token-box") {
+} else if (PART == "token-box") {   // bom: 1 | Token box |
     token_box();
-} else if (PART == "token-lid") {
+} else if (PART == "token-lid") {   // bom: 1 | Token box lid |
     token_lid();
 } else {
     translate( [-5, -5,0] ) rotate( [0,0,180] ) tile_box();
