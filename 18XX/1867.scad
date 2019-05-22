@@ -9,7 +9,7 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-include <MCAD/units.scad>;
+include <../util/units.scad>;
 
 // Command Line Arguments
 PART = "other";         // Which part to output
@@ -85,19 +85,19 @@ function alt_box_size( count ) = [ALT_WIDTH, ALT_HEIGHT, layer_height( count*TIL
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=5 ) {
-    hex_box_2( TILE_CENTERS_3X5, half_box_size( count ), TILE_DIAMETER, [ "1867", "V3" ] );
+    hex_box_2( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, [ "1867", "V3" ] );
 }
 
 module tile_lid( count=5, holes=true ) {
-    hex_lid_2( TILE_CENTERS_3X5, half_box_size( count ), TILE_DIAMETER, true,  holes );
+    hex_lid_2( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, true,  holes );
 }
 
 module alt_tile_box( count=5 ) {
-    hex_box_2( TILE_CENTERS_4X4, alt_box_size( count ), TILE_DIAMETER, ["1867", "V4"] );
+    hex_box_2( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, ["1867", "V4"] );
 }
 
 module alt_tile_lid( count=5, holes=true ) {
-    hex_lid_2( TILE_CENTERS_4X4, alt_box_size( count ), TILE_DIAMETER, true, holes );
+    hex_lid_2( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, true, holes );
 }
 
 module token_box() {
@@ -113,7 +113,7 @@ module card_box() {
 }
 
 module card_lid() {
-    cell_lid( CARD_CELLS, CARD_THICKNESS );
+    cell_lid( CARD_CELLS, CARD_THICKNESS, HOLLOW, true );
 }
 
 module loan_box() {
@@ -121,7 +121,7 @@ module loan_box() {
 }
 
 module loan_lid() {
-    cell_lid( LOAN_CELLS, LOAN_THICKNESS );
+    cell_lid( LOAN_CELLS, LOAN_THICKNESS, HOLLOW, true );
 }
 
 /* card_rack( count, slot_depth, width, height )
@@ -138,12 +138,12 @@ module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=
     rounding = 2*mm; // radius
 
     offset = [
-        (height - 3*mm) / T60 + WALL_WIDTH[6],
+        (height - 3*mm) / tan(60) + WALL_WIDTH[6],
         width/2 - CARD_WIDTH/2,
         3*mm
     ];
 
-    dx = slot_depth / S60 + WALL_WIDTH[6];
+    dx = slot_depth / sin(60) + WALL_WIDTH[6];
 
     length = dx*count + offset.x;
 
@@ -169,34 +169,36 @@ module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "tile-lid-05") { // bom: 2 | Lid for short tile tray |
+if (PART == "tile-lid-05") {            // bom: 2 | Lid for short tile tray |
     tile_lid(5);
-} else if (PART == "tile-lid-10") { // bom: 2 | Lid for tall tile tray |
+} else if (PART == "tile-lid-10") {     // bom: 2 | Lid for tall tile tray |
     tile_lid(10);
-} else if (PART == "tile-tray-05") { // bom: 2 | Short tile tray |
+} else if (PART == "tile-tray-05") {    // bom: 2 | Short tile tray |
     tile_box(5);
-} else if (PART == "tile-tray-10") { // bom: 2 | Tall tile tray |
+} else if (PART == "tile-tray-10") {    // bom: 2 | Tall tile tray |
     tile_box(10);
-} else if (PART == "alt-tile-lid") {
-    alt_tile_lid();
-} else if (PART == "alt-tile-tray-05") {
-    alt_tile_box(5);
-} else if (PART == "alt-tile-tray-10") {
-    alt_tile_box(10);
-} else if (PART == "card-box") { // bom: 2 | Tray for Engines or Stock Certificates |
+} else if (PART == "card-box") {        // bom: 2 | Tray for Engines or Stock Certificates |
     card_box();
-} else if (PART == "card-lid") { // bom: 2 | Lid for card tray |
+} else if (PART == "card-lid") {        // bom: 2 | Lid for card tray |
     card_lid();
-} else if (PART == "token-box") { // bom: 1 | Minor and Stock Company tokens |
+} else if (PART == "token-box") {       // bom: 1 | Minor and Stock Company tokens |
     token_box();
-} else if (PART == "token-lid") { // bom: 1 | Token box lid |
+} else if (PART == "token-lid") {       // bom: 1 | Token box lid |
     token_lid();
-} else if (PART == "loan-box") { // bom: 1 | Box for Loans and Start Order |
+} else if (PART == "loan-box") {        // bom: 1 | Box for Loans and Start Order |
     loan_box();
-} else if (PART == "loan-lid") { // bom: 1 | Loan box lid |
+} else if (PART == "loan-lid") {        // bom: 1 | Loan box lid |
     loan_lid();
-} else if (PART == "card-rack") { // bom: 2 | Rack for displaying Stock or Engine cards |
+} else if (PART == "card-rack") {       // bom: 2 | Rack for displaying Stock or Engine cards |
     card_rack();
+} else if (PART == "alt-tile-lid-05") {     // bom: 2 | Lid for alternate short tile tray |
+    alt_tile_lid(5);
+} else if (PART == "alt-tile-lid-10") {     // bom: 2 | Lid for alternate tall tile tray |
+    alt_tile_lid(10);
+} else if (PART == "alt-tile-tray-05") {    // bom: 2 | Alternate short tile tray |
+    alt_tile_box(5);
+} else if (PART == "alt-tile-tray-10") {    // bom: 2 | Alternate tall tile tray |
+    alt_tile_box(10);
 } else {
 
     // large_tile_box(5);

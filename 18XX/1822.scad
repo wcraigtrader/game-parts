@@ -21,7 +21,7 @@ BOX_HEIGHT      =  9.625 * inch;    // (Y)
 BOX_DEPTH       =  2.250 * inch;    // (Z)
 
 ALT_WIDTH       = 8.000 * inch;
-ALT_HEIGHT      = 4.000 * inch;
+ALT_HEIGHT      = 7.000 * inch;
 
 // Tile dimensions
 TILE_DIAMETER   = 25.00 * mm;
@@ -35,33 +35,34 @@ include <18XX.scad>;
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
 function tile_height( count ) = layer_height( count*TILE_THICKNESS+2*mm );
-function half_box_size( count ) = [BOX_HEIGHT, BOX_WIDTH/2, tile_height( count ) ];
-function alt_box_size( count )  = [ALT_WIDTH,  ALT_HEIGHT,  tile_height( count ) ];
+function box_size_1( count ) = [9.125*inch, BOX_WIDTH/2, tile_height( count ) ];
+function box_size_2( count ) = [7.75*inch, 7.375*inch,  tile_height( count ) ];
+function box_size_3( count ) = [8*inch, 4*inch, tile_height( count ) ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box_1( count=8 ) {
-    hex_box_2( TILE_CENTERS_6X8X, half_box_size( count ), TILE_DIAMETER, [ "V1", "1822", ] );
+    hex_box_2( hex_tile_uneven_rows( 6, 9 ), box_size_1( count ), TILE_DIAMETER, [ "V1", "1822", ] );
 }
 
 module tile_lid_1( count=8, holes=true ) {
-    hex_lid_2( TILE_CENTERS_6X8X, half_box_size( count ), TILE_DIAMETER, true, holes );
+    hex_lid_2( hex_tile_uneven_rows( 6, 9 ), box_size_1( count ), TILE_DIAMETER, true, holes );
 }
 
 module tile_box_2( count=8 ) {
-    hex_box_2( TILE_CENTERS_7X7, alt_box_size( count ), TILE_DIAMETER, [ "V2", "1822", ] );
+    hex_box_2( hex_tile_even_rows( 8, 7 ), box_size_2( count ), TILE_DIAMETER, [ "V2", "1822", ] );
 }
 
 module tile_lid_2( count=8, holes=true ) {
-    hex_lid_2( TILE_CENTERS_7X7,  alt_box_size( count ), TILE_DIAMETER, true, holes );
+    hex_lid_2( hex_tile_even_rows( 8, 7 ),  box_size_2( count ), TILE_DIAMETER, true, holes );
 }
 
 module tile_box_3( count=8 ) {
-    hex_box_2( TILE_CENTERS_4X7, [8*inch, 4*inch, tile_height( count )], TILE_DIAMETER, [ "V2", "1822", ] );
+    hex_box_2(hex_tile_even_rows( 4, 7 ), box_size_3( count ), TILE_DIAMETER, [ "V3", "1822", ] );
 }
 
 module tile_lid_3( count=8, holes=true ) {
-    hex_lid_2( TILE_CENTERS_4X7,  [8*inch, 4*inch, tile_height( count )], TILE_DIAMETER, true, holes );
+    hex_lid_2( hex_tile_even_rows( 4, 7 ), box_size_3( count ), TILE_DIAMETER, true, holes );
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
@@ -79,5 +80,5 @@ if (PART == "tile-lid-1") {
 } else if (PART == "tile-box-3") {
     tile_box_3();
 } else {
-    tile_box_3();
+    tile_box_2();
 }

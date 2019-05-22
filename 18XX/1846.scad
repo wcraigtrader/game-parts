@@ -60,11 +60,11 @@ function half_box_size( count ) = [BOX_WIDTH, 5.5*inch, layer_height( count*TILE
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=5 ) {
-    hex_box_2( TILE_CENTERS_3X4, half_box_size( count ), TILE_DIAMETER, [ "V2", "1846" ] );
+    hex_box_2( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, [ "V2", "1846" ] );
 }
 
 module tile_lid( count=5 ) {
-    hex_lid_2(  TILE_CENTERS_3X4, half_box_size( count ), TILE_DIAMETER, false, true );
+    hex_lid_2(  hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, false, true );
 }
 
 module card_box_1( dimensions=REASONABLE ) {
@@ -251,13 +251,10 @@ module card_plate() {
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
 if (PART == "short-tile-tray") {
-    // hex_box_1( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, tile_height( 2 ), WIDE_WALL );
     tile_box( 2 );
 } else if (PART == "tall-tile-tray") {
-    // hex_box_1( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, tile_height( 5 ), WIDE_WALL );
     tile_box( 5 );
 } else if (PART == "short-tile-lid") {
-    // hex_lid( TILE_CENTERS_3X4, BOX_WIDTH, BOX_HEIGHT/2, 6*mm, WIDE_WALL, THIN_WALL, true );
     tile_lid( 2 );
 } else if (PART == "tall-tile-lid") {
     tile_lid( 5 );

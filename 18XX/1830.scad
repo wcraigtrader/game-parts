@@ -49,11 +49,11 @@ function half_box_size( count ) = [BOX_WIDTH, 5.25*inch, layer_height( count*TIL
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=12 ) {
-    hex_box_2( TILE_CENTERS_3X4, half_box_size( count ), TILE_DIAMETER, [ "V2", "AH 1830" ] );
+    hex_box_2( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, [ "V2", "AH 1830" ] );
 }
 
 module tile_lid( count=12, holes=true ) {
-    hex_lid_2( TILE_CENTERS_3X4, half_box_size( count ), TILE_DIAMETER, true,  holes );
+    hex_lid_2( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, true,  holes );
 }
 
 module token_box() {
@@ -73,7 +73,7 @@ if (PART == "tile-tray") {
     tile_lid();
 } else if (PART == "token-box") {
     token_box();
-} else if (PART == "token-box-lid") {
+} else if (PART == "token-lid") {
     token_lid();
 } else {
     translate( [-5, -5,0] ) rotate( [0,0,180] ) tile_box();

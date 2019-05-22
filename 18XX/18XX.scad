@@ -11,11 +11,9 @@
 
 include <../util/units.scad>;
 include <../util/boxes.scad>;
-include <18XX-data.scad>;
+include <../util/hexes.scad>;
 
 // ----- Physical dimensions ------------------------------------------------------------------------------------------
-
-HEX_SPACING = WALL_WIDTH[4];
 
 STUB        = 3.00 * mm;  // Height of lid stubs
 STUB_GAP    = 0.20 * mm;  // Separation between lid stubs and tray hex corners
@@ -28,79 +26,20 @@ $fa=4; $fn=30;
 
 // ----- Calculated dimensions ----------------------------------------------------------------------------------------
 
-C30 = cos(30); C60 = cos(60);
-S30 = sin(30); S60 = sin(60);
-T30 = tan(30); T60 = tan(60);
-
-// ----- Offsets for positioning hex tiles ----------------------------------------------------------------------------
-
-TILE_CORNERS = [ // Corners 0, 1, 2, 3, 4, 5, 6, 0
-    [ 0, 2 ], [ 2, 1 ], [ 2,-1 ], [ 0,-2 ], [-2,-1 ], [-2, 1 ], [ 0, 2 ]
-];
+WALL1 = WALL_WIDTH[4];
+WALL2 = WALL1 + 2*STUB_GAP;
+WALL3 = WALL2 + 2*WALL_WIDTH[4];
+PADDING = [ 4*WALL1, 2*WALL1, 0 ];
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
-function hex_length( hex ) = hex + 2*HEX_SPACING;
-function hex_width( hex ) = hex_length( hex ) * S60;
-function hex_edge( hex ) = hex_length( hex ) / 2;
-function hex_delta( hex ) = [ hex_width( hex )/4, hex_length( hex )/4, hex_edge( hex ) ];
-
-function hex_rows( layout ) = len( layout );
-function hex_cols( layout ) = max( len( layout[0] ), len( layout[1] ) );
-function uneven_rows( layout ) = (len( layout[0] ) != len( layout[1] )) ? 0 : 0.5;
-function short_row( layout ) = len( layout[0] ) > len( layout[1] ) ? 1 : 0;
-
-function border_size_x( layout, hex, x ) = (x - (hex_cols( layout ) + uneven_rows( layout ) ) * hex_width( hex ) ) / 2;
-function border_size_y( layout, hex, y ) = (y - (hex_rows( layout ) * 3+1) / 4 * hex_length( hex ) ) / 2;
-function border_delta( layout, hex, size ) = [ border_size_x( layout, hex, size.x ), border_size_y( layout, hex, size.y ) ];
-
 function tile_offset( tile, delta, border, z ) = [ tile.x*delta.x+border.x, tile.y*delta.y+border.y, z ];
 function corner_offset( tile, corner, delta, border, z ) = [ (tile.x + corner.x) * delta.x + border.x, (tile.y + corner.y) * delta.y + border.y, z ];
+function actual_size( size, optimum ) = [ size.x == 0 ? optimum.x : size.x, size.y == 0 ? optimum.y : size.y, size.z ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
-/* hex_corner( corner, height )
- *
- * This creates a short segment of the corner of a hexagonal wall
- *
- * corner -- 0-5, specifying which corner of the hexagon to create, clockwise
- * height -- Height of the wall segment in millimeters
- * gap    -- Fraction of a millimeter, to tweak the width of the corner
- */
-module hex_corner( corner, height, gap=0 ) {
-    // FIXME
-    size = THIN_WALL;
-    offset = corner * -60;
-    for ( angle=[210,330] ) {
-        rotate( [0, 0, angle+offset] )
-        translate( [ 0, -size/2-gap/2, 0 ] )
-        cube( [4*size, size+gap, height ] );
-    }
-    cylinder( d=size+2*gap, h=height );
-}
-
-/* hex_wall( corner, height )
- */
-
-module hex_wall( corner, delta, width, height ) {
-    diff = TILE_CORNERS[ corner+1 ] - TILE_CORNERS[ corner ];
-    w2l = width / delta[2];
-
-    hull() {
-        translate( [diff.x*delta.x*(0.15+w2l), diff.y*delta.y*(0.15+w2l), 0] ) cylinder( d=width, h=height, $fn=6 );
-        translate( [diff.x*delta.x*(0.85-w2l), diff.y*delta.y*(0.85-w2l), 0] ) cylinder( d=width, h=height, $fn=6 );
-    }
-}
-
-/* hex_prism( height, diameter )
- *
- * Create a vertical hexagonal prism of a given height and diameter
- */
-module hex_prism( height, diameter ) {
-    rotate( [ 0, 0, 90 ] ) cylinder( h=height, d=diameter, $fn=6 );
-}
-
-/* hex_box( layout, size, hex, labels, dimensions )
+/* hex_box_1( layout, size, hex, labels, dimensions )
  *
  * Create a tray to hold hexagonal tiles
  *
@@ -116,8 +55,9 @@ module hex_box_1( layout, size, hex, labels=[], dimensions=REASONABLE ) {
 
     inside = [ size.x-4*outer-2*GAP, size.y-4*outer-2*GAP, size.z ];
 
-    border = border_delta( layout, hex, inside );
-    td = hex_delta( hex );
+    border = (inside - layout_size( layout, hex )) / 2;
+    
+    config = hex_config( hex );
 
     if (VERBOSE) {
         echo( HexBox1_Size=size, InSize=inside, Border=border, Delta=td );
@@ -133,7 +73,7 @@ module hex_box_1( layout, size, hex, labels=[], dimensions=REASONABLE ) {
                 for (row=layout) {
                     for (tile=row) {
                         for (c=[0:5]) {
-                            offset = corner_offset( tile, TILE_CORNERS[c], td, border, 0 );
+                            offset = corner_offset( tile, TILE_CORNERS[c], config, border, 0 );
                             translate( offset ) hex_corner( c, size.z );
                         }
                     }
@@ -145,7 +85,7 @@ module hex_box_1( layout, size, hex, labels=[], dimensions=REASONABLE ) {
                 sr = short_row( layout );
 
                 for (l=[len(labels)-1:-1:0]) {
-                    ly = layout[sr+2*l][0][1]*td.y + border.y;
+                    ly = layout[sr+2*l][0][1]*config.y + border.y;
                     translate( [inside.x-border.x+1, ly, -OVERLAP] )
                         rotate( [0,0,-90] ) linear_extrude( height=FONT_HEIGHT+OVERLAP )
                             text( labels[l], font=FONT_NAME, size=FONT_SIZE, halign="center", valign="top" );
@@ -156,14 +96,14 @@ module hex_box_1( layout, size, hex, labels=[], dimensions=REASONABLE ) {
         // Remove finger holes
         for (row=layout) {
             for (tile=row) {
-                offset = tile_offset( tile, td, border, -bottom-OVERLAP );
-                translate( offset ) hex_prism( bottom+2*OVERLAP, POKE_HOLE );
+                offset = tile_offset( tile, config, border, -bottom-OVERLAP );
+                translate( offset ) hex_prism( bottom+2*OVERLAP, hex*0.75 );
             }
         }
     }
 }
 
-/* hex_lid( width, depth, height, outer, inner, remove_corners, add_stubs )
+/* hex_lid_1( width, depth, height, outer, inner, remove_corners, add_stubs )
  *
  * Create a lid for a hexagon tile tray
  *
@@ -181,11 +121,11 @@ module hex_lid_1( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
 
     inside = [ size.x-4*outer-2*GAP, size.y-4*outer-2*GAP, size.z ];
 
-    border = border_delta( layout, hex, inside );
-    td = hex_delta( hex );
+    border = (inside - layout_size( layout, hex )) / 2;
+    config = hex_config( hex );
 
     if (VERBOSE) {
-        echo( HexBox1_Size=size, InSize=inside, Border=border, Delta=td );
+        echo( HexBox1_Size=size, InSize=inside, Border=border, Config=config );
     }
 
     // Mirrored so that the lid match its box
@@ -197,8 +137,8 @@ module hex_lid_1( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
             if (remove_holes) {
                 for (row=layout) {
                     for (tile=row) {
-                        offset = tile_offset( tile, td, border, -top-OVERLAP );
-                        translate( offset ) hex_prism( top+2*OVERLAP, POKE_HOLE );
+                        offset = tile_offset( tile, config, border, -top-OVERLAP );
+                        translate( offset ) hex_prism( top+2*OVERLAP, hex*0.75 );
                     }
                 }
             }
@@ -214,7 +154,7 @@ module hex_lid_1( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
                         for (row=layout) {
                             for (tile=row) {
                                 for (c=[0:5]) {
-                                    offset = corner_offset( tile, TILE_CORNERS[c], td, border, -OVERLAP );
+                                    offset = corner_offset( tile, TILE_CORNERS[c], config, border, -OVERLAP );
                                     translate( offset ) hex_prism( STUB+OVERLAP, 7*WIDE_WALL );
                                 }
                             }
@@ -225,7 +165,7 @@ module hex_lid_1( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
                         for (row=layout) {
                             for (tile=row) {
                                 for (c=[0:5]) {
-                                    offset = corner_offset( tile, TILE_CORNERS[c], td, border, 0 );
+                                    offset = corner_offset( tile, TILE_CORNERS[c], config, border, 0 );
                                     translate( offset ) hex_corner( c, STUB+OVERLAP, STUB_GAP );
                                 }
                             }
@@ -238,7 +178,7 @@ module hex_lid_1( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
 }
 
 
-/* hex_box( layout, size, hex, labels, dimensions )
+/* hex_box_2( layout, size, hex, labels, dimensions )
  *
  * Create a tray to hold hexagonal tiles
  *
@@ -247,17 +187,27 @@ module hex_lid_1( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
  * hex        -- Diameter of a hex tile (corner to opposite corner)
  * labels     -- List of labels to add to the box
  * dimensions -- List of physical dimensions
+ *
+ * size.x     -- (X) Outside length of box (if zero, use optimum)
+ * size.y     -- (Y) Outside width of box (if zero, use optimum)
+ * size.z     -- (Z) Inside height of box
  */
 module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     bottom = dimensions[BOTTOM];
     outer  = dimensions[OUTER];
-    inside = [ size.x-4*outer-2*GAP, size.y-4*outer-2*GAP, size.z ];
+    
+    walls  = [ 4*outer+2*GAP, 4*outer+2*GAP, 0];
+    minimum = layout_size( layout, hex );
+    optimum = minimum + walls + PADDING;
+    
+    inside = actual_size( size, optimum ) - walls;
+    border = (inside - minimum) / 2;
 
-    border = border_delta( layout, hex, inside );
-    td = hex_delta( hex );
+    config = hex_config( hex );
 
     if (VERBOSE) {
-        echo( HexBox1_Size=size, InSize=inside, Border=border, Delta=td );
+        echo( HexBox1_Size=size, InSize=inside, Border=border, Config=config );
+        echo (HexBox1_Minimum=minimum, Optimum=optimum );
     }
 
     difference() {
@@ -268,7 +218,7 @@ module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
                 sr = short_row( layout );
 
                 for (l=[len(labels)-1:-1:0]) {
-                    ly = layout[sr+2*l][0][1]*td.y + border.y;
+                    ly = layout[sr+2*l][0][1]*config.y + border.y;
                     translate( [inside.x-border.x+1, ly, -OVERLAP] )
                         rotate( [0,0,-90] ) linear_extrude( height=FONT_HEIGHT+OVERLAP )
                             text( labels[l], font=FONT_NAME, size=FONT_SIZE, halign="center", valign="top" );
@@ -279,8 +229,8 @@ module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
                 for (row=layout) {
                     for (tile=row) {
                         for (c=[0:5]) {
-                            offset = corner_offset( tile, TILE_CORNERS[c], td, border, 0 );
-                            translate( offset ) hex_wall( c, td, WALL_WIDTH[2], size.z+2*OVERLAP );
+                            offset = corner_offset( tile, TILE_CORNERS[c], config, border, 0 );
+                            translate( offset ) hex_wall( c, config, WALL1, size.z+2*OVERLAP );
                         }
                     }
                 }
@@ -290,15 +240,15 @@ module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
 
         for (row=layout) {
             for (tile=row) {
-                offset = tile_offset( tile, td, border, -bottom-OVERLAP );
-                translate( offset ) hex_prism( bottom+2*OVERLAP, POKE_HOLE );
+                offset = tile_offset( tile, config, border, -bottom-OVERLAP );
+                translate( offset ) hex_prism( bottom+2*OVERLAP, hex*0.75 );
             }
         }
     }
 
 }
 
-/* hex_lid( width, depth, height, outer, inner, remove_corners, add_stubs )
+/* hex_lid_2( width, depth, height, outer, inner, remove_corners, add_stubs )
  *
  * Create a lid for a hexagon tile tray
  *
@@ -309,18 +259,26 @@ module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
  * inner          -- Inner wall thickness
  * remove_corners -- True to remove the corners of the inner walls
  * add_stubs      -- True to add stubs that fit with the hex corners from the tray
+ *
+ * size.x         -- (X) Outside length of box (if zero, use optimum)
+ * size.y         -- (Y) Outside width of box (if zero, use optimum)
+ * size.z         -- (Z) Inside height of box
  */
 module hex_lid_2( layout, size, hex, add_stubs=false, remove_holes=true, dimensions=REASONABLE ) {
     top = dimensions[TOP];
     outer = dimensions[OUTER];
 
-    inside = [ size.x-4*outer-2*GAP, size.y-4*outer-2*GAP, size.z ];
-
-    border = border_delta( layout, hex, inside );
-    td = hex_delta( hex );
+    walls  = [ 4*outer+2*GAP, 4*outer+2*GAP, 0];
+    minimum = layout_size( layout, hex );
+    optimum = minimum + walls + PADDING;
+    
+    inside = actual_size( size, optimum ) - walls;
+    border = (inside - minimum) / 2;
+    
+    config = hex_config( hex );
 
     if (VERBOSE) {
-        echo( HexBox1_Size=size, InSize=inside, Border=border, Delta=td );
+        echo( HexBox1_Size=size, InSize=inside, Border=border, Config=config );
     }
 
     // Mirrored so that the lid match its box
@@ -332,27 +290,33 @@ module hex_lid_2( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
             if (remove_holes) {
                 for (row=layout) {
                     for (tile=row) {
-                        offset = tile_offset( tile, td, border, -top-OVERLAP );
-                        translate( offset ) hex_prism( top+2*OVERLAP, POKE_HOLE );
+                        offset = tile_offset( tile, config, border, -top-OVERLAP );
+                        translate( offset ) hex_prism( top+2*OVERLAP, hex*0.75 );
                     }
                 }
             }
         }
 
         if (add_stubs) {
+            overlap = [0,0,OVERLAP];
             stub_z = min( size.z, STUB );   // If box is really thin, use thin stubs
-            translate( [0, 0, -OVERLAP] )
-                for (row=layout) {
-                    for (tile=row) {
-                        for (c=[0:5]) {
-                            offset = corner_offset( tile, TILE_CORNERS[c], td, border, 0 );
-                            difference() {
-                                translate( offset ) hex_wall( c, td, WALL_WIDTH[8], stub_z+OVERLAP );
-                                translate( offset ) hex_wall( c, td, WALL_WIDTH[3], stub_z+2*OVERLAP );
+            
+            translate( -overlap ) intersection() {
+                cube( [inside.x, inside.y, stub_z+OVERLAP] );
+                union() {
+                    for (row=layout) {
+                        for (tile=row) {
+                            for (c=[0:5]) {
+                                displacement = corner_offset( tile, TILE_CORNERS[c], config, border, 0 );
+                                difference() {
+                                    translate( displacement ) hex_wall( c, config, WALL3, stub_z+OVERLAP );
+                                    translate( displacement ) hex_wall( c, config, WALL2, STUB+2*OVERLAP );
+                                }
                             }
                         }
                     }
                 }
+            }
         }
     }
 }
@@ -389,7 +353,7 @@ if (0) {
 if (0) {
     echo ( TC=TILE_CORNERS );
     echo ( One=TILE_CORNERS[1]-TILE_CORNERS[0], Two=TILE_CORNERS[2]-TILE_CORNERS[1]);
-    box_size = [5*inch, 4*inch, 6*mm];
-    translate( [5, 5, 0] ) hex_box_2( TILE_CENTERS_2X2, box_size, 46, ["18XX"] );
-    translate( [5,-5, 0] ) hex_lid_2( TILE_CENTERS_2X2, box_size, 46, true );
+    box_size = [0,0,5];
+    translate( [5, 5, 0] ) hex_box_2( hex_tile_even_rows( 2,2 ), box_size, 46, ["18XX"] );
+    translate( [5,-5, 0] ) hex_lid_2( hex_tile_even_rows( 2,2 ), box_size, 46, true );
 }
