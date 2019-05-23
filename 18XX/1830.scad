@@ -9,7 +9,7 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-include <../util/units.scad>;
+include <util/units.scad>;
 
 // Command Line Arguments
 PART = "other";         // Which part to output
