@@ -1,11 +1,11 @@
 After using my original design for several months, I decided to refactor my designs and add some features to improve the usability of the boxes:
 
-1. Rounded boxes -- All of the boxes now use rounded corners and edges that make them more comfortable to use.
-1. Locking lids -- All of the boxes now use press-fit lids that are easy to separate, but lock into place, to keep from accidently spilling the tiles.
-1. Redesigned hex boxes -- The redesigned hex boxes and lids engage to keep tiles from sliding, but don't interfere with opening or closing the boxes.
-1. Redesigned token boxes -- now with fillets in the compartments, for easier access.
-1. Smaller boxes -- the newer box designs are easier to remove from the game boxes.
-1. Refactored models -- now it's much faster and easier to create designs for new games.
+1. **Rounded boxes** -- All of the boxes now use rounded corners and edges that make them more comfortable to use.
+1. **Locking lids** -- All of the boxes now use press-fit lids that are easy to separate, but lock into place, to keep from accidently spilling the tiles.
+1. **Redesigned hex boxes** -- The redesigned hex boxes and lids engage to keep tiles from sliding, but don't interfere with opening or closing the boxes.
+1. **Redesigned token boxes** -- now with fillets in the compartments, for easier access.
+1. **Smaller boxes** -- the newer box designs are easier to remove from the game boxes.
+1. **Refactored models** -- now it's much faster and easier to create designs for new games.
 
 I will leave the old models up for posterity and comparison, but strongly suggest using the newer models.
 

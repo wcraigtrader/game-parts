@@ -250,17 +250,17 @@ module card_plate() {
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "short-tile-tray") {
+if (PART == "short-tile-tray") {            // bom: 2 | short tile tray |
     tile_box( 2 );
-} else if (PART == "tall-tile-tray") {
+} else if (PART == "tall-tile-tray") {      // bom: 2 | tall tile tray |
     tile_box( 5 );
-} else if (PART == "short-tile-lid") {
+} else if (PART == "short-tile-lid") {      // bom: 2 | short tile tray lid |
     tile_lid( 2 );
-} else if (PART == "tall-tile-lid") {
+} else if (PART == "tall-tile-lid") {       // bom: 2 | tall tile tray lid |
     tile_lid( 5 );
-} else if (PART == "card-box") {
+} else if (PART == "card-box") {            // bom: 8 | card box |
     card_box_3();
-} else if (PART == "card-lid") {
+} else if (PART == "card-lid") {            // bom: 8 | card box lid |
     card_lid_3();
 } else if (PART == "card-plate") {
     card_plate();
