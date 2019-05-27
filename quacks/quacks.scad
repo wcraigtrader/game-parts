@@ -20,67 +20,36 @@ VERBOSE = true;           // Set to non-zero to see more data
 // ----- Physical Measurements ----------------------------------------------------------------------------------------
 
 WELL = [ 10.5*inch, 3.5*inch, 2*inch ];     // Inside measurement of component well
-HALF = [ WELL.x/2, WELL.y, WELL.z/2 ];
-CHIP = [ WELL.x/4, WELL.y, WELL.z/2 ];      // Outside size of chip boxes
 
+// Box dimensions
 QUACKS = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[3], WALL_WIDTH[2], 5*mm, 20*mm, 2*mm ];
 
 // ----- Calculated Measurements --------------------------------------------------------------------------------------
+
+CHIP = [ WELL.x/2, WELL.y/1, WELL.z/2 ];
+MISC = [ WELL.x/2, WELL.y/1, WELL.z/3 ];    // Outside size of chip boxes
+MINI = [ WELL.y/1, WELL.z/1, WELL.x/12 ];   // Outside size of player boxes
 
 WALLS  = wall_sizes( QUACKS );
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
-module half_box() {
-    inside = CHIP - WALLS;
-    
-    overlap = [0,0,OVERLAP];
-    fillet = QUACKS[ FILLET ];
-    
-    rounded_box( inside, ROUNDED, borders=QUACKS );
+module mini_box() {
+    if (VERBOSE) { echo( MiniBox=MINI ); }
+    rounded_box( MINI - WALLS, ROUNDED, borders=QUACKS );
 }
 
-module half_lid() {
-    inside = CHIP - WALLS;
-    
-    mirror( [1,0,0] ) rounded_lid( inside, borders=QUACKS );
+module mini_lid() {
+    if (VERBOSE) { echo( MiniLid=MINI ); }
+    mirror( [1,0,0] ) rounded_lid( MINI - WALLS, borders=QUACKS );
 }
 
+module misc_box() {
+    if (VERBOSE) { echo( MiscBox=MISC ); }
 
-module single_box() {
+    inside = MISC - WALLS;
+
     inner = QUACKS[ INNER ];
-    inside = HALF - WALLS;
-
-    dx = (inside.x - inner*0) / 1;
-    dy = (inside.y - inner*0) / 1;
-
-    cells = [ [ [dx, dy] ] ];
-
-    cell_box( cells, inside.z, ROUNDED, borders=QUACKS );
-}
-
-module single_lid() {
-    inside = HALF - WALLS;
-
-    mirror( [1,0,0] ) rounded_lid( inside, borders=QUACKS );
-}
-
-module dual_box() {
-    inner = QUACKS[ INNER ];
-    inside = HALF - WALLS;
-
-    dx = (inside.x - inner*1) / 2;
-    dy = (inside.y - inner*0) / 1;
-
-    cells = [ [ [dx, dy], [dx, dy ] ] ];
-
-    cell_box( cells, inside.z, ROUNDED, borders=QUACKS );
-}
-
-module quad_box() {
-    inner = QUACKS[ INNER ];
-    inside = HALF - WALLS;
-
     dx = (inside.x - inner*1) / 2;
     dy = (inside.y - inner*1) / 2;
 
@@ -89,45 +58,54 @@ module quad_box() {
     cell_box( cells, inside.z, ROUNDED, borders=QUACKS );
 }
 
-module chip_box() {
-    inner = QUACKS[ INNER ];
-    inside = HALF - WALLS;
+module misc_lid() {
+    if (VERBOSE) { echo( MiscLid=MISC ); }
+    mirror( [1,0,0] ) rounded_lid( MISC-WALLS, borders=QUACKS );
+}
 
-    dx1 = (inside.x - inner*3) / 4;
-    dx2 = (inside.x - inner*1) / 2;
-    dy = (inside.y - inner*1) / 2;
+module chip_box() {
+    if (VERBOSE) { echo( ChipBox=CHIP ); }
     
-    cells = [ [ [dx2, dy], [dx2, dy ] ], [ [dx1, dy], [dx1, dy ], [dx1, dy ], [dx1, dy ] ] ];
+    inside = CHIP - WALLS;
+
+    inner = QUACKS[ INNER ];
+    dx1 = (inside.x - inner*3) * 0.25;
+    dx2 = (inside.x - inner*1) * 0.50;
+    dy1 = (inside.y - inner*1) * 0.50;
+    dy2 = (inside.y - inner*1) * 0.50;
+    
+    cells = [ [ [dx2, dy1], [dx2, dy1 ] ], [ [dx1, dy2], [dx1, dy2], [dx1, dy2], [dx1, dy2] ] ];
 
     cell_box( cells, inside.z, ROUNDED, borders=QUACKS );
 }
 
+module chip_lid() {
+    if (VERBOSE) { echo( ChipLid=CHIP ); }
+    mirror( [1,0,0] ) rounded_lid( CHIP-WALLS, borders=QUACKS );
+}
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "single-lid") {
-    single_lid();
-} else if (PART == "single-box") {
-    single_box();
-} else if (PART == "dual-box") {
-    dual_box();
-} else if (PART == "quad-box") {
-    quad_box();
+if (PART == "chip-lid") {
+    chip_lid();
 } else if (PART == "chip-box") {
     chip_box();
-} else if (PART == "half-box") {
-    half_box();
-} else if (PART == "half-lid") {
-    half_lid();
+} else if (PART == "misc-box") {
+    misc_box();
+} else if (PART == "misc-lid") {
+    misc_lid();
+} else if (PART == "mini-box") {
+    mini_box();
+} else if (PART == "mini-lid") {
+    mini_lid();
 } else {
-    translate( [ 5,-89,0] ) half_box();
-    translate( [-5,-89,0] ) half_lid();
+    translate( [  5, -51, 0] ) mini_box();
+    translate( [ -5, -51, 0] ) mini_lid();
 
-    translate( [-5,  5,0] ) single_lid();
+    translate( [  5,   5, 0] ) misc_box();
+    translate( [ -5,   5, 0] ) misc_lid();
 
-    translate( [   5,  5, 0] ) single_box();
-    translate( [   5, 99, 0] ) dual_box();
-    translate( [ 144,  5, 0] ) quad_box();
-    translate( [ 144, 99, 0] ) chip_box();
+    translate( [  5,  99, 0] ) chip_box();
+    translate( [ -5,  99, 0] ) chip_lid();
 }
 
