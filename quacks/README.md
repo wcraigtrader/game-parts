@@ -13,7 +13,8 @@ I got a copy of [The Quacks of Quedlinburg](https://boardgamegeek.com/boardgame/
 
 1. Wrap the fortune teller cards with Hugo's Amazing Tape (or put them in a small bag).
 1. Each player box gets (1) flask, (1) seal, (2) droplets, (1) rat, (1) score marker, (1) pumpkin 1, (1) green 1, (1) white 3, (2) white 2, (5) white 1, and (3) witch pennies (one of each color).
-1. The die and the flame marker will fit in with the rubies.
+1. The die and the flame marker will fit in with the rubies in a mini box.
+1. The Locoweed ingredients go in the last mini box.
 
 **Assembly Order**
 
