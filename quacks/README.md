@@ -1,4 +1,4 @@
-I got a copy of [The Quacks of Quedlinburg](https://boardgamegeek.com/boardgame/244521/quacks-quedlinburg), so of course I had to design boxes to hold all of the components. Then I received my copy of [The Herb Witches](https://www.boardgamegeek.com/boardgameexpansion/269259/quacks-quedlinburg-herb-witches) expansion, and had to resize everything to fit all of the new components into the original box. Everything will just fit without removing the box insert.
+I got a copy of [The Quacks of Quedlinburg](https://boardgamegeek.com/boardgame/244521/quacks-quedlinburg), so of course I had to design boxes to hold all of the components. Then I received my copy of [The Herb Witches](https://www.boardgamegeek.com/boardgameexpansion/269259/quacks-quedlinburg-herb-witches) expansion, and had to resize everything to fit all of the new components into the original box. Now, everything will just fit without removing the box insert.
 
 | Model | Qty | Description |
 | ----- | --- | ----------- |
