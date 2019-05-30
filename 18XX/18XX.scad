@@ -31,6 +31,12 @@ WALL2 = WALL1 + 2*STUB_GAP;
 WALL3 = WALL2 + 2*WALL_WIDTH[4];
 PADDING = [ 4*WALL1, 2*WALL1, 0 ];
 
+SHIFTING = 1.00 * mm;    // Room for tiles to shift
+
+WIDTH  = 0;     // (X) Card width
+HEIGHT = 1;     // (Y) Card height 
+MARKER = 2;     // (Z) Marker diameter
+
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
 function tile_offset( tile, delta, border, z ) = [ tile.x*delta.x+border.x, tile.y*delta.y+border.y, z ];
@@ -318,6 +324,79 @@ module hex_lid_2( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
                 }
             }
         }
+    }
+}
+
+/* card_box( sizes, dimensios )
+ *
+ * Create a box to hold cards and tokens
+ *
+ * sizes      -- Width aand Height of cards, diameter of Marker
+ * dimensions -- List of physical dimensions
+ */
+module card_box( sizes, dimensions=REASONABLE ) {
+    inner  = dimensions[INNER];
+    bottom = dimensions[BOTTOM];
+    width  = sizes[WIDTH];
+    height = sizes[HEIGHT];
+    marker = sizes[MARKER];
+    border = 10 * mm;
+    
+    inside = [
+        marker + SHIFTING + inner + width + 2 * SHIFTING,
+        height + 2 * SHIFTING,
+        layer_height( marker )
+    ];
+            
+    marker_radius = (marker + SHIFTING) / 2;
+    
+    window = [ inside.x-2*border-2*marker_radius-inner, inside.y-2*border, bottom+2*OVERLAP ];
+
+    if (VERBOSE) {
+        echo( CardBox=sizes, CardBoxInside=inside );
+    }
+    
+    difference() {
+        union() {
+            // Start with a hollow box
+            rounded_box( inside, HOLLOW );
+            
+            // Add a marker rack
+            difference() {
+                cube( [2*marker_radius, inside.y, marker_radius] );
+                translate( [marker_radius, 0, marker_radius] )  rotate( [-90,0,0] ) cylinder( r=marker_radius, h = inside.y, center=false );
+            }
+            
+            // Add a divider
+            translate( [2*marker_radius, 0, 0] ) cube( [inner, inside.y, inside.z*0.75] );
+        }
+        
+        // Remove a finger hole
+        translate( [inside.x-window.x-border, border, -bottom-OVERLAP] ) cube( window );
+    }
+}
+
+module card_lid( sizes, dimensions=REASONABLE ) {
+    inner  = dimensions[INNER];
+    top    = dimensions[TOP];
+    width  = sizes[WIDTH];
+    height = sizes[HEIGHT];
+    marker = sizes[MARKER];
+    border = 10 * mm;
+    
+    inside = [
+        marker + SHIFTING + inner + width + 2 * SHIFTING,
+        height + 2 * SHIFTING,
+        layer_height( marker )
+    ];
+            
+    marker_radius = (marker + SHIFTING) / 2;
+    
+    window = [ inside.x-2*border-2*marker_radius-inner, inside.y-2*border, top+2*OVERLAP ];
+    
+    difference() {
+        rounded_lid( inside );
+        translate( [inside.x-window.x-border, border, -top-OVERLAP] ) cube( window );
     }
 }
 
