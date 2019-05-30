@@ -11,10 +11,12 @@
 #
 # Override PREFIX on the command line to select the parts to produce.
 #
-#     make all PREFIX=1830
 #     make all PREFIX=1846
-#     make all PREFIX=1867
 #     make all PREFIX=steam
+#
+# To list all available prefixes:
+#
+#     make list
 #
 # To build all for every model:
 #
@@ -50,7 +52,7 @@ OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
 # Name of OpenSCAD model file
-PREFIX=1830
+PREFIX=1846
 
 # ----- Everything after this should not need modification
 
@@ -66,7 +68,7 @@ IMAGE=png
 BOMS=$(BOM)/$(PREFIX)-bom.md
 MODELS=$(patsubst %,$(STL)/$(PREFIX)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE),$(PARTS))
-COMMON=18XX.scad ../util/hexes.scad ../util/boxes.scad ../util/printers.scad ../util/units.scad
+COMMON=18XX.scad util/hexes.scad util/boxes.scad util/printers.scad util/units.scad
 
 # Name of all model prefixes
 PREFIXES=$(shell ls *.scad | egrep -v 18XX | sed "s/.scad//" | tr "\n" " ")
@@ -84,6 +86,12 @@ all-boms:
 		$(MAKE) PREFIX=$${prefix} boms ; \
 	done
 
+list:
+	@fgrep -l "include <18XX.scad>" *.scad | sed "s/.scad//" | \
+		while read prefix ; do \
+			description=$$(head -1 $${prefix}.scad | sed "s;// ;;") ; \
+			printf "%10s => %s\n" $$prefix "$$description" ; \
+		done
 
 directories:
 	@mkdir -p $(STL)/$(PREFIX) $(IMAGE)/$(PREFIX) $(BOM)
@@ -92,7 +100,7 @@ models: directories $(MODELS)
 
 images: directories $(IMAGES)
 
-boms:    directories $(BOMS)
+boms:   directories $(BOMS)
 
 clean:
 	rm $(STL)/$(PREFIX)/$(PREFIX)-* $(IMAGE)/$(PREFIX)/$(PREFIX)-* $(BOM)/$(PREFIX)-bom.md
