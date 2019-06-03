@@ -1,4 +1,4 @@
-// 1867: The Railways of Canada
+// 1867: The Railways of Canada (All Aboard Games)
 // by W. Craig Trader
 //
 // --------------------------------------------------------------------------------------------------------------------
@@ -122,49 +122,6 @@ module loan_box() {
 
 module loan_lid() {
     cell_lid( LOAN_CELLS, LOAN_THICKNESS, HOLLOW, true );
-}
-
-/* card_rack( count, slot_depth, width, height )
- *
- * Create a card rack, sized for the share / engine cards
- *
- * count      -- Number of card slots
- * slot_depth -- How thick a stack of cards will fit in a slot
- * width      -- How wide should the rack be (~60% of width of cards)
- * height     -- How tall should the rack be?
- */
-module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=20*mm ) {
-
-    rounding = 2*mm; // radius
-
-    offset = [
-        (height - 3*mm) / tan(60) + WALL_WIDTH[6],
-        width/2 - CARD_WIDTH/2,
-        3*mm
-    ];
-
-    dx = slot_depth / sin(60) + WALL_WIDTH[6];
-
-    length = dx*count + offset.x;
-
-
-    difference() {
-        translate( [rounding, rounding, rounding] ) minkowski() {
-            cube( [ length-2*rounding, width-2*rounding, height-2*rounding ] );
-            sphere( r=rounding );
-        }
-
-        // Remove slots for cards
-        for (x=[0:1:count-1]) { // Extra slot bevels the front of the rack
-            translate( [offset.x+x*dx, offset.y, offset.z] )
-                rotate( [0,-30, 0] )
-                    cube( [ slot_depth, CARD_WIDTH, CARD_HEIGHT ] );
-        }
-
-        // Slope the front of the rack
-        translate( [offset.x+count*dx, offset.y, offset.z] ) rotate( [0, -30, 0 ] )
-            cube( [3*slot_depth, CARD_WIDTH, CARD_HEIGHT] );
-    }
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------

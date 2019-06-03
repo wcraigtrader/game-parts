@@ -32,6 +32,7 @@ TOKEN_HEIGHT    = layer_height( 3*TILE_THICKNESS );
 // Card dimensions
 CARD_WIDTH      = 2.75 * inch;
 CARD_HEIGHT     = 1.75 * inch;
+CARD_THICKNESS  = 0.50 * mm;
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
 
@@ -60,23 +61,27 @@ module token_lid() {
     cell_lid( TOKEN_CELLS, TOKEN_HEIGHT );
 }
 
+
+module train_rack() {
+    card_rack( 6, 6*CARD_THICKNESS, 1.5*inch, 20*mm );
+}
+
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "short-tile-tray") {            // bom: 2 | short tile tray |
-    tile_box( 2 );
-} else if (PART == "tall-tile-tray") {      // bom: 2 | tall tile tray |
+if (PART == "tile-tray") {          // bom: 4 | short tile tray |
     tile_box( 4 );
-} else if (PART == "short-tile-lid") {      // bom: 2 | short tile tray lid |
-    tile_lid( 2 );
-} else if (PART == "tall-tile-lid") {       // bom: 2 | tall tile tray lid |
+} else if (PART == "tile-lid") {    // bom: 4 | tall tile tray lid |
     tile_lid( 4 );
-} else if (PART == "card-box") {            // bom: 9 | card box |
+} else if (PART == "card-box") {    // bom: 9 | card box |
     card_box( CARDS );
-} else if (PART == "card-lid") {            // bom: 9 | card box lid |
+} else if (PART == "card-lid") {    // bom: 9 | card box lid |
     card_lid( CARDS );
+} else if (PART == "card-rack") {       // bom: 2 | Rack for displaying Stock or Engine cards |
+    train_rack();
 } else {
     translate( [ 5,   5,0] ) tile_box();
     translate( [ 5,  -5,0] ) tile_lid();
     translate( [-5, -95,0] ) rotate( [0,0,90] ) card_box( CARDS );
     translate( [-5,   5,0] ) rotate( [0,0,90] ) card_lid( CARDS );
+    translate( [-60,  3,0] ) rotate( [0,0,90] ) train_rack();
 }

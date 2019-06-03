@@ -327,7 +327,7 @@ module hex_lid_2( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
     }
 }
 
-/* card_box( sizes, dimensios )
+/* card_box( sizes, dimensions )
  *
  * Create a box to hold cards and tokens
  *
@@ -343,14 +343,14 @@ module card_box( sizes, dimensions=REASONABLE ) {
     border = 10 * mm;
     
     inside = [
-        marker + SHIFTING + inner + width + 2 * SHIFTING,
+        marker + inner + width + 3 * SHIFTING,
         height + 2 * SHIFTING,
         layer_height( marker )
     ];
             
-    marker_radius = (marker + SHIFTING) / 2;
+    mr = (marker + SHIFTING) / 2;   // Marker Radius
     
-    window = [ inside.x-2*border-2*marker_radius-inner, inside.y-2*border, bottom+2*OVERLAP ];
+    window = [ inside.x-2*border-2*mr-inner, inside.y-2*border, bottom+2*OVERLAP ];
 
     if (VERBOSE) {
         echo( CardBox=sizes, CardBoxInside=inside );
@@ -363,19 +363,26 @@ module card_box( sizes, dimensions=REASONABLE ) {
             
             // Add a marker rack
             difference() {
-                cube( [2*marker_radius, inside.y, marker_radius] );
-                translate( [marker_radius, 0, marker_radius] )  rotate( [-90,0,0] ) cylinder( r=marker_radius, h = inside.y, center=false );
+                cube( [2*mr, inside.y, mr] );
+                translate( [mr, 0, mr] ) rotate( [-90,0,0] ) cylinder( r=mr, h = inside.y, center=false );
             }
             
             // Add a divider
-            translate( [2*marker_radius, 0, 0] ) cube( [inner, inside.y, inside.z*0.75] );
+            translate( [2*mr, 0, 0] ) cube( [inner, inside.y, inside.z] );
         }
-        
+
         // Remove a finger hole
         translate( [inside.x-window.x-border, border, -bottom-OVERLAP] ) cube( window );
     }
 }
 
+/* card_lid( sizes, dimensions )
+ *
+ * Create a lid for a card box
+ *
+ * sizes      -- Width aand Height of cards, diameter of Marker
+ * dimensions -- List of physical dimensions
+ */
 module card_lid( sizes, dimensions=REASONABLE ) {
     inner  = dimensions[INNER];
     top    = dimensions[TOP];
@@ -385,18 +392,61 @@ module card_lid( sizes, dimensions=REASONABLE ) {
     border = 10 * mm;
     
     inside = [
-        marker + SHIFTING + inner + width + 2 * SHIFTING,
+        marker + inner + width + 3 * SHIFTING,
         height + 2 * SHIFTING,
         layer_height( marker )
     ];
             
-    marker_radius = (marker + SHIFTING) / 2;
+    mr = (marker + SHIFTING) / 2;   // Marker Radius
     
-    window = [ inside.x-2*border-2*marker_radius-inner, inside.y-2*border, top+2*OVERLAP ];
+    window = [ inside.x-2*border-2*mr-inner, inside.y-2*border, top+2*OVERLAP ];
     
     difference() {
         rounded_lid( inside );
         translate( [inside.x-window.x-border, border, -top-OVERLAP] ) cube( window );
+    }
+}
+
+/* card_rack( count, slot_depth, width, height )
+ *
+ * Create a card rack, sized for the share / engine cards
+ *
+ * count      -- Number of card slots
+ * slot_depth -- How thick a stack of cards will fit in a slot
+ * width      -- How wide should the rack be (~60% of width of cards)
+ * height     -- How tall should the rack be?
+ */
+module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=20*mm ) {
+
+    rounding = 2*mm; // radius
+
+    offset = [
+        (height - 3*mm) / tan(60) + WALL_WIDTH[6],
+        width/2 - CARD_WIDTH/2,
+        3*mm
+    ];
+
+    dx = slot_depth / sin(60) + WALL_WIDTH[6];
+
+    length = dx*count + offset.x;
+
+
+    difference() {
+        translate( [rounding, rounding, rounding] ) minkowski() {
+            cube( [ length-2*rounding, width-2*rounding, height-2*rounding ] );
+            sphere( r=rounding );
+        }
+
+        // Remove slots for cards
+        for (x=[0:1:count-1]) { // Extra slot bevels the front of the rack
+            translate( [offset.x+x*dx, offset.y, offset.z] )
+                rotate( [0,-30, 0] )
+                    cube( [ slot_depth, CARD_WIDTH, CARD_HEIGHT ] );
+        }
+
+        // Slope the front of the rack
+        translate( [offset.x+count*dx, offset.y, offset.z] ) rotate( [0, -30, 0 ] )
+            cube( [3*slot_depth, CARD_WIDTH, CARD_HEIGHT] );
     }
 }
 
