@@ -9,11 +9,13 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-include <util/units.scad>;
+assert( version_num() > 20190000, "********** Will NOT work with this version of OpenSCAD **********" );
 
 // Command Line Arguments
 PART = "other";         // Which part to output
 VERBOSE = true;        	// Set to non-zero to see more data
+
+include <18XX.scad>;
 
 // Game box dimensions
 BOX_HEIGHT      = 11.125 * inch;
@@ -26,21 +28,35 @@ TILE_THICKNESS  =  0.5 * mm;
 POKE_HOLE       = 35.0 * mm;    // Diameter of poke holes in bottom
 
 // Part box dimensions
-TOKEN_WIDTH      = 35.0 * mm;   // X
-TOKEN_DEPTH      = 17.5 * mm;   // Y
-TOKEN_HEIGHT     = 6.00 * mm;   // Z
+TOKEN_DIAMETER  = 17.5 * mm;
+TOKEN_THICKNESS =  2.0 * mm;
 
-include <18XX.scad>;
+WOOD_WIDTH      = 95.0 * mm;
+WOOD_DEPTH      = 16.0 * mm;
+WOOD_THICKNESS  =  5.2 * mm;
+
+// Cards
+CARD_LENGTH     = 2.625 * inch;
+CARD_WIDTH      = 1.750 * inch;
+CARD_THICKNESS  = 0.300 * mm;
+
+CARD_NUMBERS    = 6;
+CARD_PRIVATES   = 6;
+CARD_TRAINS     = 6 + 5 + 4 + 3 + 3 + 6;
+CARD_COMPANY    = 9;
+
+// ----- Calculated Dimensions ----------------------------------------------------------------------------------------
+
+TOKEN_WIDTH     = 2 * TOKEN_DIAMETER;   // X
+TOKEN_DEPTH     = 1 * TOKEN_DIAMETER;   // Y
+TOKEN_HEIGHT    = 3 * TOKEN_THICKNESS;  // Z
+
+CARD_SIZES      = [ CARD_WIDTH, CARD_LENGTH, CARD_THICKNESS ];
+
+CARD_COMPANIES  = 4 * CARD_COMPANY;
+CARD_OTHER      = 1 + CARD_NUMBERS + CARD_PRIVATES + CARD_TRAINS;
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
-
-tx = TOKEN_WIDTH; ty = TOKEN_DEPTH;
-
-TOKEN_CELLS = [
-    [ [ tx, ty ], [ tx, ty ], [ tx, ty ] ],
-    [ [ tx, ty ], [ tx, ty ], [ tx, ty ] ],
-    [ [ tx, ty ], [ tx, ty ], [ tx, ty ] ]
-];
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
@@ -57,27 +73,42 @@ module tile_lid( count=12, holes=true ) {
 }
 
 module token_box() {
-    cell_box( TOKEN_CELLS, TOKEN_HEIGHT );
+    cell_box( uniform_token_cells( 3, 3, TOKEN_WIDTH, TOKEN_DEPTH), TOKEN_HEIGHT, ROUNDED );
 }
 
 module token_lid() {
-    cell_lid( TOKEN_CELLS, TOKEN_HEIGHT );
+    cell_lid( uniform_token_cells( 3, 3, TOKEN_WIDTH, TOKEN_DEPTH), TOKEN_HEIGHT );
 }
 
+module wood_box() {
+    cell_box( uniform_token_cells( 8, 1, WOOD_WIDTH, WOOD_DEPTH), WOOD_THICKNESS, ROUNDED );
+}
+
+module wood_lid() {
+    cell_lid( uniform_token_cells( 8, 1, WOOD_WIDTH, WOOD_DEPTH), WOOD_THICKNESS );
+}
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "tile-tray") {          // bom: 4 | Tile tray |
+if (PART == "tile-tray") {              // bom: 4 | Tile tray |
     tile_box();
-} else if (PART == "tile-lid") {    // bom: 4 | Tile tray lid |
+} else if (PART == "tile-lid") {        // bom: 4 | Tile tray lid |
     tile_lid();
-} else if (PART == "token-box") {   // bom: 1 | Token box |
+} else if (PART == "token-box") {       // bom: 1 | Token box |
     token_box();
-} else if (PART == "token-lid") {   // bom: 1 | Token box lid |
+} else if (PART == "token-lid") {       // bom: 1 | Token box lid |
     token_lid();
+} else if (PART == "wood-box") {       // bom: 1 | Wood token box |
+    wood_box();
+} else if (PART == "wood-lid") {       // bom: 1 | Wood token box lid |
+    wood_lid();
+} else if (PART == "company-cards") {   // bom: 2 | Card sleeve for shares for 4 companeis |
+    deck_box( CARD_SIZES, CARD_COMPANIES );
+} else if (PART == "other-cards") {     // bom: 1 | Card sleeve for other cards |
+    deck_box( CARD_SIZES, CARD_OTHER );
 } else {
-    translate( [-5, -5,0] ) rotate( [0,0,180] ) tile_box();
-    translate( [-5,  5,0] ) rotate( [0,0,180] ) tile_lid();
-    translate( [ 5,  5,0] ) token_box();
-    translate( [ 5,-59,0] ) token_lid();
+    translate( [ 5,  5,0] ) tile_box();
+    translate( [ 5, -5,0] ) tile_lid();
+    translate( [-5, -5,0] ) rotate( [0,0,180] ) wood_box();
+    translate( [-5,  5,0] ) wood_lid();
 }
