@@ -42,6 +42,7 @@ MARKER = 2;     // (Z) Marker diameter
 function tile_offset( tile, delta, border, z ) = [ tile.x*delta.x+border.x, tile.y*delta.y+border.y, z ];
 function corner_offset( tile, corner, delta, border, z ) = [ (tile.x + corner.x) * delta.x + border.x, (tile.y + corner.y) * delta.y + border.y, z ];
 function actual_size( size, optimum ) = [ size.x == 0 ? optimum.x : size.x, size.y == 0 ? optimum.y : size.y, size.z ];
+function uniform_token_cells( rows, cols, tx, ty ) = [ for( r=[0:rows-1] ) [ for( c=[0:cols-1] ) [ tx, ty ] ] ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
@@ -54,6 +55,8 @@ function actual_size( size, optimum ) = [ size.x == 0 ? optimum.x : size.x, size
  * hex        -- Diameter of a hex tile (corner to opposite corner)
  * labels     -- List of labels to add to the box
  * dimensions -- List of physical dimensions
+ *
+ * @deprecated
  */
 module hex_box_1( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     bottom = dimensions[BOTTOM];
@@ -120,6 +123,8 @@ module hex_box_1( layout, size, hex, labels=[], dimensions=REASONABLE ) {
  * inner          -- Inner wall thickness
  * remove_corners -- True to remove the corners of the inner walls
  * add_stubs      -- True to add stubs that fit with the hex corners from the tray
+ *
+ * @deprecated
  */
 module hex_lid_1( layout, size, hex, add_stubs=false, remove_holes=true, dimensions=REASONABLE ) {
     top = dimensions[TOP];
