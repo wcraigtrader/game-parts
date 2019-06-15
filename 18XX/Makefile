@@ -52,9 +52,12 @@ OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
 # Name of OpenSCAD model file
-PREFIX=1846
+# PREFIX=unspecified
 
 # ----- Everything after this should not need modification
+
+check_defined = $(strip $(foreach 1,$1, $(call __check_defined,$1,$(strip $(value 2)))))
+__check_defined = $(if $(value $1),, $(error Undefined $1$(if $2, ($2))$(if $(value @), required by target `$@')))
 
 # Names of parts to build
 PARTS=$(shell grep 'PART == ' $(PREFIX).scad | cut -d'"' -f2)
@@ -94,6 +97,7 @@ list:
 		done
 
 directories:
+@:$(call check_defined, PREFIX, game prefix)
 	@mkdir -p $(STL)/$(PREFIX) $(IMAGE)/$(PREFIX) $(BOM)
 
 models: directories $(MODELS)
@@ -103,6 +107,7 @@ images: directories $(IMAGES)
 boms:   directories $(BOMS)
 
 clean:
+	@:$(call check_defined, PREFIX, game prefix)
 	rm $(STL)/$(PREFIX)/$(PREFIX)-* $(IMAGE)/$(PREFIX)/$(PREFIX)-* $(BOM)/$(PREFIX)-bom.md
 
 cleanall:
@@ -110,6 +115,7 @@ cleanall:
 
 # Dependencies for BOM
 $(BOM)/$(PREFIX)-$(BOM).md : $(PREFIX).scad
+	@:$(call check_defined, PREFIX, game prefix)
 	@/bin/echo "Creating BOM for $(PREFIX)"
 	@/bin/echo "| Model | Qty | Description |" > $@
 	@/bin/echo "| ----- | --- | ----------- |" >> $@
@@ -118,10 +124,12 @@ $(BOM)/$(PREFIX)-$(BOM).md : $(PREFIX).scad
 # Dependencies for models
 
 $(MODELS) : $(STL)/$(PREFIX)/$(PREFIX)-%.$(STL) : $(PREFIX).scad $(COMMON)
+	@:$(call check_defined, PREFIX, game prefix)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(STL),,$(@F)))\" $<
 
 # Dependencies for images
 
 $(IMAGES) : $(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE) : $(PREFIX).scad $(COMMON)
+	@:$(call check_defined, PREFIX, game prefix)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(IMAGE),,$(@F)))\" $(IMAGE_OPTIONS) $<
 
