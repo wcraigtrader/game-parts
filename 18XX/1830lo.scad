@@ -61,22 +61,21 @@ module token_lid() {
     cell_lid( TOKEN_CELLS, TOKEN_HEIGHT );
 }
 
-
 module train_rack() {
     card_rack( 6, 6*CARD_THICKNESS, 1.5*inch, 20*mm );
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "tile-tray") {          // bom: 4 | short tile tray |
+if (PART == "tile-tray") {          // bom: 4 | tile tray |
     tile_box( 4 );
-} else if (PART == "tile-lid") {    // bom: 4 | tall tile tray lid |
+} else if (PART == "tile-lid") {    // bom: 4 | tile tray lid |
     tile_lid( 4 );
 } else if (PART == "card-box") {    // bom: 9 | card box |
     card_box( CARDS );
 } else if (PART == "card-lid") {    // bom: 9 | card box lid |
     card_lid( CARDS );
-} else if (PART == "card-rack") {       // bom: 2 | Rack for displaying Stock or Engine cards |
+} else if (PART == "card-rack") {   // bom: 1 | Rack for displaying Train cards |
     train_rack();
 } else {
     translate( [ 5,   5,0] ) tile_box();
