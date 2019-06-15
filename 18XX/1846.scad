@@ -32,10 +32,11 @@ WELL_WIDTH      = BOX_WIDTH;
 // Card dimensions
 CARD_WIDTH      = 2.50 * inch;
 CARD_HEIGHT     = 1.75 * inch;
+CARD_THICKNESS  = 0.35 * mm;
 
-COMPANY_CARDS   =  3.4 * mm;
-TRAIN_CARDS     = 10.6 * mm; // (9) Yel, (6) Grn, (5) Brn, (9) Sil
-OTHER_CARDS     =  5.9 * mm; // (10 + 5 + 1)
+COMPANY_CARDS   = 9;
+TRAIN_CARDS     = 2 + 7 + 6 + 5 + 9; 
+OTHER_CARDS     = 10 + 5 + 1;
 
 // Marker dimensions
 MARK_DIAMETER   = 9/16 * inch;
@@ -46,9 +47,8 @@ MARK_MAX        = 10;
 CHIP_DIAMETER   = 41 * mm;
 CHIP_THICKNESS  = 3.31 * mm;
 
-LIP     = 5.00 * mm;
-
-CARDS = [ CARD_WIDTH, CARD_HEIGHT, MARK_DIAMETER ];
+CARDS           = [ CARD_WIDTH, CARD_HEIGHT, MARK_DIAMETER ];
+CARD_SIZES      = [ CARD_HEIGHT, CARD_WIDTH, CARD_THICKNESS ];
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
@@ -79,10 +79,14 @@ if (PART == "short-tile-tray") {            // bom: 2 | short tile tray |
     card_box( CARDS );
 } else if (PART == "card-lid") {            // bom: 8 | card box lid |
     card_lid( CARDS );
+} else if (PART == "card-sleeve") {         // bom: 1 | Card sleeve for trains |
+    deck_box( CARD_SIZES, TRAIN_CARDS );
 } else {
     translate( [-5, -5, 0] ) rotate( [0,0,180] ) tile_box( 5 );
     translate( [-5,  5, 0] ) rotate( [0,0,180] ) tile_lid( 5 );
     
     translate( [55,  5, 0] ) rotate( [0,0,90] ) card_box( CARDS );
     translate( [55,-87, 0] ) rotate( [0,0,90] ) card_lid( CARDS );
+    
+    translate( [60, 5, 0] ) deck_box( CARD_SIZES, TRAIN_CARDS );
 }
