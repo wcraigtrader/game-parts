@@ -63,19 +63,19 @@ To clean (remove) all generated files for one game
 ## Available Components
 
 * **Hex Boxes**
-  Hex boxes (and their lids) are intended to store the hexagonal tiles that represent track in these games. A hex box will have walls to separate out stacks of tiles, and a hexagonal hole in the bottom of each stack to assist in removing tiles.
+  Hex boxes (and their lids) are intended to store the hexagonal tiles that represent track in these games. A hex box will have walls to separate out stacks of tiles, and a hexagonal hole in the bottom of each stack to assist in removing tiles.  
   ![Hex Box](docs/tile-box.png)
-  The lid will also have hexagonal holes to reveal the tiles. The lid may have a set of stubs that will engage with the walls in the box, to keep tiles from shifting around when the box is closed.
+  The lid will also have hexagonal holes to reveal the tiles. The lid may have a set of stubs that will engage with the walls in the box, to keep tiles from shifting around when the box is closed.  
   ![Hex Lid](docs/tile-lid.png)
 
 * **Card Boxes**
-  Card boxes (and their lids) are intended to store the stock shares for companies, and their associated tokens (market tokens, station tokens, etcetera). The box will have a narrow rack to hold the tokens, and a larger bin to hold the cards themselves. The box will have a rectangular hole in the bottom to assist in removing the cards.
+  Card boxes (and their lids) are intended to store the stock shares for companies, and their associated tokens (market tokens, station tokens, etcetera). The box will have a narrow rack to hold the tokens, and a larger bin to hold the cards themselves. The box will have a rectangular hole in the bottom to assist in removing the cards.  
   ![Card Box](docs/card-box.png)
-    The lid will also have a rectangular hole, to reveal the cards.
+    The lid will also have a rectangular hole, to reveal the cards.  
   ![Card Lid](docs/card-lid.png)
 
 * **Card Rack**
-  A card rack is a small rack intended to display shares or trains.
+  A card rack is a small rack intended to display shares or trains.  
   ![Card Rack](docs/card-rack.png)
   
 * **Rounded Box**
