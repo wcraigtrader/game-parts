@@ -15,6 +15,8 @@ include <util/units.scad>;
 PART = "other";         // Which part to output
 VERBOSE = true;        	// Set to non-zero to see more data
 
+include <18XX.scad>;
+
 // Game box dimensions
 BOX_WIDTH       = 11.500 * inch;    // (X)
 BOX_HEIGHT      =  9.625 * inch;    // (Y)
@@ -40,7 +42,8 @@ TILE_DIAMETER   = 46.00 * mm;
 TILE_THICKNESS  =  0.65 * mm;
 POKE_HOLE       = 30.00 * mm;    // Diameter of poke holes in bottom
 
-include <18XX.scad>;
+MAJOR_CHARTERS  = [ 4.2500*inch, 5.125*inch, 0.60*mm ];
+MINOR_CHARTERS  = [ 3.1875*inch, 5.875*inch, 0.60*mm ];
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
 
@@ -113,7 +116,7 @@ module card_box() {
 }
 
 module card_lid() {
-    cell_lid( CARD_CELLS, CARD_THICKNESS, HOLLOW, true );
+    cell_lid( CARD_CELLS, CARD_THICKNESS, HOLLOW, true, true );
 }
 
 module loan_box() {
@@ -121,7 +124,7 @@ module loan_box() {
 }
 
 module loan_lid() {
-    cell_lid( LOAN_CELLS, LOAN_THICKNESS, HOLLOW, true );
+    cell_lid( LOAN_CELLS, LOAN_THICKNESS, HOLLOW, true, true );
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
@@ -148,6 +151,10 @@ if (PART == "tile-lid-05") {            // bom: 2 | Lid for short tile tray |
     loan_lid();
 } else if (PART == "card-rack") {       // bom: 2 | Rack for displaying Stock or Engine cards |
     card_rack();
+} else if (PART == "minor-charters") {  // bom: 1 | Sleeve for minor charters |
+    deck_box( MINOR_CHARTERS, 16 );
+} else if (PART == "major-charters") {  // bom: 1 | Sleeve for major charters |
+    deck_box( MAJOR_CHARTERS, 9 );
 } else if (PART == "alt-tile-lid-05") {     // bom: 2 | Lid for alternate short tile tray |
     alt_tile_lid(5);
 } else if (PART == "alt-tile-lid-10") {     // bom: 2 | Lid for alternate tall tile tray |
@@ -160,15 +167,18 @@ if (PART == "tile-lid-05") {            // bom: 2 | Lid for short tile tray |
 
     // large_tile_box(5);
 
+/*
+*/
     translate( [ 5,  5, 0] ) tile_box(10);
     translate( [ 5, -5, 0] ) tile_lid(10);
 
-/*
-    translate( [ 3,   3, 0] ) token_box();
-    translate( [ 3,-138, 0] ) token_lid();
+    translate( [ -5, -5, 0] ) rotate( [0,0,180] ) token_box();
+    translate( [ -5,  5, 0] ) token_lid();
 
+    translate( [ 254, 5, 0] ) card_box();
+    translate( [ 254, -5, 0] ) rotate( [0,0,180] ) card_lid();
 
-    translate( [ 170,    3, 0] ) card_box();
-    translate( [ 170, -132, 0] ) card_lid();
-*/
+    translate( [ 5, 145, 0 ] ) deck_box( MINOR_CHARTERS, 16 );
+    translate( [ 5, 165, 0 ] ) deck_box( MAJOR_CHARTERS, 9 );
+
 }

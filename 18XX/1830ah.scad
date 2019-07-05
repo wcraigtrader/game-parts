@@ -23,17 +23,12 @@ BOX_WIDTH       =  8.0 * inch;
 BOX_DEPTH       =  2.0 * inch;
 
 // Tile dimensions
-TILE_DIAMETER   = 46.0 * mm;
+TILE_DIAMETER   = 46.0 * mm;    // 1.75 * inch
 TILE_THICKNESS  =  0.5 * mm;
-POKE_HOLE       = 35.0 * mm;    // Diameter of poke holes in bottom
 
 // Part box dimensions
 TOKEN_DIAMETER  = 17.5 * mm;
 TOKEN_THICKNESS =  2.0 * mm;
-
-WOOD_WIDTH      = 95.0 * mm;
-WOOD_DEPTH      = 16.0 * mm;
-WOOD_THICKNESS  =  5.2 * mm;
 
 // Cards
 CARD_LENGTH     = 2.625 * inch;
@@ -80,14 +75,6 @@ module token_lid() {
     cell_lid( uniform_token_cells( 3, 3, TOKEN_WIDTH, TOKEN_DEPTH), TOKEN_HEIGHT );
 }
 
-module wood_box() {
-    cell_box( uniform_token_cells( 8, 1, WOOD_WIDTH, WOOD_DEPTH), WOOD_THICKNESS, ROUNDED );
-}
-
-module wood_lid() {
-    cell_lid( uniform_token_cells( 8, 1, WOOD_WIDTH, WOOD_DEPTH), WOOD_THICKNESS );
-}
-
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
 if (PART == "tile-tray") {              // bom: 4 | Tile tray |
@@ -98,10 +85,6 @@ if (PART == "tile-tray") {              // bom: 4 | Tile tray |
     token_box();
 } else if (PART == "token-lid") {       // bom: 1 | Token box lid |
     token_lid();
-} else if (PART == "wood-box") {       // bom: 1 | Wood token box |
-    wood_box();
-} else if (PART == "wood-lid") {       // bom: 1 | Wood token box lid |
-    wood_lid();
 } else if (PART == "company-cards") {   // bom: 2 | Card sleeve for shares for 4 companeis |
     deck_box( CARD_SIZES, CARD_COMPANIES );
 } else if (PART == "other-cards") {     // bom: 1 | Card sleeve for other cards |
@@ -109,6 +92,6 @@ if (PART == "tile-tray") {              // bom: 4 | Tile tray |
 } else {
     translate( [ 5,  5,0] ) tile_box();
     translate( [ 5, -5,0] ) tile_lid();
-    translate( [-5, -5,0] ) rotate( [0,0,180] ) wood_box();
-    translate( [-5,  5,0] ) wood_lid();
+    translate( [-5, -5,0] ) rotate( [0,0,180] ) token_box();
+    translate( [-5,  5,0] ) token_lid();
 }

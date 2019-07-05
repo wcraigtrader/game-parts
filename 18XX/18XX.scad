@@ -34,7 +34,7 @@ PADDING = [ 4*WALL1, 2*WALL1, 0 ];
 SHIFTING = 1.00 * mm;    // Room for tiles to shift
 
 WIDTH  = 0;     // (X) Card width
-HEIGHT = 1;     // (Y) Card height 
+HEIGHT = 1;     // (Y) Card height
 MARKER = 2;     // (Z) Marker diameter
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ module hex_box_1( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     inside = [ size.x-4*outer-2*GAP, size.y-4*outer-2*GAP, size.z ];
 
     border = (inside - layout_size( layout, hex )) / 2;
-    
+
     config = hex_config( hex );
 
     if (VERBOSE) {
@@ -206,11 +206,11 @@ module hex_lid_1( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
 module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     bottom = dimensions[BOTTOM];
     outer  = dimensions[OUTER];
-    
+
     walls  = [ 4*outer+2*GAP, 4*outer+2*GAP, 0];
     minimum = layout_size( layout, hex );
     optimum = minimum + walls + PADDING;
-    
+
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
@@ -282,10 +282,10 @@ module hex_lid_2( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
     walls  = [ 4*outer+2*GAP, 4*outer+2*GAP, 0];
     minimum = layout_size( layout, hex );
     optimum = minimum + walls + PADDING;
-    
+
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
-    
+
     config = hex_config( hex );
 
     if (VERBOSE) {
@@ -311,7 +311,7 @@ module hex_lid_2( layout, size, hex, add_stubs=false, remove_holes=true, dimensi
         if (add_stubs) {
             overlap = [0,0,OVERLAP];
             stub_z = min( size.z, STUB );   // If box is really thin, use thin stubs
-            
+
             translate( -overlap ) intersection() {
                 cube( [inside.x, inside.y, stub_z+OVERLAP] );
                 union() {
@@ -346,32 +346,32 @@ module card_box( sizes, dimensions=REASONABLE ) {
     height = sizes[HEIGHT];
     marker = sizes[MARKER];
     border = 10 * mm;
-    
+
     inside = [
         marker + inner + width + 3 * SHIFTING,
         height + 2 * SHIFTING,
         layer_height( marker )
     ];
-            
+
     mr = (marker + SHIFTING) / 2;   // Marker Radius
-    
+
     window = [ inside.x-2*border-2*mr-inner, inside.y-2*border, bottom+2*OVERLAP ];
 
     if (VERBOSE) {
         echo( CardBox=sizes, CardBoxInside=inside );
     }
-    
+
     difference() {
         union() {
             // Start with a hollow box
             rounded_box( inside, HOLLOW );
-            
+
             // Add a marker rack
             difference() {
                 cube( [2*mr, inside.y, mr] );
                 translate( [mr, 0, mr] ) rotate( [-90,0,0] ) cylinder( r=mr, h = inside.y, center=false );
             }
-            
+
             // Add a divider
             translate( [2*mr, 0, 0] ) cube( [inner, inside.y, inside.z] );
         }
@@ -395,20 +395,100 @@ module card_lid( sizes, dimensions=REASONABLE ) {
     height = sizes[HEIGHT];
     marker = sizes[MARKER];
     border = 10 * mm;
-    
+
     inside = [
         marker + inner + width + 3 * SHIFTING,
         height + 2 * SHIFTING,
         layer_height( marker )
     ];
-            
+
     mr = (marker + SHIFTING) / 2;   // Marker Radius
-    
+
     window = [ inside.x-2*border-2*mr-inner, inside.y-2*border, top+2*OVERLAP ];
-    
-    difference() {
+
+    mirror( [0,1,0] ) difference() {
         rounded_lid( inside );
         translate( [inside.x-window.x-border, border, -top-OVERLAP] ) cube( window );
+    }
+}
+
+/* deep_card_box( sizes, dimensions )
+ *
+ * Create a box to hold cards and tokens
+ *
+ * sizes      -- Width aand Height of cards, diameter of Marker
+ * dimensions -- List of physical dimensions
+ */
+module deep_card_box( sizes, dimensions=REASONABLE ) {
+    inner  = dimensions[INNER];
+    bottom = dimensions[BOTTOM];
+    width  = sizes[WIDTH];
+    height = sizes[HEIGHT];
+    marker = sizes[MARKER];
+    border = 10 * mm;
+
+    inside = [
+        width + 2 * SHIFTING,
+        marker + inner + height + 3 * SHIFTING,
+        layer_height( marker )
+    ];
+
+    mr = (marker + SHIFTING) / 2;   // Marker Radius
+
+    window = [ inside.x-2*border, inside.y-2*border-2*mr-inner, bottom+2*OVERLAP ];
+
+    if (VERBOSE) {
+        echo( CardBox=sizes, CardBoxInside=inside );
+    }
+
+    difference() {
+        union() {
+            // Start with a hollow box
+            rounded_box( inside, HOLLOW );
+
+            // Add a marker rack
+            difference() {
+                cube( [inside.x, 2*mr, mr] );
+                translate( [0, mr, mr] ) rotate( [0,90,0] ) cylinder( r=mr, h = inside.x, center=false );
+            }
+
+            // Add a divider
+            translate( [0, 2*mr, 0] ) cube( [inside.x, inner, inside.z] );
+        }
+
+        // Remove a finger hole
+        translate( [border, inside.y-window.y-border, -bottom-OVERLAP] ) cube( window );
+    }
+}
+
+/* deep_card_lid( sizes, dimensions )
+ *
+ * Create a lid for a card box
+ *
+ * sizes      -- Width aand Height of cards, diameter of Marker
+ * dimensions -- List of physical dimensions
+ */
+module deep_card_lid( sizes, dimensions=REASONABLE ) {
+    inner  = dimensions[INNER];
+    top    = dimensions[TOP];
+    width  = sizes[WIDTH];
+    height = sizes[HEIGHT];
+    marker = sizes[MARKER];
+    border = 10 * mm;
+
+    inside = [
+        width + 2 * SHIFTING,
+        marker + inner + height + 3 * SHIFTING,
+        layer_height( marker )
+    ];
+
+    mr = (marker + SHIFTING) / 2;   // Marker Radius
+
+    window = [ inside.x-2*border, inside.y-2*border-2*mr-inner, top+2*OVERLAP ];
+
+    mirror( [0,1,0] ) difference() {
+        rounded_lid( inside );
+        translate( [border, inside.y-window.y-border, -top-OVERLAP] ) cube( window );
     }
 }
 
@@ -456,6 +536,14 @@ module card_rack( count=9, slot_depth=10*TILE_THICKNESS, width=1.5*inch, height=
 }
 
 // ----- Testing ------------------------------------------------------------------------------------------------------
+
+if (0) {
+    CARDS = [ 2.50 * inch, 1.75 * inch, 15*mm ];
+    translate( [ 5,  5, 0] ) deep_card_box( CARDS );
+    translate( [ 5, -5, 0] ) deep_card_lid( CARDS );
+    translate( [-5, -5, 0] ) rotate( [0, 0, 180] ) card_box( CARDS );
+    translate( [-5,  5, 0] ) rotate( [0, 0, 180] ) card_lid( CARDS );
+}
 
 if (0) {
     VERBOSE = true;
