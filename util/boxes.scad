@@ -16,12 +16,8 @@ include <printers.scad>;
 
 // ----- Physical dimensions ------------------------------------------------------------------------------------------
 
-NOTCH     = 10.0 * mm;  // Radius of notches
-
-GAPZ      = 0.10 * mm;
-
-DECK_BOX_SPACING =  1.00 * mm;
-DECK_BOK_OVERLAP = 20.00 * mm;
+NOTCH               = 10.00 * mm;   // Radius of thumb notches
+DECK_BOX_SPACING    =  0.50 * mm;   // Padding for cards in deck boxes
 
 $fa=4; $fn=30;
 
@@ -40,6 +36,7 @@ FFS_SLEEVE = [ 66.70, 94.60, 0.625 ];
 SOLID   = 0;    // Not so much a box, as a block
 HOLLOW  = 1;    // Standard box with sharp inside corners
 ROUNDED = 2;    // Box with rounded inside corners
+NOTCHED = 3;    // Hollow box with notches for easily removing tiles
 
 BOTTOM = 0;     // Bottom thickness
 TOP    = 1;     // Top thickness
@@ -64,6 +61,8 @@ function col_length( cellz, space ) = row_offset( cellz, space, len(cellz), 0) -
 
 function round_up( size, step ) = ceil( size / step ) * step;
 function wall_sizes( borders ) = [ borders[ OUTER ]*4 + GAP*2, borders[ OUTER ]*4 + GAP*2, borders[ TOP ] + borders[ BOTTOM ] ];
+
+function uniform_cells( rows, cols, tx, ty ) = [ for( r=[0:rows-1] ) [ for( c=[0:cols-1] ) [ tx, ty ] ] ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
@@ -209,7 +208,7 @@ module rounded_lid( size, borders=REASONABLE ) {
  *
  * cells   -- Layout of cells (inside dimensions)
  * height  -- Height (Z) of cells (inside dimensions)
- * type    -- SOLID, HOLLOW, ROUNDED
+ * type    -- SOLID, HOLLOW, ROUNDED, NOTCHED
  * holes   -- if true, then add finger holes to cells
  * borders -- vector of physical characteristics (see REASONABLE)
  *
@@ -255,13 +254,25 @@ module cell_box( cells, height, type=HOLLOW, holes=false, borders=REASONABLE ) {
                     echo( Position=[row,col], row=cells[row], dx=dx, dy=dy );
                 }
 
-                if (type == HOLLOW) {
+                if (type == HOLLOW || type == NOTCHED) {
                     translate( [ dx, dy, 0 ] )
                     cube( [ cell.x, cell.y, height+OVERLAP ] );
                 } else if (type == ROUNDED) {
                     translate( [ dx, dy, fillet+OVERLAP ] ) minkowski() {
                         translate( [fillet, fillet, 0] ) cube( [ cell.x-2*fillet, cell.y-2*fillet, height+OVERLAP ] );
                         hemisphere( r=fillet );
+                    }
+                }
+                
+                if (type == NOTCHED) {
+                    if (cell.x > cell.y) {
+                        translate([dx-inner/2-OVERLAP,dy+cell.y/2,height]) 
+                            scale([cell.x+inner+2*OVERLAP,cell.y/2,2*height]) 
+                                rotate([0,+90,0]) cylinder( d=1, h=1 );
+                    } else {
+                        translate([dx+cell.x/2,dy-inner/2-OVERLAP,height]) 
+                            scale([cell.x/2,cell.y+inner+2*OVERLAP,2*height]) 
+                                rotate([-90,0,0]) cylinder( d=1, h=1 );
                     }
                 }
                 
@@ -281,7 +292,7 @@ module cell_box( cells, height, type=HOLLOW, holes=false, borders=REASONABLE ) {
  * height  -- Height (Z) of cells (inside dimensions)
  * borders -- vector of physical characteristics (see REASONABLE)
  */
-module cell_lid( cells, height, type=HOLLOW, stubs=false, borders=REASONABLE ) {
+module cell_lid( cells, height, type=HOLLOW, stubs=false, holes=false, borders=REASONABLE ) {
     inner  = borders[INNER];
     top    = borders[TOP];
     fillet = borders[FILLET];
@@ -297,138 +308,84 @@ module cell_lid( cells, height, type=HOLLOW, stubs=false, borders=REASONABLE ) {
         echo( CellLid_Inside=inside );
     }
 
-    mirror( [ 1,0,0 ] ) union() {
-        rounded_lid( inside, borders );
-        
-        if (stubs) {
-            gap = [ inner/2+0.250, inner/2+0.25, 0];
-            dgap = gap + gap;
-            wall = [ inner, inner, 0];
-            dwall = wall + wall;
+    mirror( [ 1,0,0 ] ) difference() { 
+        union() {
+            rounded_lid( inside, borders );
             
-            fillz = [ fillet, fillet, 9];
-            overlap = [ 0, 0, OVERLAP ];
-            
-            intersection() {
-                translate( wall + gap - overlap ) cube( [ inside.x, inside.y, stub] - dwall - dgap + overlap );
-            
-                for ( row = [len(cells)-1:-1:0] ) {
-                    for ( col = [0:1:len(cells[row])-1 ] ) {
-                        cell = cells[row][col];
-                        hole = [ cell.x, cell.y, height+OVERLAP ];
-                        delta = [ col_offset( cells, inner, row, col ), row_offset( cells, inner, row, 0 ), 0 ];
+            if (stubs) {
+                gap = [ inner/2+0.250, inner/2+0.25, 0];
+                dgap = gap + gap;
+                wall = [ inner, inner, 0];
+                dwall = wall + wall;
+                
+                fillz = [ fillet, fillet, 9];
+                overlap = [ 0, 0, OVERLAP ];
+                
+                intersection() {
+                    translate( wall + gap - overlap ) cube( [ inside.x, inside.y, stub] - dwall - dgap + overlap );
+                
+                    for ( row = [len(cells)-1:-1:0] ) {
+                        for ( col = [0:1:len(cells[row])-1 ] ) {
+                            cell = cells[row][col];
+                            hole = [ cell.x, cell.y, height+OVERLAP ];
+                            delta = [ col_offset( cells, inner, row, col ), row_offset( cells, inner, row, 0 ), 0 ];
 
-                        if (delta.x==undef || delta.y==undef) {
-                            echo( Position=[row,col], row=cells[row], hole=hole, delta=delta );
-                        }
+                            if (delta.x==undef || delta.y==undef) {
+                                echo( Position=[row,col], row=cells[row], hole=hole, delta=delta );
+                            }
 
-                        difference() {
-                            translate( delta + gap ) cube( hole - dgap );
-                            translate( delta + gap + wall - overlap ) cube( hole - dgap - dwall + overlap );
+                            difference() {
+                                translate( delta + gap ) cube( hole - dgap );
+                                translate( delta + gap + wall - overlap ) cube( hole - dgap - dwall + overlap );
+                            }
                         }
                     }
+                }
+            }
+        }
+
+        if (holes) {
+            for ( row = [len(cells)-1:-1:0] ) {
+                for ( col = [0:1:len(cells[row])-1 ] ) {
+                    cell = cells[row][col];
+                    delta = [ col_offset( cells, inner, row, col ), row_offset( cells, inner, row, 0 ), 0 ];
+
+                    translate( [delta.x+cell.x/2, delta.y+cell.y/2, -top-OVERLAP] ) 
+                        scale( [cell.x/2, cell.y/2, 1] ) 
+                            cylinder( d=1, h=top+4*OVERLAP );
                 }
             }
         }
     }
 }
 
-module deck_box( sizes, quantity, wall ) {
-    bottom = 1.00 * mm;
-    top    = 1.00 * mm;
+/** deck_box -- create a sleeve to hold cards
+ *
+ * sizes    -- Vector ( short size of card, long size of card, thickness of card )
+ * quantity -- number of cards
+ * wall     -- thickness of box wall
+ */
+module deck_box( sizes, quantity, wall=WALL_WIDTH[1] ) {
 
-    inside_x = sizes[0] + DECK_BOX_SPACING;
-    inside_y = sizes[2] * quantity + DECK_BOX_SPACING;
-    inside_z = sizes[1] + DECK_BOX_SPACING;
+    bottom = layers( 3 );
 
-    lip_x = inside_x + 2 * wall;
-    lip_y = inside_y + 2 * wall;
-
-    box_x = lip_x + 2 * GAP;
-    box_y = lip_y + 2 * GAP;
-    box_z = round_up( inside_z/2, LAYER_HEIGHT );
+    inside = [
+        sizes[0] + DECK_BOX_SPACING,
+        sizes[2] * quantity + DECK_BOX_SPACING,
+        layer_height( sizes[1] + DECK_BOX_SPACING )
+    ];
     
-    lip_z = box_z + DECK_BOK_OVERLAP;
+    box = inside + [ 2 * wall, 2 * wall, bottom - layer_height( sizes[1]*0.25 ) ];
 
     if (VERBOSE) {
-        echo( DeckBoxInside=[ inside_x, inside_y, inside_z ], DeckBoxOutside=[ box_x+wall, box_y+wall, box_z ] );
+        echo( ThinDeckBox=sizes, Quantity=quantity, Thickness=wall, Inside=inside, Box=box );
     }
 
-    translate( [ -wall-GAP, -wall-GAP, -bottom ] ) difference() {
-        union() {
-            minkowski() {
-                cube( [ box_x, box_y, box_z ] );
-                cylinder( r=wall, h=OVERLAP );
-            }
-            translate( [ GAP, GAP, bottom-OVERLAP ] )
-                cube( [ lip_x, lip_y, lip_z+OVERLAP ] );
-        }
-        
-        translate( [GAP+wall, GAP+wall, bottom] )
-            cube( [ inside_x, inside_y, inside_z+OVERLAP ] );
-    }    
-}
-
-module deck_lid( sizes, quantity, wall ) {
-    bottom = 1.00 * mm;
-    top    = 1.00 * mm;
-
-    inside_x = sizes[0] + DECK_BOX_SPACING;
-    inside_y = sizes[2] * quantity + DECK_BOX_SPACING;
-    inside_z = sizes[1] + DECK_BOX_SPACING;
-
-    lip_x = inside_x + 2 * wall;
-    lip_y = inside_y + 2 * wall;
-
-    box_x = lip_x + 2 * GAP;
-    box_y = lip_y + 2 * GAP;
-    box_z = round_up( inside_z/2, LAYER_HEIGHT );
-    
-    lip_z = box_z;
-    lip_r = NOTCH;
-
-    if (VERBOSE) {
-        echo( DeckLidInside=[ inside_x, inside_y, inside_z ], DeckLidOutside=[ box_x+wall, box_y+wall, lip_z ] );
+    translate( [-wall, -wall, -bottom ] ) difference() {
+        cube( box );
+        translate( [ wall, wall, bottom ] ) 
+            cube( inside );
     }
-
-    translate( [ -wall-GAP, -wall-GAP, -bottom ] ) difference() {
-        // Outside of lid
-        minkowski() {
-            cube( [ box_x, box_y, lip_z ] );
-            cylinder( r=wall, h=OVERLAP );
-        }
-
-        // Remove inside of lid
-        translate( [ wall+GAP, wall+GAP, top ] )
-            cube( [ inside_x, inside_y, inside_z ] );
-
-        translate( [ 0, 0, lip_z-DECK_BOK_OVERLAP ] ) 
-            cube( [ lip_x, lip_y, box_z+OVERLAP ] );
-
-        // Remove notches to make it easier to remove the lid
-        translate( [-2*wall,lip_y/2+wall/2,lip_r-0+lip_z-2*wall] )
-            rotate( [0,90,0] )
-                cylinder( r=NOTCH, h=lip_x+4*wall );
-    }
-}
-
-module thin_deck_box( sizes, quantity, wall ) {
-    bottom = 0.6 * mm;
-
-    inside_x = sizes[0] + DECK_BOX_SPACING;
-    inside_y = sizes[2] * quantity + DECK_BOX_SPACING;
-    inside_z = sizes[1] + DECK_BOX_SPACING;
-    
-    box_x = inside_x + 2 * wall;
-    box_y = inside_y + 2 * wall;
-    box_z = inside_z + bottom - 20 * mm;
-    
-    translate( [-wall, -wall, -bottom ] ) 
-        difference() {
-            cube( [ box_x, box_y, box_z ] );
-            translate( [ wall, wall, bottom ] ) 
-                cube( [ inside_x, inside_y, inside_z ] );
-        }
 }
 
 // ----- Testing ---------------------------------------------------------------
@@ -452,7 +409,11 @@ if (0) {
 //    translate( [50, 0, 0] ) rounded_lid( [40, 40, 15] );
 
     translate( [ 5, 5, 0] ) cell_box( cell_test, 20, HOLLOW, true );
-    translate( [-5, 5, 0] ) cell_lid( cell_test, 20, HOLLOW, true );
+    translate( [-5, 5, 0] ) cell_lid( cell_test, 20, HOLLOW, true, true );
 }
 /*
 */
+
+if (0) {
+    deck_box( [1.5*inch, 2.5*inch, 0.5 ], 20 );
+}

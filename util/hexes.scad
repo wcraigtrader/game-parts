@@ -17,7 +17,7 @@ assert( version_num() > 20190000, "********** Will NOT work with this version of
 // ----- Physical Measurements ----------------------------------------------------------------------------------------
 
 HEX_SPACING = WALL_WIDTH[4];    // aka 1.67mm
-WALL_BEG = 0.15;
+WALL_BEG = 0.20;
 WALL_END = 1 - WALL_BEG;
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
