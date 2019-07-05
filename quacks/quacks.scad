@@ -23,6 +23,7 @@ WELL = [ 10.5*inch, 3.5*inch, 2*inch ];     // Inside measurement of component w
 
 // Box dimensions
 QUACKS = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[3], WALL_WIDTH[2], 5*mm, 20*mm, 2*mm ];
+CARDS  = [56.25, 87.5, 0.30 ];
 
 // ----- Calculated Measurements --------------------------------------------------------------------------------------
 
@@ -98,7 +99,11 @@ if (PART == "chip-lid") {
     mini_box();
 } else if (PART == "mini-lid") {
     mini_lid();
+} else if (PART == "card-sleeve") {
+    deck_box( CARDS, 24 );
 } else {
+    deck_box( CARDS, 24 );
+    /*
     translate( [  5, -51, 0] ) mini_box();
     translate( [ -5, -51, 0] ) mini_lid();
 
@@ -107,5 +112,6 @@ if (PART == "chip-lid") {
 
     translate( [  5,  99, 0] ) chip_box();
     translate( [ -5,  99, 0] ) chip_lid();
+    */
 }
 
