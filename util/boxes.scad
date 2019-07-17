@@ -44,9 +44,10 @@ OUTER  = 2;     // Outer box walls thickness
 INNER  = 3;     // Inside partition walls thickness
 FILLET = 4;     // Size of inside fillet
 BUMPS  = 5;     // Minimum spacing between bumps
-STUBS  = 6;
+STUBS  = 6;     // Height of lid stubs that overlap cell walls
 
 REASONABLE = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[3], WALL_WIDTH[2], 1*mm, 20*mm, 2*mm ];
+STURDY     = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[4], WALL_WIDTH[3], 1*mm, 20*mm, 2*mm ];
 
 HORIZONTAL = [ 1, 1, 0 ];
 VERTICAL   = [ 0, 0, 1 ];
@@ -86,7 +87,7 @@ module hemisphere( r=0, d=0 ) {
  * d = diameter of hemisphere
  */
 module dit( r=0, d=0 ) {
-    s = (r == 0) ? d/2 : r;
+    s = (r == 0) ? d/2 : r; // dit size
     
     points = [ [0,0,s], [s,0,0], [0,s,0], [-s,0,0], [0,-s,0], [0,0,-s] ];
     triangles = [ [0,2,1], [0,3,2], [0,4,3], [0,1,4], [5,1,2], [5,2,3], [5,3,4], [5,4,1] ];
@@ -160,6 +161,7 @@ module rounded_box( size, type=HOLLOW, borders=REASONABLE ) {
  * size    -- vector of sizes (X, Y, Z)
  * borders -- vector of physical characteristics (see REASONABLE)
  */
+
 module rounded_lid( size, borders=REASONABLE ) {
     outer1 = borders[OUTER];
     outer2 = borders[OUTER] + GAP;
@@ -201,6 +203,82 @@ module rounded_lid( size, borders=REASONABLE ) {
         }
         
         translate( [-outer2-outer1-OVERLAP,size.y/2,nz] ) rotate( [0,90,0] ) cylinder( r=NOTCH, h=outsize.x+2*OVERLAP );
+    }
+}
+
+/** overlap_box -- Create an empty box with rounded corners lid that can contain the box
+ * 
+ * size    -- vector of sizes (X, Y, Z)
+ * type    -- SOLID, HOLLOW, ROUNDED
+ * borders -- vector of physical characteristics (see REASONABLE)
+ */
+ 
+module overlap_box( size, type=HOLLOW, borders=REASONABLE ) {
+    outer  = borders[OUTER];
+    bottom = borders[BOTTOM];
+    fillet = borders[FILLET];
+    
+    midsize =    size + [ 2*outer, 2*outer, 0 ];
+    gapsize = midsize + [ 2*GAP, 2*GAP, 0 ];
+    outsize = gapsize + [ 2*outer, 2*outer, 0 ];
+    
+    if (VERBOSE) {
+        echo ( OverlapBox_InSize=size, MidSize=midsize, GapSize=gapsize, OutSize=outsize );
+    }
+    
+    difference() {
+        // Inner wall (full height)
+        minkowski() {
+            cube( size );
+            scale( [outer, outer, bottom] ) hemisphere( r=1 );
+        }
+
+        // Remove inside, if necessary
+        if (type == ROUNDED) {
+            translate( [fillet, fillet, fillet] ) minkowski() {
+                cube( size - [2*fillet, 2*fillet, 0] );
+                hemisphere( fillet );
+            }
+        } else if (type == HOLLOW) {
+            cube( size + [0, 0, 2*OVERLAP] );
+        }
+    }
+}
+
+/** overlap_lid -- Create a lid that can contain its box
+ * 
+ * size    -- vector of sizes (X, Y, Z)
+ * borders -- vector of physical characteristics (see REASONABLE)
+ */
+ 
+module overlap_lid( size, borders=REASONABLE ) {
+    outer = borders[OUTER];
+    top   = borders[TOP];
+    
+    midsize =    size + [ 2*outer, 2*outer, 0 ];
+    gapsize = midsize + [ 2*GAP, 2*GAP, 0 ];
+    outsize = gapsize + [ 2*outer, 2*outer, 0 ];
+
+    nz = (size.z > NOTCH*1.5) ? size.z : (size.z < NOTCH/2 ? NOTCH : NOTCH/2 + size.z);
+
+    
+    if (VERBOSE) {
+        echo ( OverlapBox_InSize=size, MidSize=midsize, GapSize=gapsize, OutSize=outsize, NotchZ=nz );
+    }
+    
+    difference() {
+        // Inner wall (full height)
+        translate( [0, 0, 0] ) minkowski() {
+            cube( gapsize );
+            scale( [outer, outer, top] ) hemisphere( r=1 );
+        }
+
+        // Remove inside
+        cube( gapsize + [0, 0, 2*OVERLAP] );
+        
+        // Remove notch
+        translate( [(gapsize.x-outsize.x)/2-OVERLAP, gapsize.y/2, nz] ) 
+            rotate( [0,90,0] ) cylinder( r=NOTCH, h=outsize.x+2*OVERLAP );
     }
 }
 
@@ -408,8 +486,13 @@ if (0) {
 //    translate( [ 0, 0, 0] ) rounded_box( [40, 40, 15], ROUNDED );
 //    translate( [50, 0, 0] ) rounded_lid( [40, 40, 15] );
 
-    translate( [ 5, 5, 0] ) cell_box( cell_test, 20, HOLLOW, true );
-    translate( [-5, 5, 0] ) cell_lid( cell_test, 20, HOLLOW, true, true );
+//    translate( [ 5, 5, 0] ) cell_box( cell_test, 20, HOLLOW, true );
+//    translate( [-5, 5, 0] ) cell_lid( cell_test, 20, HOLLOW, true, true );
+    
+    o = REASONABLE[ OUTER ] + GAP;
+    
+    translate( [    5,   5, 0] ) overlap_box( [40, 20, 10] );
+    translate( [ -5+o, 5-o, 0] ) mirror( [1,0,0] ) overlap_lid( [40, 20, 10] );
 }
 /*
 */
