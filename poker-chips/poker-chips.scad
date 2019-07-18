@@ -26,10 +26,11 @@ CHIPS     = 2;      // Chips per Row
 ROWS      = 3;      // Rows per Rack
 GROUPS    = 4;      // Breaks per Row
 
-ECLIPSE      = [ 3.30 * mm, 40.10 * mm,   25, 4, 1 ];
-CUSTOM       = [ 3.35 * mm, 40.00 * mm,   25, 5, 1 ];
-STANDARD_14G = [ 3.40 * mm, 41.00 * mm,   25, 4, 1 ];
-MINI         = [ 2.60 * mm,   7/8 * inch, 50, 5, 5 ];
+ECLIPSE      = [ 3.30 * mm, 40.10 * mm,   25, 4, 0 ];
+CUSTOM       = [ 3.35 * mm, 40.00 * mm,   25, 5, 0 ];
+STANDARD_14G = [ 3.40 * mm, 41.00 * mm,   25, 4, 0 ];
+MINI_250     = [ 2.60 * mm,   7/8 * inch, 50, 5, 5 ];
+MINI_300     = [ 2.60 * mm,   7/8 * inch, 50, 6, 5 ];
 TEST         = [ 2.60 * mm,   7/8 * inch, 20, 2, 2 ];
 
 CHIPCASE_200 = [ 3.40*mm, 41.00*mm, 20, 2 ];
@@ -68,106 +69,6 @@ function lip( diameter )     = layer_height(1/2 * diameter);
 
 // ----- Components -----------------------------------------------------------
 
-module chip_tray( parameters, borders=STURDY ) {
-    thickness = parameters[THICKNESS];
-    diameter  = parameters[DIAMETER];
-    chips     = parameters[CHIPS];
-    rows      = parameters[ROWS];
-    
-    inner_x = rows * diameter + (rows-1) * SPACING;
-    inner_y = chips * thickness + 2/3 * thickness;
-    inner_z = layer_height( diameter * 3/4 );
-    
-    outer_x = inner_x + 2*INNER;
-    outer_y = inner_y + 2*INNER;
-    outer_z = inner_z + BOTTOM;
-    
-    div_z = divider( diameter );
-    lip_z = lip( diameter );
-    cut_r = cutout( diameter/2 );
-    cut_z = lip_z + cut_r;
-    
-    if (VERBOSE) {
-        echo (TrayParameters=parameters);
-        echo (TrayInnerX=inner_x, TrayInnerY=inner_y, TrayInnerZ=inner_z);
-        echo (TrayOuterX=outer_x, TrayOuterY=outer_y, TrayOuterZ=outer_z);
-        echo (TrayBorderX=outer_x+2*OUTER, TrayBorderY=outer_y+2*OUTER);
-        echo (DividerHeight=div_z, LipHeight=lip_z, CutHeight=cut_z, CutRadius=cut_r);
-    }
-    
-    difference() {
-        // Outside of box
-        union() {
-            minkowski() {
-                cube( [outer_x, outer_y, lip_z] );
-                hemisphere( r=OUTER );
-            }
-            cube( [ outer_x, outer_y, outer_z] );
-        }
-        
-        // Remove all space above dividers
-        translate( [ INNER, INNER, BOTTOM+div_z ] ) cube ( [ inner_x, inner_y, inner_z+OVERLAP ] );
-        
-        // For each row
-        for (row=[0:rows-1]) {
-            sx = row * (diameter+SPACING) + INNER;
-            tx = sx + (diameter+SPACING) / 2;
-            
-            // Remove space for chips below dividers
-            translate( [ sx, INNER, BOTTOM ] ) cube( [ diameter, inner_y, inner_z+ OVERLAP ] );
-            
-            // Remove thumb holes for chips
-            translate( [ tx, outer_y/2-OVERLAP, cut_z ] ) rotate( [90, 0, 0] ) cylinder( h=outer_y+4*OVERLAP, r=cut_r, center=true );
-        }
-    }
-}
-
-
-module chip_lid( parameters ) {
-    thickness = parameters[THICKNESS];
-    diameter  = parameters[DIAMETER];
-    chips     = parameters[CHIPS];
-    rows      = parameters[ROWS];
-    
-    lip_z = lip( diameter / 2 );
-    
-    inner_x = rows * diameter + (rows-1) * SPACING;
-    inner_y = chips * thickness + 2/3 * thickness;
-    inner_z = layer_height( diameter * 1/4 + SPACING);
-    
-    outer_x = inner_x + 2*INNER;
-    outer_y = inner_y + 2*INNER;
-    outer_z = inner_z + lip_z + BOTTOM; //  inner_z + BOTTOM;
-    
-    cut_r = cutout( diameter/2 );
-    cut_z = outer_z - inner_z + cut_r;
-
-    if (VERBOSE) {
-        echo (LidParameters=parameters);
-        echo (LidInnerX=inner_x, LidInnerY=inner_y, LidInnerZ=inner_z);
-        echo (LidOuterX=outer_x, LidOuterY=outer_y, LidOuterZ=outer_z);
-        echo (LidBorderX=outer_x+2*OUTER, LidBorderY=outer_y+2*OUTER);
-        echo (LipHeight=lip_z, CutHeight=cut_z, CutRadius=cut_r);
-    }
-    
-    difference() {
-        // Outside of box
-        minkowski() {
-            cube( [outer_x, outer_y, outer_z] );
-            hemisphere( r=OUTER );
-        }
-        
-        // Remove all space above lip
-        translate( [0, 0, outer_z-inner_z] ) cube( [outer_x, outer_y, outer_z] );
-        
-        // Remove inner space
-        translate( [INNER, INNER, BOTTOM] ) cube( [inner_x, inner_y, outer_z] );
-        
-        // Remove thumb holes
-        translate( [ outer_x/2-OVERLAP, outer_y/2-OVERLAP, cut_z ] ) rotate( [0, 90, 0] ) cylinder( h=outer_x+2*OUTER+4*OVERLAP, r=cut_r, center=true );
-    }
-}
-
 /** rack_box -- Create a box to hold poker chips
  *
  * parameters -- vector of chip characteristics
@@ -183,14 +84,12 @@ module rack_box( parameters, borders=STURDY ) {
     outer     = borders[ OUTER ];
     inner     = borders[ INNER ];
 
-    group_count = chips/groups;
-    gdy = stack_size( parameters, group_count ) + BREAK_SIZE;
-
     size = rack_size( parameters, borders );
     
     if (VERBOSE) {
-        echo( ChipBox_Size=size, x=rows*(diameter+inner)-inner, y=groups*gdy-BREAK_SIZE );
+        echo( RackBox_Size=size );
     }
+
     union() {
         difference() {
             overlap_box( size, HOLLOW, borders );
@@ -198,36 +97,29 @@ module rack_box( parameters, borders=STURDY ) {
             // Remove thumb holes for chips
             for (row=[0:rows-1]) {
                 tx = row * (diameter+inner) + diameter/2;
-                echo( Row=row, TX=tx, size=cutout(diameter), diameter=diameter );
                 translate( [ tx, size.y/2-OVERLAP, size.z ] ) rotate( [90, 0, 0] ) 
                     cylinder( h=size.y+2*outer+2*OVERLAP, d=cutout(diameter), center=true );
             }
         }
-        
+
         // Add dividers between rows of chips
         for (row=[1:rows-1]) {
             rx = row * (diameter + SPACE_SIZE) - SPACE_SIZE/2 - inner/2;
-            echo( Row=row, RX=rx, size=inner );
             translate( [rx, -OVERLAP, -OVERLAP] ) cube( [inner, size.y+2*OVERLAP, divider( size.z) + OVERLAP ] );
         }
-        
+
         // Add dividers between groups of chips
-        for (group=[1:groups-1]) {
-            gy = group * gdy - BREAK_SIZE;
-            echo( Group=group, GY=gy, size=BREAK_SIZE );
-            translate( [-OVERLAP, gy, -OVERLAP] ) 
-                cube( [size.x+2*OVERLAP, BREAK_SIZE, layer_height( BREAK_SIZE ) + OVERLAP] );
+        if (groups > 0) {
+            group_count = chips/groups;
+            gdy = stack_size( parameters, group_count ) + BREAK_SIZE;
+
+            for (group=[1:groups-1]) {
+                gy = group * gdy - BREAK_SIZE;
+                translate( [-OVERLAP, gy, -OVERLAP] ) 
+                    cube( [size.x+2*OVERLAP, BREAK_SIZE, layer_height( BREAK_SIZE ) + OVERLAP] );
+            }
         }
     }
-
-/*
-        // Remove all space above dividers
-        translate( [0, 0, divider( diameter ) ] ) cube( size ) ;
-
-
-            // Remove space for chips below dividers
-            translate( [ sx, 0, 0 ] ) cube( [ diameter, size.y, size.z + OVERLAP ] );
-*/
 }
 
 /** rack_lid -- Create a lid for a box to hold poker chips
@@ -240,7 +132,7 @@ module rack_lid( parameters, borders=STURDY ) {
     size = rack_size( parameters, borders );
     
     if (VERBOSE) {
-        echo( ChipLid_Size=size );
+        echo( RackLid_Size=size );
     }
     
     overlap_lid( size, borders );
@@ -287,48 +179,28 @@ module spacer2( parameters, spacing ) {
 
 // ----- Render Logic for makefile --------------------------------------------
 
-module place( translation=[0,0,0], angle=0, hue="" ) {
-	for (i = [0 : $children-1]) {
-		translate( translation ) 
-			rotate( a=angle ) 
-				if ( hue != "" ) {
-					color( hue ) children(i);
-				} else {
-					children(i);
-				}
-	}
-}
-
-if (PART == "14g-tray") {
-    chip_tray( STANDARD_14G );
+if (PART == "14g-box") {
+    rack_box( STANDARD_14G );
 } else if (PART == "14g-lid") {
-    chip_lid( STANDARD_14G );
-} else if (PART == "eclipse-tray") {
-    chip_tray( ECLIPSE );
+    rack_lid( STANDARD_14G );
+} else if (PART == "eclipse-box") {
+    rack_box( ECLIPSE );
 } else if (PART == "eclipse-lid") {
-    chip_lid( ECLIPSE );
-} else if (PART == "mini-tray") {
-    rack_box( MINI );
-} else if (PART == "mini-lid") {
-    rack_lid( MINI );
+    rack_lid( ECLIPSE );
+} else if (PART == "mini-250-box") {
+    rack_box( MINI_250 );
+} else if (PART == "mini-250-lid") {
+    rack_lid( MINI_250 );
+} else if (PART == "mini-300-box") {
+    rack_box( MINI_300 );
+} else if (PART == "mini-300-lid") {
+    rack_lid( MINI_300 );
 } else {
-/*
-    place( [5, 5,0] ) rounded_box( [90, 30, 16] );
-    place( [5,45,0] ) rounded_lid( [90, 30, 16] );
-    
-    place( [ 105, 5, 0] ) spacer1( CHIPCASE_200, 1*cm );
-    place( [ 160, 5, 0] ) 
-*/
-    
-    // spacer2( CHIPCASE_300, 1*cm );
-    
-    // place( [0,  0,0] ) chip_tray( CHIPCASE );
-//     place( [0,100,0] ) chip_lid( CHIPCASE );
     
     o = STURDY[ OUTER ] + GAP;
     d = rack_height( TEST, STURDY );
     
     translate( [ 5, 5, 0 ] ) rack_box( TEST );
-    translate( [ o-5, 5-o, 0 ] ) mirror( [1,0,0] ) rack_lid( TEST ); 
-    // # translate( [5-o, 5-o, d ] ) mirror( VERTICAL) rack_lid( TEST );
+    // translate( [ o-5, 5-o, 0 ] ) mirror( [1,0,0] ) rack_lid( TEST ); 
+    # translate( [5-o, 5-o, d ] ) mirror( VERTICAL) rack_lid( TEST );
 }
