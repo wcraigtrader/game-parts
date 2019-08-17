@@ -13,7 +13,14 @@ include <units.scad>;
 
 // ----- 3D Printer -----------------------------------------------------------
 
+// Layer height is the preferred layer height for your printer / slicer.
+
 LAYER_HEIGHT = 0.20 * mm;
+
+// WALL_WIDTH is an array of extrusion widths for a given number of filament lines, starting at zero (0).
+// For my Slicer (PrusaSlicer) I get these from the Print Settings / Layers and perimeters tab.
+// Some extrapolation may be necessary.
+
 WALL_WIDTH   = [ 0.00, 0.45, 0.86, 1.26, 1.67, 2.08, 2.49, 2.89, 3.30 ];
 
 GAP       = WALL_WIDTH[1]/2;    // Gap between outer and inner walls for boxes
