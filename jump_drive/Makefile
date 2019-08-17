@@ -30,32 +30,35 @@
 # png/widget-foo.png png/widget-bar.png png/widget-foo-bar.png
 # gcode/widget-foo.gcode gcode/widget-bar.gcode gcode/widget-foo-bar.gcode
 
+# Name of OpenSCAD model file
+PREFIX=jump-drive
+
+# ----- Local OpenSCAD settings -----------------------------------------------
+
 # OpenSCAD binary and options
 OPENSCAD=/usr/bin/openscad
 OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
-# Slic3r binary and options
-SLIC3R=/opt/Slic3r/latest/slic3r
-SLIC3R_INI=slic3r.ini
-SLIC3R_OPTIONS=--load $(SLIC3R_INI) --print-center 125,105
+# ----- Everything after this should not need modification --------------------
 
-# Name of OpenSCAD model file
-PREFIX=jump-drive
-
-# ----- Everything after this should not need modification
+# Scripts
+EXPAND=../bin/scad-expand.py
+DEPEND=../bin/scad-dependencies.py
 
 # Names of parts to build
 PARTS=$(shell grep 'PART == ' $(PREFIX).scad | cut -d'"' -f2)
+SOURCES=$(shell $(DEPEND) $(PREFIX).scad)
 
 STL=stl
 IMAGE=png
 
 MODELS=$(patsubst %,$(STL)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-%.$(IMAGE),$(PARTS))
-GCODES=$(patsubst %,$(GCODE)/$(PREFIX)-%.$(GCODE),$(PARTS))
+ALLIN1=$(PREFIX)-all.scad
 
-all:	models images
+
+all:	models images $(ALLIN1)
 
 directories:
 	@mkdir -p $(STL) $(IMAGE)
@@ -65,15 +68,22 @@ models: directories $(MODELS)
 images: directories $(IMAGES)
 
 clean:
-	rm -rf $(STL) $(IMAGE)
+	rm -f $(STL)/$(PREFIX)-* $(IMAGE)/$(PREFIX)-* $(ALLIN1)
+
+cleanall:
+	rm -rf $(STL) $(IMAGE) $(ALLIN1)
 
 # Dependencies for models
 
-$(MODELS) : $(STL)/$(PREFIX)-%.$(STL) : $(PREFIX).scad
+$(MODELS) : $(STL)/$(PREFIX)-%.$(STL) : $(SOURCES)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(STL),,$(@F)))\" $<
 
 # Dependencies for images
 
-$(IMAGES) : $(IMAGE)/$(PREFIX)-%.$(IMAGE) : $(PREFIX).scad
+$(IMAGES) : $(IMAGE)/$(PREFIX)-%.$(IMAGE) : $(SOURCES)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(IMAGE),,$(@F)))\" $(IMAGE_OPTIONS) $<
+
+# Dependencies for all-in-1
+$(ALLIN1) : $(SOURCES)
+	$(EXPAND) $(PREFIX).scad $(ALLIN1)
 
