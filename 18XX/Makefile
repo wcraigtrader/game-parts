@@ -46,23 +46,27 @@
 # stl/widget-foo.stl stl/widget-bar.stl stl/widget-foo-bar.stl
 # png/widget-foo.png png/widget-bar.png png/widget-foo-bar.png
 
+# ----- Local OpenSCAD settings -----------------------------------------------
+
 # OpenSCAD binary and options
 OPENSCAD=/opt/openscad
 OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
-
-# Name of OpenSCAD model file
-# PREFIX=unspecified
 
 # ----- Everything after this should not need modification
 
 check_defined = $(strip $(foreach 1,$1, $(call __check_defined,$1,$(strip $(value 2)))))
 __check_defined = $(if $(value $1),, $(error Undefined $1$(if $2, ($2))$(if $(value @), required by target `$@')))
 
+# Scripts
+EXPAND=../bin/scad-expand.py
+DEPEND=../bin/scad-dependencies.py
+
 # Names of parts to build
 PARTS=$(shell grep 'PART == ' $(PREFIX).scad | cut -d'"' -f2)
-UTIL1=$(shell grep 'include' 18XX.scad | tr '<>' '||' | cut -d'|' -f2 | sort | uniq)
-UTIL2=$(shell grep 'include' $(UTIL1) | tr '<>' '||' | cut -d'|' -f2 | sort | uniq)
+SOURCES=$(shell $(DEPEND) $(PREFIX).scad)
+#UTIL1=$(shell grep 'include' 18XX.scad | tr '<>' '||' | cut -d'|' -f2 | sort | uniq)
+#UTIL2=$(shell grep 'include' $(UTIL1) | tr '<>' '||' | cut -d'|' -f2 | sort | uniq)
 
 BOM=bom
 STL=stl
@@ -71,7 +75,7 @@ IMAGE=png
 BOMS=$(BOM)/$(PREFIX)-bom.md
 MODELS=$(patsubst %,$(STL)/$(PREFIX)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE),$(PARTS))
-COMMON=18XX.scad util/hexes.scad util/boxes.scad util/printers.scad util/units.scad
+#COMMON=18XX.scad util/hexes.scad util/boxes.scad util/printers.scad util/units.scad
 
 # Name of all model prefixes
 PREFIXES=$(shell ls *.scad | egrep -v 18XX | sed "s/.scad//" | tr "\n" " ")
@@ -123,13 +127,13 @@ $(BOM)/$(PREFIX)-$(BOM).md : $(PREFIX).scad
 
 # Dependencies for models
 
-$(MODELS) : $(STL)/$(PREFIX)/$(PREFIX)-%.$(STL) : $(PREFIX).scad $(COMMON)
+$(MODELS) : $(STL)/$(PREFIX)/$(PREFIX)-%.$(STL) : $(SOURCES)
 	@:$(call check_defined, PREFIX, game prefix)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(STL),,$(@F)))\" $<
 
 # Dependencies for images
 
-$(IMAGES) : $(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE) : $(PREFIX).scad $(COMMON)
+$(IMAGES) : $(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE) : $(SOURCES)
 	@:$(call check_defined, PREFIX, game prefix)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(IMAGE),,$(@F)))\" $(IMAGE_OPTIONS) $<
 

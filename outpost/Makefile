@@ -1,4 +1,4 @@
-OPENSCAD=/usr/bin/openscad
+OPENSCAD=/opt/openscad
 OPENSCAD_OPTIONS=-DVERBOSE=0
 
 SLIC3R=/opt/Slic3r/Slic3r-1.36.2-prusa3d-linux64-full-201707281217/slic3r

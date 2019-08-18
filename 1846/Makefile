@@ -34,7 +34,7 @@ PREFIX=1846
 # ----- Local OpenSCAD settings -----------------------------------------------
 
 # OpenSCAD binary and options
-OPENSCAD=/usr/bin/openscad
+OPENSCAD=/opt/openscad
 OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 

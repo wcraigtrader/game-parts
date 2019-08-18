@@ -9,9 +9,8 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-include <util/units.scad>;
-include <util/boxes.scad>;
-include <util/hexes.scad>;
+include <../util/boxes.scad>;
+include <../util/hexes.scad>;
 
 // ----- Physical dimensions ------------------------------------------------------------------------------------------
 
