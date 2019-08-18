@@ -1,6 +1,3 @@
-# 18XX: Organizing trays for tiles and other components
-# by W. Craig Trader
-#
 # --------------------------------------------------------------------------------------------------------------------
 #
 # This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
@@ -8,19 +5,6 @@
 # or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 #
 # --------------------------------------------------------------------------------------------------------------------
-#
-# Override PREFIX on the command line to select the parts to produce.
-#
-#     make all PREFIX=1846
-#     make all PREFIX=steam
-#
-# To list all available prefixes:
-#
-#     make list
-#
-# To build all for every model:
-#
-#     make everything
 #
 # This makefile expects an OpenSCAD file named $(PREFIX).scad that defines
 # the following variables:
@@ -53,7 +37,7 @@ OPENSCAD=/opt/openscad
 OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
-# ----- Everything after this should not need modification
+# ----- Everything after this should not need modification --------------------
 
 check_defined = $(strip $(foreach 1,$1, $(call __check_defined,$1,$(strip $(value 2)))))
 __check_defined = $(if $(value $1),, $(error Undefined $1$(if $2, ($2))$(if $(value @), required by target `$@')))
@@ -66,71 +50,41 @@ DEPEND=../bin/scad-dependencies.py
 PARTS=$(shell grep 'PART == ' $(PREFIX).scad | cut -d'"' -f2)
 SOURCES=$(shell $(DEPEND) $(PREFIX).scad)
 
-BOM=bom
 STL=stl
 IMAGE=png
 
-BOMS=$(BOM)/$(PREFIX)-bom.md
-MODELS=$(patsubst %,$(STL)/$(PREFIX)/$(PREFIX)-%.$(STL),$(PARTS))
-IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE),$(PARTS))
-
-# Name of all model prefixes
-PREFIXES=$(shell ls *.scad | egrep -v 18XX | sed "s/.scad//" | tr "\n" " ")
+MODELS=$(patsubst %,$(STL)/$(PREFIX)-%.$(STL),$(PARTS))
+IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)-%.$(IMAGE),$(PARTS))
+ALLIN1=$(PREFIX)-all.scad
 
 
-all:	models images boms
-
-everything:
-	@for prefix in $(PREFIXES) ; do \
-		$(MAKE) PREFIX=$${prefix} all ; \
-	done
-
-all-boms:
-	@for prefix in $(PREFIXES) ; do \
-		$(MAKE) PREFIX=$${prefix} boms ; \
-	done
-
-list:
-	@fgrep -l "include <18XX.scad>" *.scad | sed "s/.scad//" | \
-		while read prefix ; do \
-			description=$$(head -1 $${prefix}.scad | sed "s;// ;;") ; \
-			printf "%10s => %s\n" $$prefix "$$description" ; \
-		done
+all:	models images $(ALLIN1)
 
 directories:
 @:$(call check_defined, PREFIX, game prefix)
-	@mkdir -p $(STL)/$(PREFIX) $(IMAGE)/$(PREFIX) $(BOM)
+	@mkdir -p $(STL) $(IMAGE)
 
 models: directories $(MODELS)
 
 images: directories $(IMAGES)
 
-boms:   directories $(BOMS)
-
 clean:
-	@:$(call check_defined, PREFIX, game prefix)
-	rm $(STL)/$(PREFIX)/$(PREFIX)-* $(IMAGE)/$(PREFIX)/$(PREFIX)-* $(BOM)/$(PREFIX)-bom.md
+	rm -f $(STL)/$(PREFIX)-* $(IMAGE)/$(PREFIX)-* $(ALLIN1)
 
 cleanall:
-	rm -rf $(STL) $(IMAGE) $(BOM)
-
-# Dependencies for BOM
-$(BOM)/$(PREFIX)-$(BOM).md : $(PREFIX).scad
-	@:$(call check_defined, PREFIX, game prefix)
-	@/bin/echo "Creating BOM for $(PREFIX)"
-	@/bin/echo "| Model | Qty | Description |" > $@
-	@/bin/echo "| ----- | --- | ----------- |" >> $@
-	@fgrep '// bom:' $(PREFIX).scad | tr -s '":()/' '|||||' | cut -d '|' -f3,6,7 | sed 's/|/.stl |/;s/^/| $(PREFIX)-/;s/$$/|/' >> $@
+	rm -rf $(STL) $(IMAGE) $(ALLIN1)
 
 # Dependencies for models
 
-$(MODELS) : $(STL)/$(PREFIX)/$(PREFIX)-%.$(STL) : $(SOURCES)
-	@:$(call check_defined, PREFIX, game prefix)
+$(MODELS) : $(STL)/$(PREFIX)-%.$(STL) : $(SOURCES)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(STL),,$(@F)))\" $<
 
 # Dependencies for images
 
-$(IMAGES) : $(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE) : $(SOURCES)
-	@:$(call check_defined, PREFIX, game prefix)
+$(IMAGES) : $(IMAGE)/$(PREFIX)-%.$(IMAGE) : $(SOURCES)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(IMAGE),,$(@F)))\" $(IMAGE_OPTIONS) $<
+
+# Dependencies for all-in-1
+$(ALLIN1) : $(SOURCES)
+	$(EXPAND) $(PREFIX).scad $(ALLIN1)
 
