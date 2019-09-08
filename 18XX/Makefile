@@ -98,7 +98,7 @@ list:
 		done
 
 directories:
-@:$(call check_defined, PREFIX, game prefix)
+	@:$(call check_defined, PREFIX, game prefix)
 	@mkdir -p $(STL)/$(PREFIX) $(IMAGE)/$(PREFIX) $(BOM)
 
 models: directories $(MODELS)
