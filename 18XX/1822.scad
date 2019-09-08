@@ -9,11 +9,11 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-include <util/units.scad>;
-
 // Command Line Arguments
 PART = "other";         // Which part to output
 VERBOSE = 1;        	// Set to non-zero to see more data
+
+include <18XX.scad>;
 
 // Game box dimensions
 BOX_WIDTH       = 11.500 * inch;    // (X)
@@ -26,9 +26,6 @@ ALT_HEIGHT      = 7.000 * inch;
 // Tile dimensions
 TILE_DIAMETER   = 25.00 * mm;
 TILE_THICKNESS  =  0.65 * mm;
-POKE_HOLE       = 18.00 * mm;    // Diameter of poke holes in bottom
-
-include <18XX.scad>;
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
 

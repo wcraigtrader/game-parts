@@ -53,16 +53,16 @@ CARD_SIZES      = [ CARD_HEIGHT, CARD_WIDTH, CARD_THICKNESS ];
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
 function tile_height( count ) = count * TILE_THICKNESS;
-function half_box_size( count ) = [BOX_WIDTH, 5.5*inch, layer_height( count*TILE_THICKNESS ) ];
+function half_box_size( count ) = [0, 0, layer_height( count*TILE_THICKNESS ) ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=5 ) {
-    hex_box_2( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, [ "V2", "1846" ] );
+    hex_box_corners( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, [ "V2", "1846" ] );
 }
 
 module tile_lid( count=5 ) {
-    hex_lid_2(  hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, false, true );
+    hex_lid_corners(  hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, false, true );
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------

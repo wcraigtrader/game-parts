@@ -9,8 +9,6 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-assert( version_num() > 20190000, "********** Will NOT work with this version of OpenSCAD **********" );
-
 // Command Line Arguments
 PART = "other";         // Which part to output
 VERBOSE = true;        	// Set to non-zero to see more data
