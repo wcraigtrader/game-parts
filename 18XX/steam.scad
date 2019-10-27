@@ -45,11 +45,11 @@ function tray_size( count ) = [TRAY_LENGTH, TRAY_WIDTH, layer_height( count*TILE
 // ----- Modules ---------------------------------------------------------------
 
 module tile_box( count=6 ) {
-    hex_box_2( hex_tile_even_rows( 4, 5 ), tray_size( count ), TILE_DIAMETER, [ "V2", "STEAM" ] );
+    hex_box_walls( hex_tile_even_rows( 4, 5 ), tray_size( count ), TILE_DIAMETER, [ "V2", "STEAM" ] );
 }
 
 module tile_lid( count=6 ) {
-    hex_lid_2( hex_tile_even_rows( 4, 5 ), tray_size( count ), TILE_DIAMETER, true, true );
+    hex_lid_walls( hex_tile_even_rows( 4, 5 ), tray_size( count ), TILE_DIAMETER, true, true );
 }
 
 // ----- Rendering -------------------------------------------------------------

@@ -176,7 +176,7 @@ module hex_lid_corners( layout, size, hex, add_stubs=false, remove_holes=true, d
 }
 
 
-/* hex_box_2( layout, size, hex, labels, dimensions )
+/* hex_box_walls( layout, size, hex, labels, dimensions )
  *
  * Create a tray to hold hexagonal tiles
  *
@@ -190,7 +190,7 @@ module hex_lid_corners( layout, size, hex, add_stubs=false, remove_holes=true, d
  * size.y     -- (Y) Outside width of box (if zero, use optimum)
  * size.z     -- (Z) Inside height of box
  */
-module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
+module hex_box_walls( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     bottom = dimensions[BOTTOM];
     outer  = dimensions[OUTER];
 
@@ -238,7 +238,7 @@ module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     }
 }
 
-/* hex_lid_2( width, depth, height, outer, inner, remove_corners, add_stubs )
+/* hex_lid_walls( width, depth, height, outer, inner, remove_corners, add_stubs )
  *
  * Create a lid for a hexagon tile tray
  *
@@ -254,7 +254,7 @@ module hex_box_2( layout, size, hex, labels=[], dimensions=REASONABLE ) {
  * size.y         -- (Y) Outside width of box (if zero, use optimum)
  * size.z         -- (Z) Inside height of box
  */
-module hex_lid_2( layout, size, hex, add_stubs=false, remove_holes=true, dimensions=REASONABLE ) {
+module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dimensions=REASONABLE ) {
     top = dimensions[TOP];
     outer = dimensions[OUTER];
 
@@ -554,6 +554,6 @@ if (0) {
 if (1) {
     box_size = [0,0,5];
     
-    translate( [5, 5, 0] ) hex_box_2( hex_tile_even_rows( 2,2 ), box_size, 43, ["ONE"] );
-    translate( [5,-5, 0] ) hex_lid_2( hex_tile_even_rows( 2,2 ), box_size, 43, true );
+    translate( [5, 5, 0] ) hex_box_walls( hex_tile_even_rows( 2,2 ), box_size, 43, ["ONE"] );
+    translate( [5,-5, 0] ) hex_lid_walls( hex_tile_even_rows( 2,2 ), box_size, 43, true );
 }

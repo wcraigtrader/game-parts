@@ -39,27 +39,27 @@ function box_size_3( count ) = [8*inch, 4*inch, tile_height( count ) ];
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box_1( count=8 ) {
-    hex_box_2( hex_tile_uneven_rows( 6, 9 ), box_size_1( count ), TILE_DIAMETER, [ "V1", "1822", ] );
+    hex_box_walls( hex_tile_uneven_rows( 6, 9 ), box_size_1( count ), TILE_DIAMETER, [ "V1", "1822", ] );
 }
 
 module tile_lid_1( count=8, holes=true ) {
-    hex_lid_2( hex_tile_uneven_rows( 6, 9 ), box_size_1( count ), TILE_DIAMETER, true, holes );
+    hex_lid_walls( hex_tile_uneven_rows( 6, 9 ), box_size_1( count ), TILE_DIAMETER, true, holes );
 }
 
 module tile_box_2( count=8 ) {
-    hex_box_2( hex_tile_even_rows( 8, 7 ), box_size_2( count ), TILE_DIAMETER, [ "V2", "1822", ] );
+    hex_box_walls( hex_tile_even_rows( 8, 7 ), box_size_2( count ), TILE_DIAMETER, [ "V2", "1822", ] );
 }
 
 module tile_lid_2( count=8, holes=true ) {
-    hex_lid_2( hex_tile_even_rows( 8, 7 ),  box_size_2( count ), TILE_DIAMETER, true, holes );
+    hex_lid_walls( hex_tile_even_rows( 8, 7 ),  box_size_2( count ), TILE_DIAMETER, true, holes );
 }
 
 module tile_box_3( count=8 ) {
-    hex_box_2(hex_tile_even_rows( 4, 7 ), box_size_3( count ), TILE_DIAMETER, [ "V3", "1822", ] );
+    hex_box_walls(hex_tile_even_rows( 4, 7 ), box_size_3( count ), TILE_DIAMETER, [ "V3", "1822", ] );
 }
 
 module tile_lid_3( count=8, holes=true ) {
-    hex_lid_2( hex_tile_even_rows( 4, 7 ), box_size_3( count ), TILE_DIAMETER, true, holes );
+    hex_lid_walls( hex_tile_even_rows( 4, 7 ), box_size_3( count ), TILE_DIAMETER, true, holes );
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------

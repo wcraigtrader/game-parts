@@ -46,11 +46,11 @@ function minimum_size( count ) = [0, 0, layer_height( count*TILE_THICKNESS ) ];
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=4 ) {
-    hex_box_2( hex_tile_even_rows( 3, 4 ), minimum_size( count ), TILE_DIAMETER, [ "V1", "LO 1830" ] );
+    hex_box_walls( hex_tile_even_rows( 3, 4 ), minimum_size( count ), TILE_DIAMETER, [ "V1", "LO 1830" ] );
 }
 
 module tile_lid( count=4, holes=true ) {
-    hex_lid_2( hex_tile_even_rows( 3, 4 ), minimum_size( count ), TILE_DIAMETER, false,  holes );
+    hex_lid_walls( hex_tile_even_rows( 3, 4 ), minimum_size( count ), TILE_DIAMETER, false,  holes );
 }
 
 module token_box() {

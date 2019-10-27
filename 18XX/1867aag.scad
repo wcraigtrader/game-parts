@@ -88,19 +88,19 @@ function alt_box_size( count ) = [ALT_WIDTH, ALT_HEIGHT, layer_height( count*TIL
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=5 ) {
-    hex_box_2( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, [ "1867", "V3" ] );
+    hex_box_walls( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, [ "1867", "V3" ] );
 }
 
 module tile_lid( count=5, holes=true ) {
-    hex_lid_2( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, true,  holes );
+    hex_lid_walls( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, true,  holes );
 }
 
 module alt_tile_box( count=5 ) {
-    hex_box_2( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, ["1867", "V4"] );
+    hex_box_walls( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, ["1867", "V4"] );
 }
 
 module alt_tile_lid( count=5, holes=true ) {
-    hex_lid_2( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, true, holes );
+    hex_lid_walls( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, true, holes );
 }
 
 module token_box() {
