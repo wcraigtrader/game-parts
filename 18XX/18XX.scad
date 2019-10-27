@@ -64,14 +64,12 @@ module hex_box_corners( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     minimum = layout_size( layout, hexed );
     optimum = minimum + walls + PADDING;
 
-    config = hex_config( hexed );
-
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
 
     if (VERBOSE) {
-        echo( HexBoxCorners_Size=size, InSize=inside, Minimum=minimum, Border=border, Config=config );
+        echo( HexBoxCorners_Size=size, InSize=inside, Minimum=minimum, Border=border );
     }
 
     difference() {
@@ -127,13 +125,11 @@ module hex_lid_corners( layout, size, hex, add_stubs=false, remove_holes=true, d
     minimum = layout_size( layout, hexed );
     optimum = minimum + walls + PADDING;
 
-    config = hex_config( hexed );
-
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
     if (VERBOSE) {
-        echo( HexBox1_Size=size, InSize=inside, Border=border, Config=config );
+        echo( HexLidCorners_Size=size, InSize=inside, Border=border );
     }
 
     // Mirrored so that the lid match its box
@@ -200,11 +196,8 @@ module hex_box_walls( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
-    config = hex_config( hexed );
-
     if (VERBOSE) {
-        echo( HexBox1_Size=size, InSize=inside, Border=border, Config=config );
-        echo (HexBox1_Minimum=minimum, Optimum=optimum );
+        echo( HexBoxWalls_Size=size, InSize=inside, Border=border );
     }
 
     difference() {
@@ -264,10 +257,8 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
-    config = hex_config( hexed );
-
     if (VERBOSE) {
-        echo( HexBox1_Size=size, InSize=inside, Border=border, Config=config );
+        echo( HexLidWalls_Size=size, InSize=inside, Border=border );
     }
 
     // Mirrored so that the lid match its box
@@ -549,7 +540,7 @@ if (0) {
     translate( [5,-5, 0] ) hex_lid_corners( hex_tile_even_rows( 2,2 ), box_size, 43, true );
 }
 
-if (1) {
+if (0) {
     box_size = [0,0,5];
     
     translate( [5, 5, 0] ) hex_box_walls( hex_tile_even_rows( 2,2 ), box_size, 43, ["ONE"] );
