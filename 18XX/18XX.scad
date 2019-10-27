@@ -40,8 +40,6 @@ MARKER = 2;     // (Z) Marker diameter
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
-function tile_offset( tile, delta, border, z ) = [ tile.x*delta.x+border.x, tile.y*delta.y+border.y, z ];
-function corner_delta( corner, config ) = [ corner.x*config.x, corner.y*config.y, 0];
 function actual_size( size, optimum ) = [ size.x == 0 ? optimum.x : size.x, size.y == 0 ? optimum.y : size.y, size.z ];
 function uniform_token_cells( rows, cols, tx, ty ) = [ for( r=[0:rows-1] ) [ for( c=[0:cols-1] ) [ tx, ty ] ] ];
 
