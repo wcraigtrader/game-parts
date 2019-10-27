@@ -466,6 +466,34 @@ module deck_box( sizes, quantity, wall=WALL_WIDTH[1] ) {
     }
 }
 
+module thumb_box( sizes, quantity, wall=WALL_WIDTH[1] ) {
+
+    bottom = layers( 3 );
+
+    inside = [
+        sizes[0] + DECK_BOX_SPACING,
+        sizes[2] * quantity + DECK_BOX_SPACING,
+        layer_height( sizes[1] + DECK_BOX_SPACING )
+    ];
+    
+    box = inside + [ 2 * wall, 2 * wall, bottom - DECK_BOX_SPACING ];
+
+    if (VERBOSE) {
+        echo( ThinDeckBox=sizes, Quantity=quantity, Thickness=wall, Inside=inside, Box=box );
+    }
+
+    translate( [-wall, -wall, -bottom ] ) difference() {
+        // Outside of box
+        cube( box );
+        
+        // Inside of box
+        translate( [ wall, wall, bottom ] ) cube( inside );
+        
+        // Thumb holes
+        translate( [box.x/2,box.y+OVERLAP,box.z+NOTCH/4] ) rotate( [90,0,0] ) cylinder( r=NOTCH, h=box.y + 2*OVERLAP );
+    }
+}
+
 // ----- Testing ---------------------------------------------------------------
 
 /*
@@ -498,5 +526,5 @@ if (0) {
 */
 
 if (0) {
-    deck_box( [1.5*inch, 2.5*inch, 0.5 ], 20 );
+    thumb_box( [ 2.03*inch, 3.5*inch, 0.5 ], 25 );
 }
