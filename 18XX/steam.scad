@@ -9,11 +9,11 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-include <util/units.scad>;
-
 // Command Line Arguments
 PART = "other";         // Which part to output
 VERBOSE = 1;        	// Set to non-zero to see more data
+
+include <18XX.scad>;
 
 // Game box dimensions
 BOX_HEIGHT      = 12.125 * inch;
@@ -34,22 +34,20 @@ TOKEN_WIDTH      = 35.0 * mm;   // X
 TOKEN_DEPTH      = 17.5 * mm;   // Y
 TOKEN_HEIGHT     = 6.00 * mm;   // Z
 
-include <18XX.scad>;
-
 // ----- Data ------------------------------------------------------------------
 
 // ----- Functions -------------------------------------------------------------
 
-function tray_size( count ) = [TRAY_LENGTH, TRAY_WIDTH, layer_height( count*TILE_THICKNESS ) + 2*mm ];
+function tray_size( count ) = [TRAY_LENGTH, TRAY_WIDTH, layer_height( count*TILE_THICKNESS ) + STUB ];
 
 // ----- Modules ---------------------------------------------------------------
 
 module tile_box( count=6 ) {
-    hex_box_walls( hex_tile_even_rows( 4, 5 ), tray_size( count ), TILE_DIAMETER, [ "V2", "STEAM" ] );
+    hex_box_corners( hex_tile_even_rows( 4, 5 ), tray_size( count ), TILE_DIAMETER, [ "V3", "STEAM" ] );
 }
 
 module tile_lid( count=6 ) {
-    hex_lid_walls( hex_tile_even_rows( 4, 5 ), tray_size( count ), TILE_DIAMETER, true, true );
+    hex_lid_corners( hex_tile_even_rows( 4, 5 ), tray_size( count ), TILE_DIAMETER, true, true );
 }
 
 // ----- Rendering -------------------------------------------------------------

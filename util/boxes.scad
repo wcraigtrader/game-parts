@@ -9,7 +9,7 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-// VERBOSE=true;
+DEBUG = is_undef( DEBUG ) ? (is_undef( VERBOSE ) ? true : VERBOSE) : DEBUG;
 
 include <units.scad>;
 include <printers.scad>;
@@ -116,7 +116,7 @@ module rounded_box( size, type=HOLLOW, borders=REASONABLE ) {
     lipsize = [gapsize.x, gapsize.y, lip];
     outsize = [lipsize.x+2*outer1, lipsize.y+2*outer1, size.z+bottom];
     
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( RoundedBox_InSize=size, MidSize=midsize, GapSize=gapsize, LipSize=lipsize, OutSize=outsize );
     }
     
@@ -177,7 +177,7 @@ module rounded_lid( size, borders=REASONABLE ) {
     
     nz = (lip > NOTCH*1.5) ? lip : (lip < NOTCH/2 ? NOTCH : NOTCH/2 + lip);
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( RoundedLid_InSize=size, MidSize=midsize, GapSize=gapsize, LipSize=lipsize, OutSize=outsize, NotchZ=nz );
     }
 
@@ -222,7 +222,7 @@ module overlap_box( size, type=HOLLOW, borders=REASONABLE ) {
     gapsize = midsize + [ 2*GAP, 2*GAP, 0 ];
     outsize = gapsize + [ 2*outer, 2*outer, 0 ];
     
-    if (VERBOSE) {
+    if (DEBUG) {
         echo ( OverlapBox_InSize=size, MidSize=midsize, GapSize=gapsize, OutSize=outsize );
     }
     
@@ -262,7 +262,7 @@ module overlap_lid( size, borders=REASONABLE ) {
     nz = (size.z > NOTCH*1.5) ? size.z : (size.z < NOTCH/2 ? NOTCH : NOTCH/2 + size.z);
 
     
-    if (VERBOSE) {
+    if (DEBUG) {
         echo ( OverlapBox_InSize=size, MidSize=midsize, GapSize=gapsize, OutSize=outsize, NotchZ=nz );
     }
     
@@ -315,7 +315,7 @@ module cell_box( cells, height, type=HOLLOW, holes=false, borders=REASONABLE ) {
         height
     ];
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( CellBox_Cells=cells, Height=height, Type=type, Holes=holes, Borders=borders, Inside=inside );
     }
 
@@ -382,7 +382,7 @@ module cell_lid( cells, height, type=HOLLOW, stubs=false, holes=false, borders=R
         height
     ];
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( CellLid_Inside=inside );
     }
 
@@ -455,7 +455,7 @@ module deck_box( sizes, quantity, wall=WALL_WIDTH[1] ) {
     
     box = inside + [ 2 * wall, 2 * wall, bottom - layer_height( sizes[1]*0.25 ) ];
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( ThinDeckBox=sizes, Quantity=quantity, Thickness=wall, Inside=inside, Box=box );
     }
 
@@ -478,7 +478,7 @@ module thumb_box( sizes, quantity, wall=WALL_WIDTH[1] ) {
     
     box = inside + [ 2 * wall, 2 * wall, bottom - DECK_BOX_SPACING ];
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( ThinDeckBox=sizes, Quantity=quantity, Thickness=wall, Inside=inside, Box=box );
     }
 

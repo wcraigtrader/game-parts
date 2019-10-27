@@ -53,16 +53,16 @@ CARD_OTHER      = 1 + CARD_NUMBERS + CARD_PRIVATES + CARD_TRAINS;
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
-function half_box_size( count ) = [BOX_WIDTH, 5.25*inch, layer_height( count*TILE_THICKNESS+2*mm ) ];
+function half_box_size( count ) = [BOX_WIDTH, 5.25*inch, layer_height( count*TILE_THICKNESS+STUB ) ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=12 ) {
-    hex_box_walls( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, [ "V2", "AH 1830" ] );
+    hex_box_corners( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, [ "V3", "AH 1830" ] );
 }
 
 module tile_lid( count=12, holes=true ) {
-    hex_lid_walls( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, true,  holes );
+    hex_lid_corners( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, true,  holes );
 }
 
 module token_box() {

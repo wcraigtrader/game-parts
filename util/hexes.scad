@@ -9,16 +9,14 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
+DEBUG = is_undef( DEBUG ) ? (is_undef( VERBOSE ) ? true : VERBOSE) : DEBUG;
+
 include <units.scad>;
 include <printers.scad>;
 
 assert( version_num() > 20190000, "********** Will NOT work with this version of OpenSCAD **********" );
 
 // ----- Physical Measurements ----------------------------------------------------------------------------------------
-
-HEX_SPACING = WALL_WIDTH[6];    // aka 1.67mm
-WALL_BEG = 0.20;
-WALL_END = 1 - WALL_BEG;
 
 // ----- X and Y Offsets for positioning hex corners ------------------------------------------------------------------
 
@@ -39,7 +37,7 @@ function hex_tile_row( r, cols ) = [ for( c=[0:cols-1] ) hex_tile_pos( r, c ) ];
 function hex_tile_even_rows( rows, cols ) = [ for( r=[0:rows-1] ) hex_tile_row( r, cols ) ];
 function hex_tile_uneven_rows( rows, cols ) = [ for( r=[0:rows-1] ) hex_tile_row( r, cols-r%2 ) ];
 
-function hex_length( diameter ) = diameter; //  + 2*HEX_SPACING;
+function hex_length( diameter ) = diameter;
 function hex_width( diameter ) = hex_length( diameter ) * sin(60);
 function hex_edge( diameter ) = hex_length( diameter ) / 2;
 
@@ -65,7 +63,7 @@ function layout_size( layout, hex ) = [ (hex_cols( layout ) + uneven_rows( layou
  * size   -- This is how large a percentage of the wall to construct (-1 <= size < 0 || 0 < size <= 1).
  *
  * Hex walls rarely run from one corner to the next -- they either have a gap in the middle of the wall,
- * or a gaps around either end of the wall. If the size is positive, it describes how large the centered wall is;
+ * or gaps around either end of the wall. If the size is positive, it describes how large the centered wall is;
  * If the size is negative, it describes how large the centered gap between two end walls is.
  *
  * Examples:
@@ -73,7 +71,7 @@ function layout_size( layout, hex ) = [ (hex_cols( layout ) + uneven_rows( layou
  * -0.60  =>   *----            ----*
  */
 
-module hex_wall( corner, config, width, height, size=0.60 ) {
+module hex_wall( corner, config, width, height, size=+0.60 ) {
     diff = TILE_CORNERS[ corner+1 ] - TILE_CORNERS[ corner ];
 
     m0 = 0.0;

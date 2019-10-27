@@ -40,10 +40,10 @@ TILE_THICKNESS  =  0.65 * mm;
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
 
-tx3 = 3 * TOKEN_DIAMETER;
-tx5 = 5 * TOKEN_DIAMETER;
+tx3 = 2 * PAR_DIAMETER;
+tx5 = 4 * STATION_DIAMETER + 1 * PAR_DIAMETER;
 tx8 = tx5 + tx3 + THIN_WALL;
-ty  = TOKEN_DIAMETER;
+ty  = STATION_DIAMETER;
 
 TOKEN_CELLS = [
     [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],

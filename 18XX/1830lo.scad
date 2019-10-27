@@ -46,11 +46,11 @@ function minimum_size( count ) = [0, 0, layer_height( count*TILE_THICKNESS ) ];
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=4 ) {
-    hex_box_walls( hex_tile_even_rows( 3, 4 ), minimum_size( count ), TILE_DIAMETER, [ "V1", "LO 1830" ] );
+    hex_box_corners( hex_tile_even_rows( 3, 4 ), minimum_size( count ), TILE_DIAMETER, [ "V2", "LO 1830" ] );
 }
 
 module tile_lid( count=4, holes=true ) {
-    hex_lid_walls( hex_tile_even_rows( 3, 4 ), minimum_size( count ), TILE_DIAMETER, false,  holes );
+    hex_lid_corners( hex_tile_even_rows( 3, 4 ), minimum_size( count ), TILE_DIAMETER, false,  holes );
 }
 
 module token_box() {
@@ -81,6 +81,6 @@ if (PART == "tile-tray") {          // bom: 4 | tile tray |
     translate( [ 5,   5,0] ) tile_box();
     translate( [ 5,  -5,0] ) tile_lid();
     translate( [-5, -95,0] ) rotate( [0,0,90] ) card_box( CARDS );
-    translate( [-5,   5,0] ) rotate( [0,0,90] ) card_lid( CARDS );
+    translate( [-52,  5,0] ) rotate( [0,0,90] ) card_lid( CARDS );
     translate( [-60,  3,0] ) rotate( [0,0,90] ) train_rack();
 }

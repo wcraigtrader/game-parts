@@ -9,8 +9,6 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-include <util/units.scad>;
-
 // Command Line Arguments
 PART = "other";         // Which part to output
 VERBOSE = true;        	// Set to non-zero to see more data
@@ -53,14 +51,7 @@ tx8 = tx5 + tx3 + THIN_WALL;
 ty  = TOKEN_DIAMETER;
 
 TOKEN_CELLS = [
-    [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],
-    [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],
-    [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],
-    [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],
-    [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],
-    [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],
-    [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],
-    [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],
+    for (i=[1:8]) [ [ tx5, ty ], [ tx3, ty ], [ tx3, ty ] ],
     [ [ tx8, ty ], [ tx3, ty ] ],
 ];
 
@@ -82,25 +73,25 @@ LOAN_CELLS = [
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
-function half_box_size( count ) = [BOX_HEIGHT, 5.25*inch, layer_height( count*TILE_THICKNESS+2*mm ) ];
-function alt_box_size( count ) = [ALT_WIDTH, ALT_HEIGHT, layer_height( count*TILE_THICKNESS+2*mm ) ];
+function half_box_size( count ) = [BOX_HEIGHT, 5.25*inch, layer_height( count*TILE_THICKNESS+STUB ) ];
+function alt_box_size( count ) = [ALT_WIDTH, ALT_HEIGHT, layer_height( count*TILE_THICKNESS+STUB ) ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=5 ) {
-    hex_box_walls( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, [ "1867", "V3" ] );
+    hex_box_corners( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, [ "1867", "V5" ] );
 }
 
 module tile_lid( count=5, holes=true ) {
-    hex_lid_walls( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, true,  holes );
+    hex_lid_corners( hex_tile_even_rows( 3, 5 ), half_box_size( count ), TILE_DIAMETER, true,  holes );
 }
 
 module alt_tile_box( count=5 ) {
-    hex_box_walls( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, ["1867", "V4"] );
+    hex_box_corners( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, ["1867", "V6"] );
 }
 
 module alt_tile_lid( count=5, holes=true ) {
-    hex_lid_walls( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, true, holes );
+    hex_lid_corners( hex_tile_even_rows( 4, 4 ), alt_box_size( count ), TILE_DIAMETER, true, holes );
 }
 
 module token_box() {

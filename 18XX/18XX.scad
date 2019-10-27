@@ -9,15 +9,16 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-VERBOSE=true;
+DEBUG = is_undef( DEBUG ) ? (is_undef( VERBOSE ) ? true : VERBOSE) : DEBUG;
 
 include <../util/boxes.scad>;
 include <../util/hexes.scad>;
 
 // ----- Physical dimensions ------------------------------------------------------------------------------------------
 
-STUB        = 3.00 * mm;  // Height of lid stubs
-STUB_GAP    = 0.22 * mm;  // Separation between lid stubs and tray hex corners
+
+STUB        = 2.00 * mm;  // Height of lid stubs
+STUB_GAP    = 0.25 * mm;  // Separation between lid stubs and tray hex corners
 
 FONT_NAME   = "helvetica:style=Bold";
 FONT_SIZE   = 6.0;
@@ -32,6 +33,12 @@ WALL2 = WALL1 + 2*STUB_GAP;
 WALL3 = WALL2 + 2*WALL_WIDTH[4];
 PADDING = [ 4*WALL1, 2*WALL1, 0 ];
 
+HEX_SPACING = 3 * mm;   // 1.5 mm padding on each side of the tile
+
+if (DEBUG) {
+    echo ( Walls = [WALL1, WALL2, WALL3], Spacing=HEX_SPACING );
+}
+
 SHIFTING = 1.00 * mm;    // Room for tiles to shift
 
 WIDTH  = 0;     // (X) Card width
@@ -44,6 +51,20 @@ function actual_size( size, optimum ) = [ size.x == 0 ? optimum.x : size.x, size
 function uniform_token_cells( rows, cols, tx, ty ) = [ for( r=[0:rows-1] ) [ for( c=[0:cols-1] ) [ tx, ty ] ] ];
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
+
+module hex_box_labels( labels, layout, size, inside, delta) {
+    if (len(labels) > 0) {
+        sr = short_row( layout );
+        config = hex_config( size );
+
+        for (l=[len(labels)-1:-1:0]) {
+            ly = layout[sr+2*l][0][1]*config.y + delta.y;
+            translate( [inside.x-delta.x+1, ly, -OVERLAP] )
+                rotate( [0,0,-90] ) linear_extrude( height=FONT_HEIGHT+OVERLAP )
+                    text( labels[l], font=FONT_NAME, size=FONT_SIZE, halign="center", valign="top" );
+        }
+    }
+}
 
 /* hex_box_corners( layout, size, hex, labels, dimensions )
  *
@@ -68,7 +89,7 @@ module hex_box_corners( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     border = (inside - minimum) / 2;
 
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( HexBoxCorners_Size=size, InSize=inside, Minimum=minimum, Border=border );
     }
 
@@ -78,23 +99,12 @@ module hex_box_corners( layout, size, hex, labels=[], dimensions=REASONABLE ) {
             rounded_box( inside, HOLLOW );
 
             // Add tile corners
-            union() {
-                hex_corner_layout( layout, hexed, [border.x,border.y,-OVERLAP] ) {
-                    hex_wall( $corner, $config, WALL1, size.z+2*OVERLAP, -0.6 );
-                }
+            hex_corner_layout( layout, hexed, [border.x,border.y,-OVERLAP] ) {
+                hex_wall( $corner, $config, WALL1, size.z+2*OVERLAP, -0.6 );
             }
 
             // Add labels
-            if (len(labels) > 0) {
-                sr = short_row( layout );
-
-                for (l=[len(labels)-1:-1:0]) {
-                    ly = layout[sr+2*l][0][1]*config.y + border.y;
-                    translate( [inside.x-border.x+1, ly, -OVERLAP] )
-                        rotate( [0,0,-90] ) linear_extrude( height=FONT_HEIGHT+OVERLAP )
-                            text( labels[l], font=FONT_NAME, size=FONT_SIZE, halign="center", valign="top" );
-                }
-            }
+            hex_box_labels( labels, layout, hexed, inside, border );
         }
 
         // Remove finger holes
@@ -128,7 +138,7 @@ module hex_lid_corners( layout, size, hex, add_stubs=false, remove_holes=true, d
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( HexLidCorners_Size=size, InSize=inside, Border=border );
     }
 
@@ -146,22 +156,17 @@ module hex_lid_corners( layout, size, hex, add_stubs=false, remove_holes=true, d
         }
 
         if (add_stubs) {
-            overlap = [0,0,OVERLAP];
             stub_z = min( size.z, STUB );   // If box is really thin, use thin stubs
 
-            translate( -overlap ) intersection() {
+            translate( [0,0,-OVERLAP] ) intersection() {
                 color( "white" ) cube( [inside.x, inside.y, stub_z+OVERLAP] );
                 difference() {
-                    union() {
-                        hex_corner_layout( layout, hexed, [border.x,border.y,0] ) {
-                            hex_wall( $corner, $config, WALL3, stub_z+OVERLAP, -0.6 );
-                        }
+                    hex_corner_layout( layout, hexed, [border.x,border.y,0] ) {
+                        hex_wall( $corner, $config, WALL3, stub_z+OVERLAP, -0.6 );
                     }
-                        
-                    union() {
-                        hex_corner_layout( layout, hexed, [border.x,border.y,0] ) {
-                            hex_wall( $corner, $config, WALL2, STUB+2*OVERLAP, -0.4 );
-                        }
+                    
+                    hex_corner_layout( layout, hexed, [border.x,border.y,0] ) {
+                        hex_wall( $corner, $config, WALL2, stub_z+2*OVERLAP, -0.4 );
                     }
                 }
             }
@@ -196,7 +201,7 @@ module hex_box_walls( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( HexBoxWalls_Size=size, InSize=inside, Border=border );
     }
 
@@ -210,16 +215,7 @@ module hex_box_walls( layout, size, hex, labels=[], dimensions=REASONABLE ) {
             }
 
             // Add labels
-            if (len(labels) > 0) {
-                sr = short_row( layout );
-
-                for (l=[len(labels)-1:-1:0]) {
-                    ly = layout[sr+2*l][0][1]*config.y + border.y;
-                    translate( [inside.x-border.x+1, ly, -OVERLAP] )
-                        rotate( [0,0,-90] ) linear_extrude( height=FONT_HEIGHT+OVERLAP )
-                            text( labels[l], font=FONT_NAME, size=FONT_SIZE, halign="center", valign="top" );
-                }
-            }
+            hex_box_labels( labels, layout, hexed, inside, border );
         }
 
         // Remove finger holes
@@ -257,7 +253,7 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( HexLidWalls_Size=size, InSize=inside, Border=border );
     }
 
@@ -275,17 +271,14 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
         }
 
         if (add_stubs) {
-            overlap = [0,0,OVERLAP];
             stub_z = min( size.z, STUB );   // If box is really thin, use thin stubs
 
-            translate( -overlap ) intersection() {
+            translate( [0,0,-OVERLAP] ) intersection() {
                 color( "white" ) cube( [inside.x, inside.y, stub_z+OVERLAP] );
-                union() {
-                    hex_corner_layout( layout, hexed, [border.x,border.y,0] ) {
-                        difference() {
-                            hex_wall( $corner, $config, WALL3, stub_z+OVERLAP );
-                            hex_wall( $corner, $config, WALL2, STUB+2*OVERLAP );
-                        }
+                hex_corner_layout( layout, hexed, [border.x,border.y,0] ) {
+                    difference() {
+                        hex_wall( $corner, $config, WALL3, stub_z+OVERLAP );
+                        hex_wall( $corner, $config, WALL2, stub_z+2*OVERLAP );
                     }
                 }
             }
@@ -318,7 +311,7 @@ module card_box( sizes, dimensions=REASONABLE ) {
 
     window = [ inside.x-2*border-2*mr-inner, inside.y-2*border, bottom+2*OVERLAP ];
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( CardBox=sizes, CardBoxInside=inside );
     }
 
@@ -398,7 +391,7 @@ module deep_card_box( sizes, dimensions=REASONABLE ) {
 
     window = [ inside.x-2*border, inside.y-2*border-2*mr-inner, bottom+2*OVERLAP ];
 
-    if (VERBOSE) {
+    if (DEBUG) {
         echo( CardBox=sizes, CardBoxInside=inside );
     }
 
@@ -534,13 +527,13 @@ if (0) {
 }
 
 if (0) {
-    box_size = [0,0,5];
+    box_size = [0,0,6];
     
-    translate( [5, 5, 0] ) hex_box_corners( hex_tile_even_rows( 2,2 ), box_size, 43, ["ONE"] );
-    translate( [5,-5, 0] ) hex_lid_corners( hex_tile_even_rows( 2,2 ), box_size, 43, true );
+    translate( [5, 5, 0] ) hex_box_corners( hex_tile_uneven_rows( 2,2 ), box_size, 43, ["ONE"] );
+    translate( [5,-5, 0] ) hex_lid_corners( hex_tile_uneven_rows( 2,2 ), box_size, 43, true );
 }
 
-if (0) {
+if (1) {
     box_size = [0,0,5];
     
     translate( [5, 5, 0] ) hex_box_walls( hex_tile_even_rows( 2,2 ), box_size, 43, ["ONE"] );

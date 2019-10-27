@@ -58,7 +58,7 @@ function half_box_size( count ) = [0, 0, layer_height( count*TILE_THICKNESS ) ];
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
 module tile_box( count=5 ) {
-    hex_box_corners( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, [ "V2", "1846" ] );
+    hex_box_corners( hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, [ "V3", "1846" ] );
 }
 
 module tile_lid( count=5 ) {
