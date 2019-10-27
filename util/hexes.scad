@@ -39,7 +39,7 @@ function hex_tile_row( r, cols ) = [ for( c=[0:cols-1] ) hex_tile_pos( r, c ) ];
 function hex_tile_even_rows( rows, cols ) = [ for( r=[0:rows-1] ) hex_tile_row( r, cols ) ];
 function hex_tile_uneven_rows( rows, cols ) = [ for( r=[0:rows-1] ) hex_tile_row( r, cols-r%2 ) ];
 
-function hex_length( diameter ) = diameter + 2*HEX_SPACING;
+function hex_length( diameter ) = diameter; //  + 2*HEX_SPACING;
 function hex_width( diameter ) = hex_length( diameter ) * sin(60);
 function hex_edge( diameter ) = hex_length( diameter ) / 2;
 
@@ -122,9 +122,82 @@ module hex_corner( corner, height, gap=0, size = WIDE_WALL ) {
 /* hex_prism( height, diameter )
  *
  * Create a vertical hexagonal prism of a given height and diameter
- *
- * @deprecated
  */
 module hex_prism( height, diameter ) {
     rotate( [ 0, 0, 90 ] ) cylinder( h=height, d=diameter, $fn=6 );
 }
+
+/* hex_layout( layout, size, delta )
+ *
+ * This is an operation module that loops through all of the tiles in a hex layout,
+ * coloring and positioning each child at the center of its hex.
+ *
+ * layout -- An array of tile offsets for each row/column
+ * size   -- the diameter of each hexagon in the layout
+ * delta  -- an optional position offset applied to each tile location
+ *
+ * Special variables defined for each child:
+ *
+ * $config -- the hex_config for this size of hex
+ * $row    -- the row number for this child
+ * $col    -- the column number for this child
+ * $tile   -- the tile offsets for this child
+ */
+module hex_layout( layout, size, delta=[0,0,0] ) {
+    $config = hex_config( size );
+    maxRows = len( layout );
+    for ($row = [0:maxRows-1] ) {
+        maxCols = len( layout[$row] );
+        for ($col = [0:maxCols-1] ) {
+            $tile = layout[$row][$col];
+            hue = [ $tile.x/(maxCols*4), $tile.y/(maxRows*3-1), 0.5, 1 ];
+            position = [ $tile.x*$config.x+delta.x, $tile.y*$config.y+delta.y, delta.z ];
+            color( hue ) translate( position ) children();
+        }
+    }
+}
+
+/* hex_corner_layout( layout, size, delta )
+ *
+ * This is an operation module that loops through all of the corners of all of the tiles in a hex layout,
+ * coloring and positioning each child at the corner of its hex.
+ *
+ * layout -- An array of tile offsets for each row/column
+ * size   -- the diameter of each hexagon in the layout
+ * delta  -- an optional position offset applied to each tile location
+ *
+ * Special variables defined for each child:
+ *
+ * $config -- the hex_config for this size of hex
+ * $row    -- the row number for this child (0-based)
+ * $col    -- the column number for this child (0-based)
+ * $corner -- the corner number for this child (0-5)
+ * $tile   -- the tile offsets for this child
+ */
+module hex_corner_layout( layout, size, delta=[0,0,0] ) {
+    $config = hex_config( size );
+    maxRows = len( layout );
+    for ($row = [0:maxRows-1] ) {
+        maxCols = len( layout[$row] );
+        for ($col = [0:maxCols-1] ) {
+            $tile = layout[$row][$col];
+            hue = [ $tile.x/(maxCols*4), $tile.y/(maxRows*3-1), 0.5, 1 ];
+            for ($corner = [0:5] ) {
+                tc = TILE_CORNERS[$corner];
+                position = [ ($tile.x+tc.x)*$config.x+delta.x, ($tile.y+tc.y)*$config.y+delta.y, delta.z ];
+                color( hue ) translate( position ) children();
+            }
+        }
+    }
+}
+
+if (0) {
+    hex_layout( hex_tile_uneven_rows( 3,3 ), 10*mm ) {
+        echo (row=$row, col=$col, $tile );
+        difference() {
+            hex_prism( 10, 10 );
+            translate( [0,0,-OVERLAP] ) hex_prism( 10+2*OVERLAP, 9 );
+        }
+    }
+}
+
