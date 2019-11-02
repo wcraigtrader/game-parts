@@ -46,7 +46,7 @@ To build all BOMs for every game:
 > make all-boms
 
 To clean (remove) all generated files for one game
-> make 
+> make clean
 
 ### Directory Structure
 

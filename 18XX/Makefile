@@ -62,20 +62,23 @@ __check_defined = $(if $(value $1),, $(error Undefined $1$(if $2, ($2))$(if $(va
 EXPAND=../bin/scad-expand.py
 DEPEND=../bin/scad-dependencies.py
 
-# Names of parts to build
-PARTS=$(shell grep 'PART == ' $(PREFIX).scad | cut -d'"' -f2)
-SOURCES=$(shell $(DEPEND) $(PREFIX).scad)
+# Name of all model prefixes
+PREFIXES=$(shell ls *.scad | egrep -v 18XX | sed "s/.scad//" | tr "\n" " ")
 
+# directories
 BOM=bom
 STL=stl
 IMAGE=png
 
+# Names of parts to build
+ifneq ($(PREFIX),)
+PARTS=$(shell grep 'PART == ' $(PREFIX).scad | cut -d'"' -f2)
+SOURCES=$(shell $(DEPEND) $(PREFIX).scad)
+
 BOMS=$(BOM)/$(PREFIX)-bom.md
 MODELS=$(patsubst %,$(STL)/$(PREFIX)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE),$(PARTS))
-
-# Name of all model prefixes
-PREFIXES=$(shell ls *.scad | egrep -v 18XX | sed "s/.scad//" | tr "\n" " ")
+endif
 
 
 all:	models images boms
