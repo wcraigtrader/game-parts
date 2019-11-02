@@ -533,7 +533,7 @@ if (0) {
     translate( [5,-5, 0] ) hex_lid_corners( hex_tile_uneven_rows( 2,2 ), box_size, 43, true );
 }
 
-if (1) {
+if (0) {
     box_size = [0,0,5];
     
     translate( [5, 5, 0] ) hex_box_walls( hex_tile_even_rows( 2,2 ), box_size, 43, ["ONE"] );
