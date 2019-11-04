@@ -48,6 +48,7 @@ STUBS  = 6;     // Height of lid stubs that overlap cell walls
 
 REASONABLE = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[3], WALL_WIDTH[2], 1*mm, 20*mm, 2*mm ];
 STURDY     = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[4], WALL_WIDTH[3], 1*mm, 20*mm, 2*mm ];
+THERMOFORM = [ 0.020 *inch, 0.020 *inch, 0.020 *inch, 0.020 *inch, 1*mm, 20*mm, 2*mm ];
 
 HORIZONTAL = [ 1, 1, 0 ];
 VERTICAL   = [ 0, 0, 1 ];

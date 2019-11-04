@@ -286,6 +286,47 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
     }
 }
 
+/* hex_tray_buck( layout, size, hex, dimensions )
+ *
+ * Create a tray to hold hexagonal tiles
+ *
+ * layout     -- Arrangement of tiles in box
+ * size       -- Vector describing the exterior size of the box
+ * hex        -- Diameter of a hex tile (corner to opposite corner)
+ * dimensions -- List of physical dimensions
+ */
+module hex_tray_buck( layout, size, hex, dimensions=THERMOFORM ) {
+    bottom = 1.0 * mm;
+    outer  = 1.0* mm;
+    hexed = hex + HEX_SPACING;
+    
+    base = [0, 0, bottom];
+    walls  = [ 4*outer+2*GAP, 4*outer+2*GAP, 0];
+    minimum = layout_size( layout, hexed );
+    optimum = minimum + walls + PADDING;
+
+    actual = actual_size( size, optimum );
+    inside = actual - walls;
+    border = (inside - minimum) / 2;
+    
+    if (DEBUG) {
+        echo( HexTrayBuck_size=size, minimum=minimum, optimum=optimum, inside=inside, border=border, walls=walls);
+    }
+    
+    difference() {
+        cube( inside + base);
+        
+        hex_layout( layout, hexed, [border.x, border.y, bottom] ) {
+            hex_prism( size.z+OVERLAP, hex, 10 );
+        }
+        
+        hex_corner_layout( layout, hexed, [border.x,border.y,bottom] ) {
+            hex_angle_wall( $corner, $config, 3*mm, size.z+2*OVERLAP, 0.6, 1.15 );
+        }
+    }
+    
+}
+
 /* card_box( sizes, dimensions )
  *
  * Create a box to hold cards and tokens
@@ -538,4 +579,11 @@ if (0) {
     
     translate( [5, 5, 0] ) hex_box_walls( hex_tile_even_rows( 2,2 ), box_size, 43, ["ONE"] );
     translate( [5,-5, 0] ) hex_lid_walls( hex_tile_even_rows( 2,2 ), box_size, 43, true );
+}
+
+if (1) {
+    box_size = [0,0,10];
+    layout = hex_tile_even_rows( 3,4 ) ;
+    
+    hex_tray_buck( layout, box_size, 46 );
 }

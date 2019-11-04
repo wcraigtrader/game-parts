@@ -40,6 +40,7 @@ function hex_tile_uneven_rows( rows, cols ) = [ for( r=[0:rows-1] ) hex_tile_row
 function hex_length( diameter ) = diameter;
 function hex_width( diameter ) = hex_length( diameter ) * sin(60);
 function hex_edge( diameter ) = hex_length( diameter ) / 2;
+function hex_angle( c ) = ( 60 * c + 240 ) % 360;
 
 function hex_config( diameter ) = [ hex_width( diameter )/4, hex_length( diameter )/4, hex_edge( diameter ) ];
 
@@ -71,7 +72,7 @@ function layout_size( layout, hex ) = [ (hex_cols( layout ) + uneven_rows( layou
  * -0.60  =>   *----            ----*
  */
 
-module hex_wall( corner, config, width, height, size=+0.60 ) {
+module hex_wall( corner, config, width, height, size=+0.60, fn=6 ) {
     diff = TILE_CORNERS[ corner+1 ] - TILE_CORNERS[ corner ];
 
     m0 = 0.0;
@@ -79,22 +80,69 @@ module hex_wall( corner, config, width, height, size=+0.60 ) {
     m2 = 1 - m1;
     m3 = 1.0;
 
+    position = [ diff.x*config.x, diff.y*config.y, 0 ];
+
     if (size > 0) {
         w2l = width / config[2];
-
         hull() {
-            translate( [diff.x*config.x*(m1+w2l), diff.y*config.y*(m1+w2l), 0] ) cylinder( d=width, h=height, $fn=6 );
-            translate( [diff.x*config.x*(m2-w2l), diff.y*config.y*(m2-w2l), 0] ) cylinder( d=width, h=height, $fn=6 );
+            translate( position*(m1+w2l) ) cylinder( d=width, h=height, $fn=fn );
+            translate( position*(m2-w2l) ) cylinder( d=width, h=height, $fn=fn );
         }
     } else {
         hull() {
-            translate( [diff.x*config.x*m0, diff.y*config.y*m0, 0] ) cylinder( d=width, h=height, $fn=6 );
-            translate( [diff.x*config.x*m1, diff.y*config.y*m1, 0] ) cylinder( d=width, h=height, $fn=6 );
+            translate( position*m0 ) cylinder( d=width, h=height, $fn=fn );
+            translate( position*m1 ) cylinder( d=width, h=height, $fn=fn );
         }
         hull() {
-            translate( [diff.x*config.x*m2, diff.y*config.y*m2, 0] ) cylinder( d=width, h=height, $fn=6 );
-            translate( [diff.x*config.x*m3, diff.y*config.y*m3, 0] ) cylinder( d=width, h=height, $fn=6 );
+            translate( position*m2 ) cylinder( d=width, h=height, $fn=fn );
+            translate( position*m3 ) cylinder( d=width, h=height, $fn=fn );
         }
+    }
+}
+
+module hex_cube_wall( corner, config, width, height, size ) {
+    diff = TILE_CORNERS[ corner+1 ] - TILE_CORNERS[ corner ];
+
+    m0 = 0.0;
+    m1 = (1 - abs( size ) ) / 2;
+    m2 = 1 - m1;
+    m3 = 1.0;
+
+    angle = corner * -60 - 30;
+    position = [ diff.x*config.x, diff.y*config.y, 0 ];
+    center = [0,-width/2,0];
+    
+    if (size > 0) {
+        translate( position*m1 ) rotate( angle ) translate( center ) cube( [config[2]*(m2-m1), width, height] );
+    } else {
+        translate( position*m0 ) rotate( angle ) translate( center ) cube( [config[2]*(m1-m0), width, height] );
+        translate( position*m2 ) rotate( angle ) translate( center ) cube( [config[2]*(m3-m2), width, height] );
+    }
+}
+
+module hex_angle_wall( corner, config, width, height, size, zscale = 1.0 ) {
+    diff = TILE_CORNERS[ corner+1 ] - TILE_CORNERS[ corner ];
+
+    m0 = 0.0;
+    m1 = (1 - abs( size ) ) / 2;
+    m2 = 1 - m1;
+    m3 = 1.0;
+
+    angle = corner * -60 - 30;
+    position = [ diff.x*config.x, diff.y*config.y, 0 ];
+    center = [0,-0,0];
+    
+    module angle_wall( size, zscale ) {
+        d1 = size.y/2; d3 = size.x; d2 = d3-d1;
+        // linear_extrude( size.z, scale=zscale ) polygon( [ [d1,0], [0,d1], [d3,d1], [d2,0], [d2,-d1], [0,-d1] ] );
+        linear_extrude( size.z, scale=zscale ) polygon( [ [d1,d1], [d2,d1], [d2,-d1], [d1,-d1] ] );
+    }
+    
+    if (size > 0) {
+        translate( position*m1 ) rotate( angle ) translate( center ) angle_wall( [config[2]*(m2-m1), width, height], zscale );
+    } else {
+        translate( position*m0 ) rotate( angle ) translate( center ) angle_wall( [config[2]*(m1-m0), width, height], zscale );
+        translate( position*m2 ) rotate( angle ) translate( center ) angle_wall( [config[2]*(m3-m2), width, height], zscale );
     }
 }
 
@@ -121,8 +169,10 @@ module hex_corner( corner, height, gap=0, size = WIDE_WALL ) {
  *
  * Create a vertical hexagonal prism of a given height and diameter
  */
-module hex_prism( height, diameter ) {
-    rotate( [ 0, 0, 90 ] ) cylinder( h=height, d=diameter, $fn=6 );
+module hex_prism( height, diameter, angle=0 ) {
+    bot_d = diameter;
+    top_d = diameter + height * sin( angle );
+    rotate( [ 0, 0, 90 ] ) cylinder( h=height, d1=bot_d, d2=top_d, $fn=6 );
 }
 
 /* hex_layout( layout, size, delta )
@@ -190,12 +240,11 @@ module hex_corner_layout( layout, size, delta=[0,0,0] ) {
 }
 
 if (0) {
-    hex_layout( hex_tile_uneven_rows( 3,3 ), 10*mm ) {
-        echo (row=$row, col=$col, $tile );
-        difference() {
-            hex_prism( 10, 10 );
-            translate( [0,0,-OVERLAP] ) hex_prism( 10+2*OVERLAP, 9 );
-        }
+    layout = hex_tile_uneven_rows( 3,3 );
+    color( "gray" ) hex_layout( layout, 40*mm ) hex_prism( 0.1*mm, 40*mm );
+    color( "white" ) hex_layout( layout, 40*mm ) hex_prism( 0.2*mm, 39*mm );
+    hex_corner_layout( layout, 40*mm ) {
+        hex_angle_wall( $corner, $config, 3*mm, 10, 0.6, 1.1 );
     }
 }
 
