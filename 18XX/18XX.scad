@@ -9,7 +9,7 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-DEBUG = is_undef( DEBUG ) ? (is_undef( VERBOSE ) ? true : VERBOSE) : DEBUG;
+DEBUG_18XX = is_undef( DEBUG_18XX ) ? (is_undef( VERBOSE ) ? true : VERBOSE) : DEBUG_18XX;
 
 include <../util/boxes.scad>;
 include <../util/hexes.scad>;
@@ -35,7 +35,7 @@ PADDING = [ 4*WALL1, 2*WALL1, 0 ];
 
 HEX_SPACING = 3 * mm;   // 1.5 mm padding on each side of the tile
 
-if (DEBUG) {
+if (DEBUG_18XX) {
     echo ( Walls = [WALL1, WALL2, WALL3], Spacing=HEX_SPACING );
 }
 
@@ -89,7 +89,7 @@ module hex_box_corners( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     border = (inside - minimum) / 2;
 
 
-    if (DEBUG) {
+    if (DEBUG_18XX) {
         echo( HexBoxCorners_Size=size, InSize=inside, Minimum=minimum, Border=border );
     }
 
@@ -138,7 +138,7 @@ module hex_lid_corners( layout, size, hex, add_stubs=false, remove_holes=true, d
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
-    if (DEBUG) {
+    if (DEBUG_18XX) {
         echo( HexLidCorners_Size=size, InSize=inside, Border=border );
     }
 
@@ -201,7 +201,7 @@ module hex_box_walls( layout, size, hex, labels=[], dimensions=REASONABLE ) {
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
-    if (DEBUG) {
+    if (DEBUG_18XX) {
         echo( HexBoxWalls_Size=size, InSize=inside, Border=border );
     }
 
@@ -253,7 +253,7 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
     inside = actual_size( size, optimum ) - walls;
     border = (inside - minimum) / 2;
 
-    if (DEBUG) {
+    if (DEBUG_18XX) {
         echo( HexLidWalls_Size=size, InSize=inside, Border=border );
     }
 
@@ -297,34 +297,90 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
  */
 module hex_tray_buck( layout, size, hex, dimensions=THERMOFORM ) {
     bottom = 1.0 * mm;
-    outer  = 1.0* mm;
-    hexed = hex + HEX_SPACING;
+    outer  = 1.0 * mm;
+    vacuum = 1.5 * mm;
+    slope  = 10; // degrees
+    spread = 1.0 + sin(slope) * sin( 45 );
+    spacing = 4.0 * mm;
+    
+    hex1 = hex + 3.0 * mm;
+    hex2 = hex1 + spacing;
     
     base = [0, 0, bottom];
-    walls  = [ 4*outer+2*GAP, 4*outer+2*GAP, 0];
-    minimum = layout_size( layout, hexed );
-    optimum = minimum + walls + PADDING;
+    padding = [ 2*WALL1, 2*WALL1, 0];
+    minimum = layout_size( layout, hex2 );
+    optimum = minimum + padding;
 
     actual = actual_size( size, optimum );
-    inside = actual - walls;
+    inside = actual;
     border = (inside - minimum) / 2;
     
-    if (DEBUG) {
-        echo( HexTrayBuck_size=size, minimum=minimum, optimum=optimum, inside=inside, border=border, walls=walls);
+    if (DEBUG_18XX) {
+        echo( HexTrayBuck_size=size, minimum=minimum, optimum=optimum, inside=inside, border=border, padding=padding );
+        echo( Slope=slope, Spread=spread );
+    }
+    
+    module buck_base( bsize, bangle, radius ) {
+        mx = bsize.x;
+        my = bsize.y;
+        mz = bsize.z - OVERLAP;
+        dr = radius;
+        ds = mz * sin( bangle ) / 2;
+        
+        points = [
+            [ ds+dr, ds+dr, 0 ],
+            [ mx-ds-dr, ds+dr, 0],
+            [ mx-ds-dr, my-ds-dr, 0 ],
+            [ ds+dr, my-ds-dr, 0 ],
+            [ dr, dr, mz ],
+            [ mx-dr, dr, mz ],
+            [ mx-dr, my-dr, mz ],
+            [ dr, my-dr, mz ],
+        ];
+        faces = [
+            [0,1,2,3],  // bottom
+            [4,5,1,0],  // front
+            [7,6,5,4],  // top
+            [5,6,2,1],  // right
+            [6,7,3,2],  // back
+            [7,4,0,3],  // left        
+        ];
+        
+        if (DEBUG_18XX) {
+            actual = bsize+[2*ds+0.040*inch,2*ds+0.040*inch,0.020*inch];
+            echo( BuckBase=bsize, dr=dr, ds=ds, mm=actual, inches=actual/25.4 );
+        }
+        
+        minkowski() {
+            polyhedron( points, faces );
+            cylinder( r=radius, h=OVERLAP, $fn=48 );
+        }
     }
     
     difference() {
-        cube( inside + base);
+        buck_base( inside+base, slope, 1*mm ); // cube( inside + base );
         
-        hex_layout( layout, hexed, [border.x, border.y, bottom] ) {
-            hex_prism( size.z+OVERLAP, hex, 10 );
+        hex_layout( layout, hex2, [border.x, border.y, bottom] ) {
+            hex_prism( size.z+OVERLAP, hex1, slope );
+
+            translate( [0,0,-bottom-OVERLAP] ) cylinder( d=vacuum, h=bottom+size.z+2*OVERLAP );
+
+            for (c = [0:5]) {
+                tc = TILE_CORNERS[c];
+                hconfig = hex_config( hex1-spacing/2 );
+                hposition = [ tc.x*hconfig.x, tc.y*hconfig.y, -bottom-OVERLAP ];
+                translate( hposition ) cylinder( d=vacuum, h=bottom+size.z+2*OVERLAP, $fn=30 );
+                translate( hposition+[0,0,+bottom*4/5] ) hex_cube_wall( c, hconfig, vacuum, size.z+bottom/5+2*OVERLAP, 1.0 );
+
+                outside = hex_outside_wall(layout, $row, $col, c);
+                if (!outside) {
+                    cposition = [ tc.x*$config.x, tc.y*$config.y, 0 ];
+                    translate( cposition ) hex_angle_wall( c, $config, spacing, size.z+2*OVERLAP, 0.5, spread );
+                }
+            }
+
         }
-        
-        hex_corner_layout( layout, hexed, [border.x,border.y,bottom] ) {
-            hex_angle_wall( $corner, $config, 3*mm, size.z+2*OVERLAP, 0.6, 1.15 );
-        }
-    }
-    
+    }    
 }
 
 /* card_box( sizes, dimensions )
@@ -352,7 +408,7 @@ module card_box( sizes, dimensions=REASONABLE ) {
 
     window = [ inside.x-2*border-2*mr-inner, inside.y-2*border, bottom+2*OVERLAP ];
 
-    if (DEBUG) {
+    if (DEBUG_18XX) {
         echo( CardBox=sizes, CardBoxInside=inside );
     }
 
@@ -432,7 +488,7 @@ module deep_card_box( sizes, dimensions=REASONABLE ) {
 
     window = [ inside.x-2*border, inside.y-2*border-2*mr-inner, bottom+2*OVERLAP ];
 
-    if (DEBUG) {
+    if (DEBUG_18XX) {
         echo( CardBox=sizes, CardBoxInside=inside );
     }
 
@@ -582,8 +638,7 @@ if (0) {
 }
 
 if (1) {
-    box_size = [0,0,10];
-    layout = hex_tile_even_rows( 3,4 ) ;
-    
-    hex_tray_buck( layout, box_size, 46 );
+    box_size = [9.625 * inch, 11.500 * inch, 12]; // [0,0,11]; // 
+    layout = hex_tile_uneven_rows( 7,5 ) ;
+    hex_tray_buck( layout, box_size, 44 );
 }
