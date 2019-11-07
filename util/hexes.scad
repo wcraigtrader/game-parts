@@ -9,7 +9,7 @@
 //
 // --------------------------------------------------------------------------------------------------------------------
 
-DEBUG = is_undef( DEBUG ) ? (is_undef( VERBOSE ) ? true : VERBOSE) : DEBUG;
+DEBUG_HEXES = is_undef( DEBUG_HEXES ) ? (is_undef( VERBOSE ) ? true : VERBOSE) : DEBUG_HEXES;
 
 include <units.scad>;
 include <printers.scad>;
@@ -30,6 +30,12 @@ TILE_CORNERS = [
     [ 0, 2 ],   // 6 = North (again)
 ];
 
+// Layout offset (row, col) for the neighbor of a corner 
+NEIGHBORS = [
+    [ [1, 0], [0, 1], [-1, 0], [-1,-1], [0,-1], [1,-1], [1, 0] ],
+    [ [1, 1], [0, 1], [-1, 1], [-1, 0], [0,-1], [1, 0], [1, 1] ],
+];
+
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
 function hex_tile_pos( r, c ) = [2+c*4+2*(r%2), 2+r*3 ];
@@ -40,7 +46,10 @@ function hex_tile_uneven_rows( rows, cols ) = [ for( r=[0:rows-1] ) hex_tile_row
 function hex_length( diameter ) = diameter;
 function hex_width( diameter ) = hex_length( diameter ) * sin(60);
 function hex_edge( diameter ) = hex_length( diameter ) / 2;
-function hex_angle( c ) = ( 60 * c + 240 ) % 360;
+
+function hex_angle( corner ) = corner * -60 - 30;
+function hex_tile_offset( c1, c2 ) = TILE_CORNERS[ c2 % 6 ] - TILE_CORNERS[ c1 % 6 ];
+function hex_outside_wall( layout, row, col, corner ) = is_undef( layout[row+NEIGHBORS[row%2][corner][0]][col+NEIGHBORS[row%2][corner][1]] );
 
 function hex_config( diameter ) = [ hex_width( diameter )/4, hex_length( diameter )/4, hex_edge( diameter ) ];
 
@@ -73,13 +82,12 @@ function layout_size( layout, hex ) = [ (hex_cols( layout ) + uneven_rows( layou
  */
 
 module hex_wall( corner, config, width, height, size=+0.60, fn=6 ) {
-    diff = TILE_CORNERS[ corner+1 ] - TILE_CORNERS[ corner ];
-
     m0 = 0.0;
     m1 = (1 - abs( size ) ) / 2;
     m2 = 1 - m1;
     m3 = 1.0;
 
+    diff = hex_tile_offset( corner, corner+1 );
     position = [ diff.x*config.x, diff.y*config.y, 0 ];
 
     if (size > 0) {
@@ -101,14 +109,14 @@ module hex_wall( corner, config, width, height, size=+0.60, fn=6 ) {
 }
 
 module hex_cube_wall( corner, config, width, height, size ) {
-    diff = TILE_CORNERS[ corner+1 ] - TILE_CORNERS[ corner ];
-
     m0 = 0.0;
     m1 = (1 - abs( size ) ) / 2;
     m2 = 1 - m1;
     m3 = 1.0;
 
     angle = corner * -60 - 30;
+
+    diff = hex_tile_offset( corner, corner+1 );
     position = [ diff.x*config.x, diff.y*config.y, 0 ];
     center = [0,-width/2,0];
     
@@ -121,28 +129,28 @@ module hex_cube_wall( corner, config, width, height, size ) {
 }
 
 module hex_angle_wall( corner, config, width, height, size, zscale = 1.0 ) {
-    diff = TILE_CORNERS[ corner+1 ] - TILE_CORNERS[ corner ];
-
     m0 = 0.0;
     m1 = (1 - abs( size ) ) / 2;
     m2 = 1 - m1;
     m3 = 1.0;
 
-    angle = corner * -60 - 30;
+    angle = hex_angle( corner );
+    
+    diff = hex_tile_offset( corner, corner+1 );
     position = [ diff.x*config.x, diff.y*config.y, 0 ];
-    center = [0,-0,0];
     
     module angle_wall( size, zscale ) {
-        d1 = size.y/2; d3 = size.x; d2 = d3-d1;
-        // linear_extrude( size.z, scale=zscale ) polygon( [ [d1,0], [0,d1], [d3,d1], [d2,0], [d2,-d1], [0,-d1] ] );
-        linear_extrude( size.z, scale=zscale ) polygon( [ [d1,d1], [d2,d1], [d2,-d1], [d1,-d1] ] );
+        dy0 = OVERLAP; dy1 = size.y/2;
+        dx3 = size.x/2; dx2 = dx3-dy1; dx0 = -dx3; dx1 = dx0+dy1; 
+        translate( [size.x/2,0,0] ) linear_extrude( size.z, scale=zscale ) 
+            polygon( [ [dx0,dy0], [dx3,dy0], [dx3,-dy1], [dx0,-dy1] ] );
     }
     
     if (size > 0) {
-        translate( position*m1 ) rotate( angle ) translate( center ) angle_wall( [config[2]*(m2-m1), width, height], zscale );
+        translate( position*m1 ) rotate( angle ) angle_wall( [config[2]*(m2-m1), width, height], zscale );
     } else {
-        translate( position*m0 ) rotate( angle ) translate( center ) angle_wall( [config[2]*(m1-m0), width, height], zscale );
-        translate( position*m2 ) rotate( angle ) translate( center ) angle_wall( [config[2]*(m3-m2), width, height], zscale );
+        translate( position*m0 ) rotate( angle ) angle_wall( [config[2]*(m1-m0), width, height], zscale );
+        translate( position*m2 ) rotate( angle ) angle_wall( [config[2]*(m3-m2), width, height], zscale );
     }
 }
 
@@ -216,35 +224,58 @@ module hex_layout( layout, size, delta=[0,0,0] ) {
  *
  * Special variables defined for each child:
  *
- * $config -- the hex_config for this size of hex
- * $row    -- the row number for this child (0-based)
- * $col    -- the column number for this child (0-based)
- * $corner -- the corner number for this child (0-5)
- * $tile   -- the tile offsets for this child
+ * $config  -- the hex_config for this size of hex
+ * $row     -- the row number for this child (0-based)
+ * $col     -- the column number for this child (0-based)
+ * $corner  -- the corner number for this child (0-5)
+ * $tile    -- the tile offsets for this child
+ * $outside -- true if the wall for this corner is an outside wall
  */
 module hex_corner_layout( layout, size, delta=[0,0,0] ) {
     $config = hex_config( size );
     maxRows = len( layout );
-    for ($row = [0:maxRows-1] ) {
+    for ($row = [0:maxRows-1]) {
         maxCols = len( layout[$row] );
-        for ($col = [0:maxCols-1] ) {
+        for ($col = [0:maxCols-1]) {
             $tile = layout[$row][$col];
             hue = [ $tile.x/(maxCols*4), $tile.y/(maxRows*3-1), 0.5, 1 ];
-            for ($corner = [0:5] ) {
+            tposition = [ $tile.x*$config.x+delta.x, $tile.y*$config.y+delta.y, delta.z ];
+            for ($corner = [0:5]) {
+                $outside = hex_outside_wall(layout, $row, $col, $corner);
                 tc = TILE_CORNERS[$corner];
-                position = [ ($tile.x+tc.x)*$config.x+delta.x, ($tile.y+tc.y)*$config.y+delta.y, delta.z ];
-                color( hue ) translate( position ) children();
+                cposition = [ tc.x*$config.x, tc.y*$config.y, 0 ];
+                color( hue ) translate( tposition + cposition ) children();
             }
         }
     }
 }
 
+// ----- Testing ------------------------------------------------------------------------------------------------------
+
 if (0) {
+    size = [0,0,10];
     layout = hex_tile_uneven_rows( 3,3 );
-    color( "gray" ) hex_layout( layout, 40*mm ) hex_prism( 0.1*mm, 40*mm );
-    color( "white" ) hex_layout( layout, 40*mm ) hex_prism( 0.2*mm, 39*mm );
-    hex_corner_layout( layout, 40*mm ) {
-        hex_angle_wall( $corner, $config, 3*mm, 10, 0.6, 1.1 );
+    hex = 40*mm;
+    
+    color( "gray" ) hex_layout( layout, hex ) hex_prism( 0.1*mm, hex );
+    color( "white" ) hex_layout( layout, hex ) hex_prism( 0.2*mm, hex-1 );
+    
+    hex_layout( layout, hex ) {
+//        echo ( row=$row, col=$col, config=$config );
+        
+        
+        for (c = [0:5]) {
+            tc = TILE_CORNERS[c];
+            hconfig = hex_config( hex-3*mm );
+            hposition = [ tc.x*hconfig.x, tc.y*hconfig.y, 0 ];
+            translate( hposition ) cylinder( d=1*mm, h=size.z+2*OVERLAP, $fn=30 );
+
+            outside = hex_outside_wall(layout, $row, $col, c);
+            if (!outside) {
+                cposition = [ tc.x*$config.x, tc.y*$config.y, 0 ];
+                translate( cposition ) hex_angle_wall( c, $config, 3*mm, size.z+2*OVERLAP, 0.5, 1.1 );
+            }
+        }
     }
 }
 
