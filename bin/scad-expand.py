@@ -9,9 +9,13 @@ LOG = logging.getLogger( 'scad' )
 
 LIBRARIES = []
 
+LINE_LENGTH = 120
 INCLUDE = re.compile( '^include <(.*)>;$' )
-BARS = '////////////////////////////////////////////////////////////////////////////////\n'
+BARS = '/'*LINE_LENGTH + '\n'
 
+def section_comment( string ):
+    line = "// ===== %s %s" % ( string, '='*LINE_LENGTH)
+    return line[0:LINE_LENGTH]+'\n'
 
 def expand_path( src_path, dst_file ):
     canonical = os.path.abspath( src_path )
@@ -19,14 +23,12 @@ def expand_path( src_path, dst_file ):
         LOG.info( "Expanding %s", canonical )
         LIBRARIES.append( canonical )
         with open( canonical, 'r' ) as src_file:
-            dst_file.write( BARS )
-            dst_file.write( '// Start %s\n' % src_path )
-            dst_file.write( BARS )
+            dst_file.write( section_comment( 'Start ' + src_path ) )
 
             here = os.path.curdir
             os.chdir( os.path.dirname( canonical ) )
 
-            for count, line in enumerate( src_file ):
+            for unused, line in enumerate( src_file ):
                 match = INCLUDE.match( line )
                 if match:
                     filename = match.group( 1 )
@@ -36,9 +38,7 @@ def expand_path( src_path, dst_file ):
 
             os.chdir( here )
 
-            dst_file.write( BARS )
-            dst_file.write( '// End %s\n' % src_path )
-            dst_file.write( BARS )
+            dst_file.write( section_comment( 'End ' + src_path ) )
 
 if __name__ == '__main__':
     logging.basicConfig( level=logging.WARNING, format='%(asctime)s %(message)s', datefmt='%H:%M:%S' )

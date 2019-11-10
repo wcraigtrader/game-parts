@@ -25,8 +25,12 @@ TILE_DIAMETER   = 46.0 * mm;    // 1.75 * inch
 TILE_THICKNESS  =  0.5 * mm;
 
 // Part box dimensions
-TOKEN_DIAMETER  = 17.5 * mm;
-TOKEN_THICKNESS =  2.0 * mm;
+AH_TOKEN_DIAMETER  = 17.5 * mm;
+AH_TOKEN_THICKNESS =  2.0 * mm;
+
+ROB_LARGE_TOKEN     = 15.0 * mm;
+ROB_SMALL_TOKEN     = 12.0 * mm;
+ROB_TOKEN_THICKNESS =  5.0 * mm;
 
 // Cards
 CARD_LENGTH     = 2.625 * inch;
@@ -40,16 +44,15 @@ CARD_COMPANY    = 9;
 
 // ----- Calculated Dimensions ----------------------------------------------------------------------------------------
 
-TOKEN_WIDTH     = 2 * TOKEN_DIAMETER;   // X
-TOKEN_DEPTH     = 1 * TOKEN_DIAMETER;   // Y
-TOKEN_HEIGHT    = 3 * TOKEN_THICKNESS;  // Z
-
 CARD_SIZES      = [ CARD_WIDTH, CARD_LENGTH, CARD_THICKNESS ];
 
 CARD_COMPANIES  = 4 * CARD_COMPANY;
 CARD_OTHER      = 1 + CARD_NUMBERS + CARD_PRIVATES + CARD_TRAINS;
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
+
+AH_TOKENS = uniform_token_cells( 3, 3, 2 * AH_TOKEN_DIAMETER, 1 * AH_TOKEN_DIAMETER);
+ROB_TOKENS = uniform_token_cells( 9, 1, 3 * ROB_LARGE_TOKEN + 4 * ROB_SMALL_TOKEN, 1 * ROB_SMALL_TOKEN);
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
@@ -66,11 +69,19 @@ module tile_lid( count=12, holes=true ) {
 }
 
 module token_box() {
-    cell_box( uniform_token_cells( 3, 3, TOKEN_WIDTH, TOKEN_DEPTH), TOKEN_HEIGHT, ROUNDED );
+    cell_box( AH_TOKENS, 3 * AH_TOKEN_THICKNESS, ROUNDED );
 }
 
 module token_lid() {
-    cell_lid( uniform_token_cells( 3, 3, TOKEN_WIDTH, TOKEN_DEPTH), TOKEN_HEIGHT );
+    cell_lid( AH_TOKENS, 3 * AH_TOKEN_THICKNESS );
+}
+
+module rob_token_box() {
+    cell_box( ROB_TOKENS, ROB_TOKEN_THICKNESS, ROUNDED);
+}
+
+module rob_token_lid() {
+    cell_lid( ROB_TOKENS, ROB_TOKEN_THICKNESS );
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
@@ -83,6 +94,10 @@ if (PART == "tile-tray") {              // bom: 4 | Tile tray |
     token_box();
 } else if (PART == "token-lid") {       // bom: 1 | Token box lid |
     token_lid();
+} else if (PART == "rob-token-box") {   // bom: 1 | Token box (Rails On Board) |
+    rob_token_box();
+} else if (PART == "rob-token-lid") {   // bom: 1 | Token box lid (Rails On Board) |
+    rob_token_lid();
 } else if (PART == "company-cards") {   // bom: 2 | Card sleeve for shares for 4 companeis |
     deck_box( CARD_SIZES, CARD_COMPANIES );
 } else if (PART == "other-cards") {     // bom: 1 | Card sleeve for other cards |
@@ -90,6 +105,6 @@ if (PART == "tile-tray") {              // bom: 4 | Tile tray |
 } else {
     translate( [ 5,  5,0] ) tile_box();
     translate( [ 5, -5,0] ) tile_lid();
-    translate( [-5, -5,0] ) rotate( [0,0,180] ) token_box();
-    translate( [-5,  5,0] ) token_lid();
+    translate( [-5, -5,0] ) rotate( [0,0,180] ) rob_token_box();
+    translate( [-5,  5,0] ) rob_token_lid();
 }

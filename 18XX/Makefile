@@ -68,6 +68,7 @@ PREFIXES=$(shell ls *.scad | egrep -v 18XX | sed "s/.scad//" | tr "\n" " ")
 # directories
 BOM=bom
 STL=stl
+AIO=all-in-one
 IMAGE=png
 
 # Names of parts to build
@@ -78,10 +79,11 @@ SOURCES=$(shell $(DEPEND) $(PREFIX).scad)
 BOMS=$(BOM)/$(PREFIX)-bom.md
 MODELS=$(patsubst %,$(STL)/$(PREFIX)/$(PREFIX)-%.$(STL),$(PARTS))
 IMAGES=$(patsubst %,$(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE),$(PARTS))
+AIOSCAD=$(AIO)/$(PREFIX)-all-in-one.scad
 endif
 
 
-all:	models images boms
+all:	models images boms aio
 
 everything:
 	@for prefix in $(PREFIXES) ; do \
@@ -102,13 +104,15 @@ list:
 
 directories:
 	@:$(call check_defined, PREFIX, game prefix)
-	@mkdir -p $(STL)/$(PREFIX) $(IMAGE)/$(PREFIX) $(BOM)
+	@mkdir -p $(STL)/$(PREFIX) $(IMAGE)/$(PREFIX) $(BOM) $(AIO)
 
 models: directories $(MODELS)
 
 images: directories $(IMAGES)
 
 boms:   directories $(BOMS)
+
+aio: directories $(AIOSCAD)
 
 clean:
 	@:$(call check_defined, PREFIX, game prefix)
@@ -125,15 +129,17 @@ $(BOM)/$(PREFIX)-$(BOM).md : $(PREFIX).scad
 	@/bin/echo "| ----- | --- | ----------- |" >> $@
 	@fgrep '// bom:' $(PREFIX).scad | tr -s '":()/' '|||||' | cut -d '|' -f3,6,7 | sed 's/|/.stl |/;s/^/| $(PREFIX)-/;s/$$/|/' >> $@
 
-# Dependencies for models
-
+# Generate model files
 $(MODELS) : $(STL)/$(PREFIX)/$(PREFIX)-%.$(STL) : $(SOURCES)
 	@:$(call check_defined, PREFIX, game prefix)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(STL),,$(@F)))\" $<
 
-# Dependencies for images
-
+# Generate image snapshots
 $(IMAGES) : $(IMAGE)/$(PREFIX)/$(PREFIX)-%.$(IMAGE) : $(SOURCES)
 	@:$(call check_defined, PREFIX, game prefix)
 	$(OPENSCAD) $(OPENSCAD_OPTIONS) -o $@ -DPART=\"$(subst $(PREFIX)-,,$(subst .$(IMAGE),,$(@F)))\" $(IMAGE_OPTIONS) $<
 
+# Generate all-in-one SCAD files
+$(AIOSCAD) : $(SOURCES) $(EXPAND)
+	@:$(call check_defined, PREFIX, game prefix)
+	$(EXPAND) $< $@

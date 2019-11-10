@@ -30,7 +30,7 @@ TILE_CORNERS = [
     [ 0, 2 ],   // 6 = North (again)
 ];
 
-// Layout offset (row, col) for the neighbor of a corner 
+// Layout offset (row, col) for the neighbor of a corner
 NEIGHBORS = [
     [ [1, 0], [0, 1], [-1, 0], [-1,-1], [0,-1], [1,-1], [1, 0] ],
     [ [1, 1], [0, 1], [-1, 1], [-1, 0], [0,-1], [1, 0], [1, 1] ],
@@ -62,7 +62,7 @@ function layout_size( layout, hex ) = [ (hex_cols( layout ) + uneven_rows( layou
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
-/* hex_wall( corner, offset, width, height, size )
+/* hex_wall( corner, config, width, height, size )
  *
  * This creates one wall of a hexagon, starting at a corner
  *
@@ -108,6 +108,11 @@ module hex_wall( corner, config, width, height, size=+0.60, fn=6 ) {
     }
 }
 
+/* hex_cube_wall( corner, config, width, height, size )
+ *
+ * Same as hex_wall, except with rectangular boxes instead of hulled-cylinders
+ */
+
 module hex_cube_wall( corner, config, width, height, size ) {
     m0 = 0.0;
     m1 = (1 - abs( size ) ) / 2;
@@ -119,7 +124,7 @@ module hex_cube_wall( corner, config, width, height, size ) {
     diff = hex_tile_offset( corner, corner+1 );
     position = [ diff.x*config.x, diff.y*config.y, 0 ];
     center = [0,-width/2,0];
-    
+
     if (size > 0) {
         translate( position*m1 ) rotate( angle ) translate( center ) cube( [config[2]*(m2-m1), width, height] );
     } else {
@@ -128,6 +133,11 @@ module hex_cube_wall( corner, config, width, height, size ) {
     }
 }
 
+/* hex_cube_wall( corner, config, width, height, size )
+ *
+ * Same as hex_wall, except with sloped walls, for thermoform bucks
+ */
+
 module hex_angle_wall( corner, config, width, height, size, zscale = 1.0 ) {
     m0 = 0.0;
     m1 = (1 - abs( size ) ) / 2;
@@ -135,17 +145,17 @@ module hex_angle_wall( corner, config, width, height, size, zscale = 1.0 ) {
     m3 = 1.0;
 
     angle = hex_angle( corner );
-    
+
     diff = hex_tile_offset( corner, corner+1 );
     position = [ diff.x*config.x, diff.y*config.y, 0 ];
-    
+
     module angle_wall( size, zscale ) {
         dy0 = OVERLAP; dy1 = size.y/2;
-        dx3 = size.x/2; dx2 = dx3-dy1; dx0 = -dx3; dx1 = dx0+dy1; 
-        translate( [size.x/2,0,0] ) linear_extrude( size.z, scale=zscale ) 
+        dx3 = size.x/2; dx2 = dx3-dy1; dx0 = -dx3; dx1 = dx0+dy1;
+        translate( [size.x/2,0,0] ) linear_extrude( size.z, scale=zscale )
             polygon( [ [dx0,dy0], [dx3,dy0], [dx3,-dy1], [dx0,-dy1] ] );
     }
-    
+
     if (size > 0) {
         translate( position*m1 ) rotate( angle ) angle_wall( [config[2]*(m2-m1), width, height], zscale );
     } else {
@@ -161,7 +171,7 @@ module hex_angle_wall( corner, config, width, height, size, zscale = 1.0 ) {
  * corner -- 0-5, specifying which corner of the hexagon to create, clockwise
  * height -- Height of the wall segment in millimeters
  * gap    -- Fraction of a millimeter, to tweak the width of the corner
- * size   -- width of the wall segment 
+ * size   -- width of the wall segment
  *
  * @deprecated
  */
@@ -173,9 +183,10 @@ module hex_corner( corner, height, gap=0, size = WIDE_WALL ) {
     cylinder( d=size+2*gap, h=height );
 }
 
-/* hex_prism( height, diameter )
+/* hex_prism( height, diameter, angle )
  *
  * Create a vertical hexagonal prism of a given height and diameter
+ * If angle is not zero, the prism will be sloped, for thermform bucks
  */
 module hex_prism( height, diameter, angle=0 ) {
     bot_d = diameter;
@@ -252,30 +263,4 @@ module hex_corner_layout( layout, size, delta=[0,0,0] ) {
 
 // ----- Testing ------------------------------------------------------------------------------------------------------
 
-if (0) {
-    size = [0,0,10];
-    layout = hex_tile_uneven_rows( 3,3 );
-    hex = 40*mm;
-    
-    color( "gray" ) hex_layout( layout, hex ) hex_prism( 0.1*mm, hex );
-    color( "white" ) hex_layout( layout, hex ) hex_prism( 0.2*mm, hex-1 );
-    
-    hex_layout( layout, hex ) {
-//        echo ( row=$row, col=$col, config=$config );
-        
-        
-        for (c = [0:5]) {
-            tc = TILE_CORNERS[c];
-            hconfig = hex_config( hex-3*mm );
-            hposition = [ tc.x*hconfig.x, tc.y*hconfig.y, 0 ];
-            translate( hposition ) cylinder( d=1*mm, h=size.z+2*OVERLAP, $fn=30 );
-
-            outside = hex_outside_wall(layout, $row, $col, c);
-            if (!outside) {
-                cposition = [ tc.x*$config.x, tc.y*$config.y, 0 ];
-                translate( cposition ) hex_angle_wall( c, $config, 3*mm, size.z+2*OVERLAP, 0.5, 1.1 );
-            }
-        }
-    }
-}
 

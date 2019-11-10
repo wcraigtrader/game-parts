@@ -1,13 +1,13 @@
-// 1867: The Railways of Canada (Grand Trumk Games)
-// by W. Craig Trader
-//
-// --------------------------------------------------------------------------------------------------------------------
-//
-// This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-// To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
-// or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
-//
-// --------------------------------------------------------------------------------------------------------------------
+/* 1867: The Railways of Canada (Grand Trumk Games)
+ * by W. Craig Trader
+ *
+ * --------------------------------------------------------------------------------------------------------------------
+ *
+ * This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+ * To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+ * or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ *
+ * -------------------------------------------------------------------------------------------------------------------- */
 
 // Command Line Arguments
 PART = "other";         // Which part to output
@@ -17,8 +17,8 @@ include <18XX.scad>;
 
 // Game box dimensions
 
-BOX_WIDTH       = 305 * mm;    // (X)
-BOX_HEIGHT      = 230 * mm;    // (Y)
+BOX_WIDTH       = 290 * mm;    // (X)
+BOX_HEIGHT      = 215 * mm;    // (Y)
 BOX_DEPTH       =  80 * mm;    // (Z)
 
 // Tokens
@@ -34,32 +34,27 @@ LOAN_SIZE       = 1.125 * inch;
 LOAN_THICKNESS  = 8.000 * mm;
 
 // Tile dimensions
-TILE_DIAMETER   = 46.00 * mm;
+TILE_DIAMETER   = 43.00 * mm;
 TILE_THICKNESS  =  2.00 * mm;
-TILE_DIMPLE     =  0.250 * mm;
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
 
+tray_size = [BOX_WIDTH, BOX_HEIGHT, 5*TILE_THICKNESS + 2*mm ];
+
+if (VERBOSE) {
+    echo( TraySize=tray_size, inches=tray_size/inch );
+}
+
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
-module hex_stack( count=5, angle=10 ) {
-    height = layer_height( count * TILE_THICKNESS );
-    radius1 = TILE_DIAMETER/2 + 2*mm;
-    radius2 = radius1 + height * sin( angle );
-
-    if (VERBOSE) {
-        echo( HexStack=[ count, height, radius1, radius2] );
-    }
-
-    union() {
-        cylinder( r1=radius1, r2=radius2, h=height, $fn=6 );
-#        translate( [0,0,-TILE_DIMPLE] ) cylinder( r1=0, r2=radius1, h=TILE_DIMPLE+OVERLAP, $fn=6 );
-    }
+module tray_buck() {
+    layout = hex_tile_even_rows( 5, 6 ) ;
+    hex_tray_buck( layout, tray_size, 43, false );
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
 if (PART == "empty") {
 } else {
-    hex_stack();
+    tray_buck();
 }

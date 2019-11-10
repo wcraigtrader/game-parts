@@ -16,7 +16,6 @@ include <../util/hexes.scad>;
 
 // ----- Physical dimensions ------------------------------------------------------------------------------------------
 
-
 STUB        = 2.00 * mm;  // Height of lid stubs
 STUB_GAP    = 0.25 * mm;  // Separation between lid stubs and tray hex corners
 
@@ -44,6 +43,11 @@ SHIFTING = 1.00 * mm;    // Room for tiles to shift
 WIDTH  = 0;     // (X) Card width
 HEIGHT = 1;     // (Y) Card height
 MARKER = 2;     // (Z) Marker diameter
+
+LEFT  = 1;      // When splitting a buck, show the left section
+RIGHT = 2;      // When splitting a buck, show the right section
+UPPER = 3;      // When splitting a buck, show the upper section
+LOWER = 4;      // When splitting a buck, show the lower section
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
@@ -164,7 +168,7 @@ module hex_lid_corners( layout, size, hex, add_stubs=false, remove_holes=true, d
                     hex_corner_layout( layout, hexed, [border.x,border.y,0] ) {
                         hex_wall( $corner, $config, WALL3, stub_z+OVERLAP, -0.6 );
                     }
-                    
+
                     hex_corner_layout( layout, hexed, [border.x,border.y,0] ) {
                         hex_wall( $corner, $config, WALL2, stub_z+2*OVERLAP, -0.4 );
                     }
@@ -293,94 +297,129 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
  * layout     -- Arrangement of tiles in box
  * size       -- Vector describing the exterior size of the box
  * hex        -- Diameter of a hex tile (corner to opposite corner)
+ * split      -- If non-zero, will render half of the buck (LEFT, RIGHT, UPPER, LOWER)
  * dimensions -- List of physical dimensions
  */
-module hex_tray_buck( layout, size, hex, dimensions=THERMOFORM ) {
+module hex_tray_buck( layout, size, hex, split=0, dimensions=THERMOFORM ) {
     bottom = 1.0 * mm;
-    outer  = 1.0 * mm;
     vacuum = 1.5 * mm;
+    moat   = 0.4 * mm;
     slope  = 10; // degrees
     spread = 1.0 + sin(slope) * sin( 45 );
     spacing = 4.0 * mm;
-    
+    styrene =  0.020 * inch;
+    outside = WALL_WIDTH[4]+size.z * sin( slope ) + styrene;
+
     hex1 = hex + 3.0 * mm;
     hex2 = hex1 + spacing;
-    
-    base = [0, 0, bottom];
-    padding = [ 2*WALL1, 2*WALL1, 0];
+
+    base = [ 0, 0, bottom ];
+    padding = [ outside*2, outside*2, 0];
     minimum = layout_size( layout, hex2 );
     optimum = minimum + padding;
 
     actual = actual_size( size, optimum );
-    inside = actual;
-    border = (inside - minimum) / 2;
-    
+    border = (actual - minimum) / 2;
+
     if (DEBUG_18XX) {
-        echo( HexTrayBuck_size=size, minimum=minimum, optimum=optimum, inside=inside, border=border, padding=padding );
-        echo( Slope=slope, Spread=spread );
+        echo( HexTrayBuck_size=size, config=hex_config(hex2), minimum=minimum, optimum=optimum, actual=actual, inches=actual/inch );
+        echo( Slope=slope, Spread=spread, border=border, padding=padding );
     }
-    
-    module buck_base( bsize, bangle, radius ) {
+
+    module buck_base( bsize, radius ) {
         mx = bsize.x;
         my = bsize.y;
-        mz = bsize.z - OVERLAP;
+        mz = bsize.z - OVERLAP + 1;
         dr = radius;
-        ds = mz * sin( bangle ) / 2;
-        
+        ds = mz * sin( slope ) / 2;
+
         points = [
-            [ ds+dr, ds+dr, 0 ],
-            [ mx-ds-dr, ds+dr, 0],
-            [ mx-ds-dr, my-ds-dr, 0 ],
-            [ ds+dr, my-ds-dr, 0 ],
-            [ dr, dr, mz ],
-            [ mx-dr, dr, mz ],
-            [ mx-dr, my-dr, mz ],
-            [ dr, my-dr, mz ],
+            [    dr,    dr,  0 ], [    mx-dr,    dr,  0 ], [    mx-dr,    my-dr,  0 ], [    dr,    my-dr,  0 ], // bottom
+            [ ds+dr, ds+dr, mz ], [ mx-ds-dr, ds+dr, mz ], [ mx-ds-dr, my-ds-dr, mz ], [ ds+dr, my-ds-dr, mz ], // top
         ];
-        faces = [
-            [0,1,2,3],  // bottom
-            [4,5,1,0],  // front
-            [7,6,5,4],  // top
-            [5,6,2,1],  // right
-            [6,7,3,2],  // back
-            [7,4,0,3],  // left        
-        ];
-        
+        faces = [ [0,1,2,3], [4,5,1,0], [7,6,5,4], [5,6,2,1], [6,7,3,2], [7,4,0,3], ];
+
         if (DEBUG_18XX) {
-            actual = bsize+[2*ds+0.040*inch,2*ds+0.040*inch,0.020*inch];
-            echo( BuckBase=bsize, dr=dr, ds=ds, mm=actual, inches=actual/25.4 );
+            echo( BuckBase=bsize, size=[mx, my, mz], dr=dr, ds=ds );
         }
-        
+
         minkowski() {
             polyhedron( points, faces );
             cylinder( r=radius, h=OVERLAP, $fn=48 );
         }
     }
-    
-    difference() {
-        buck_base( inside+base, slope, 1*mm ); // cube( inside + base );
-        
-        hex_layout( layout, hex2, [border.x, border.y, bottom] ) {
-            hex_prism( size.z+OVERLAP, hex1, slope );
 
-            translate( [0,0,-bottom-OVERLAP] ) cylinder( d=vacuum, h=bottom+size.z+2*OVERLAP );
+    module full_buck() {
+        difference() {
+            buck_base( actual, 2*mm );
 
-            for (c = [0:5]) {
-                tc = TILE_CORNERS[c];
-                hconfig = hex_config( hex1-spacing/2 );
-                hposition = [ tc.x*hconfig.x, tc.y*hconfig.y, -bottom-OVERLAP ];
-                translate( hposition ) cylinder( d=vacuum, h=bottom+size.z+2*OVERLAP, $fn=30 );
-                translate( hposition+[0,0,+bottom*4/5] ) hex_cube_wall( c, hconfig, vacuum, size.z+bottom/5+2*OVERLAP, 1.0 );
+            hex_layout( layout, hex2, [border.x, border.y, bottom] ) {
+                hex_prism( size.z+OVERLAP, hex1, slope );
 
-                outside = hex_outside_wall(layout, $row, $col, c);
-                if (!outside) {
-                    cposition = [ tc.x*$config.x, tc.y*$config.y, 0 ];
-                    translate( cposition ) hex_angle_wall( c, $config, spacing, size.z+2*OVERLAP, 0.5, spread );
+                // Center hole
+                // translate( [0,0,-bottom-OVERLAP] ) cylinder( d=vacuum, h=bottom+size.z+2*OVERLAP );
+
+                for (c = [0:5]) {
+                    tc = TILE_CORNERS[c];
+                    hconfig = hex_config( hex1-spacing/2 );
+                    hposition = [ tc.x*hconfig.x, tc.y*hconfig.y, -bottom-OVERLAP ];
+
+                    // Vacuum holes
+                    translate( hposition ) cylinder( d=vacuum, h=bottom+size.z+2*OVERLAP, $fn=30 );
+                    translate( hposition+[0,0,+bottom-moat] ) hex_cube_wall( c, hconfig, vacuum, size.z+moat+2*OVERLAP, 1.0 );
+
+                    outside = hex_outside_wall(layout, $row, $col, c);
+                    if (!outside) {
+                        cposition = [ tc.x*$config.x, tc.y*$config.y, 0 ];
+                        translate( cposition ) hex_angle_wall( c, $config, spacing, size.z+2*OVERLAP, 0.5, spread );
+                    }
                 }
-            }
 
+            }
         }
-    }    
+    }
+
+    module half_block( split ) {
+        granularity = 20;
+        config = hex_config( hex2 );
+
+        x0 = -OVERLAP; cx = actual.x/2; mx = actual.x+OVERLAP;
+        y0 = -OVERLAP; cy = actual.y/2; my = actual.y+OVERLAP;
+
+        if (split == UPPER || split == LOWER ) {
+            cycles = floor( actual.x / granularity );
+            ticks = cycles * granularity;
+            dx = (actual.x - ticks) / 2;
+            sy = (split == LOWER) ? y0 : my;
+
+            paths = [
+                [ mx, cy ], [ mx, sy ], [ x0, sy ], [ x0, cy ],
+                for (i=[0:ticks] ) [ dx + i, sin( i*360/granularity )*config.y/2 + cy ],
+            ];
+            translate( [0,0,-OVERLAP] ) linear_extrude( size.z + 2*OVERLAP ) polygon( paths );
+        } else {
+            cycles = floor( actual.y / granularity );
+            ticks = cycles * granularity;
+            dy = (actual.y - ticks) / 2;
+            sx = (split == LEFT) ? x0 : mx;
+
+            paths = [
+                [ cx, my ], [ sx, my ], [ sx, y0 ], [ cx, y0 ],
+                for (i=[0:ticks] ) [ sin( i*360/granularity )*config.x/2 + cx, dy + i ],
+            ];
+            translate( [0,0,-OVERLAP] ) linear_extrude( size.z + 2*OVERLAP ) polygon( paths );
+        }
+
+    }
+
+    if (split) {
+        intersection() {
+            half_block( split );
+            full_buck();
+        }
+    } else {
+        full_buck();
+    }
 }
 
 /* card_box( sizes, dimensions )
@@ -588,57 +627,3 @@ module card_rack( count=9, slot_depth=10*CARD_THICKNESS, width=1.5*inch, height=
 
 // ----- Testing ------------------------------------------------------------------------------------------------------
 
-if (0) {
-    CARDS = [ 2.50 * inch, 1.75 * inch, 15*mm ];
-    translate( [ 5,  5, 0] ) deep_card_box( CARDS );
-    translate( [ 5, -5, 0] ) deep_card_lid( CARDS );
-    translate( [-5, -5, 0] ) rotate( [0, 0, 180] ) card_box( CARDS );
-    translate( [-5,  5, 0] ) rotate( [0, 0, 180] ) card_lid( CARDS );
-}
-
-if (0) {
-    VERBOSE = true;
-
-    // Part box dimensions
-    PART_WIDTH      = 35.0; // 1.25 * inch;  // X
-    PART_DEPTH      = 17.5; // 0.75 * inch;  // Y
-    PART_HEIGHT     = 6.00 * mm;    // Z
-
-    px = PART_WIDTH; py = PART_DEPTH;
-
-    PART_CELLS = [
-        [ [ px, py ], [ px, py ], [ px, py ] ],
-        [ [ px, py ], [ px, py ], [ px, py ] ],
-        [ [ px, py ], [ px, py ], [ px, py ] ]
-    ];
-
-    TEST_CELLS = [
-        [ [ 20, 20 ], [ 30, 20 ], [ 40, 20 ] ],
-        [ [ 20, 15 ], [ 30, 15 ], [ 40, 15 ] ],
-        [ [ 20, 10 ], [ 30, 10 ], [ 40, 10 ] ]
-    ];
-
-    cell_box( PART_CELLS, PART_HEIGHT );
-    translate( [0, 70, 0] )
-    cell_lid( PART_CELLS, PART_HEIGHT );
-}
-
-if (0) {
-    box_size = [0,0,6];
-    
-    translate( [5, 5, 0] ) hex_box_corners( hex_tile_uneven_rows( 2,2 ), box_size, 43, ["ONE"] );
-    translate( [5,-5, 0] ) hex_lid_corners( hex_tile_uneven_rows( 2,2 ), box_size, 43, true );
-}
-
-if (0) {
-    box_size = [0,0,5];
-    
-    translate( [5, 5, 0] ) hex_box_walls( hex_tile_even_rows( 2,2 ), box_size, 43, ["ONE"] );
-    translate( [5,-5, 0] ) hex_lid_walls( hex_tile_even_rows( 2,2 ), box_size, 43, true );
-}
-
-if (1) {
-    box_size = [9.625 * inch, 11.500 * inch, 12]; // [0,0,11]; // 
-    layout = hex_tile_uneven_rows( 7,5 ) ;
-    hex_tray_buck( layout, box_size, 44 );
-}
