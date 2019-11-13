@@ -4,3 +4,5 @@
 *.gcode
 
 # *.stl
+.idea/
+game-parts.iml
