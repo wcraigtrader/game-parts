@@ -17,8 +17,8 @@ include <18XX.scad>;
 
 // Game box dimensions
 
-BOX_WIDTH       = 290 * mm;    // (X)
-BOX_HEIGHT      = 215 * mm;    // (Y)
+BOX_WIDTH       = 294 * mm;    // (X)
+BOX_HEIGHT      = 219 * mm;    // (Y)
 BOX_DEPTH       =  80 * mm;    // (Z)
 
 // Tokens
@@ -39,22 +39,28 @@ TILE_THICKNESS  =  2.00 * mm;
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
 
-tray_size = [BOX_WIDTH, BOX_HEIGHT, 5*TILE_THICKNESS + 2*mm ];
+horizontal = [BOX_WIDTH, BOX_HEIGHT, 5*TILE_THICKNESS + 2*mm ];
+vertical   = [BOX_HEIGHT, BOX_WIDTH, 5*TILE_THICKNESS + 2*mm ];
 
 if (VERBOSE) {
-    echo( TraySize=tray_size, inches=tray_size/inch );
+    echo( TraySize=vertical, inches=vertical/inch );
 }
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
-module tray_buck() {
-    layout = hex_tile_even_rows( 5, 6 ) ;
-    hex_tray_buck( layout, tray_size, 43, false );
+module tray_buck( orientation=0 ) {
+    layout = hex_tile_uneven_rows( 7, 5 ) ;
+    hex_tray_buck( layout, vertical, 43, orientation );
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "empty") {
+if (PART == "buck-full") {
+    tray_buck( FULL );
+} else if (PART == "buck-upper") {
+    tray_buck( UPPER );
+} else if ( PART == "buck-lower") {
+    tray_buck( LOWER );
 } else {
-    tray_buck();
+    tray_buck( FULL );
 }

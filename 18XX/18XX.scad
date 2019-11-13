@@ -44,6 +44,7 @@ WIDTH  = 0;     // (X) Card width
 HEIGHT = 1;     // (Y) Card height
 MARKER = 2;     // (Z) Marker diameter
 
+FULL  = 0;      // Don't split the buck
 LEFT  = 1;      // When splitting a buck, show the left section
 RIGHT = 2;      // When splitting a buck, show the right section
 UPPER = 3;      // When splitting a buck, show the upper section
