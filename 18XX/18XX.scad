@@ -296,7 +296,7 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
  * Create a tray to hold hexagonal tiles
  *
  * layout     -- Arrangement of tiles in box
- * size       -- Vector describing the exterior size of the box
+ * size       -- Vector describing the interior size of the box
  * hex        -- Diameter of a hex tile (corner to opposite corner)
  * split      -- If non-zero, will render half of the buck (LEFT, RIGHT, UPPER, LOWER)
  * dimensions -- List of physical dimensions
@@ -308,7 +308,7 @@ module hex_tray_buck( layout, size, hex, split=0, dimensions=THERMOFORM ) {
     slope  = 10; // degrees
     spread = 1.0 + sin(slope) * sin( 45 );
     spacing = 4.0 * mm;
-    styrene =  0.020 * inch;
+    styrene =  0.030 * inch;
     outside = WALL_WIDTH[4]+size.z * sin( slope ) + styrene;
 
     hex1 = hex + 3.0 * mm;

@@ -34,13 +34,18 @@ LOAN_SIZE       = 1.125 * inch;
 LOAN_THICKNESS  = 8.000 * mm;
 
 // Tile dimensions
-TILE_DIAMETER   = 43.00 * mm;
+TILE_DIAMETER   = 1.50 * inch / sin( 60 );
 TILE_THICKNESS  =  2.00 * mm;
+TILE_EXTRA      =  2.00 * mm;
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
 
-horizontal = [BOX_WIDTH, BOX_HEIGHT, 5*TILE_THICKNESS + 2*mm ];
-vertical   = [BOX_HEIGHT, BOX_WIDTH, 5*TILE_THICKNESS + 2*mm ];
+horizontal = [BOX_WIDTH, BOX_HEIGHT, 5*TILE_THICKNESS + TILE_EXTRA ];
+vertical   = [BOX_HEIGHT, BOX_WIDTH, 5*TILE_THICKNESS + TILE_EXTRA ];
+
+layout28 = hex_tile_uneven_rows( 5, 6 );
+layout30 = hex_tile_even_rows( 5, 6 );
+layout32 = hex_tile_uneven_rows( 7, 5 ) ;
 
 if (VERBOSE) {
     echo( TraySize=vertical, inches=vertical/inch );
@@ -48,19 +53,36 @@ if (VERBOSE) {
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
-module tray_buck( orientation=0 ) {
-    layout = hex_tile_uneven_rows( 7, 5 ) ;
-    hex_tray_buck( layout, vertical, 43, orientation );
+module buck( wells=32, orientation=FULL ) {
+    if (wells == 28) {
+        hex_tray_buck( layout28, horizontal, TILE_DIAMETER, orientation );
+    } else if (wells == 30) {
+        hex_tray_buck( layout30, horizontal, TILE_DIAMETER, orientation );
+    } else if (wells == 32) {
+        hex_tray_buck( layout32, vertical, TILE_DIAMETER, orientation );
+    }
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
 
-if (PART == "buck-full") {
-    tray_buck( FULL );
-} else if (PART == "buck-upper") {
-    tray_buck( UPPER );
-} else if ( PART == "buck-lower") {
-    tray_buck( LOWER );
+if (PART == "buck-28-full") {
+    buck( 28, FULL );
+} else if (PART == "buck-28-upper") {
+    buck( 28, UPPER );
+} else if (PART == "buck-28-lower") {
+    buck( 28, LOWER );
+} else if (PART == "buck-30-full") {
+    buck( 30, FULL );
+} else if (PART == "buck-30-upper") {
+    buck( 30, UPPER );
+} else if (PART == "buck-30-lower") {
+    buck( 30, LOWER );
+} else if (PART == "buck-32-full") {
+    buck( 32, FULL );
+} else if (PART == "buck-32-upper") {
+    buck( 32, UPPER );
+} else if (PART == "buck-32-lower") {
+    buck( 32, LOWER );
 } else {
-    tray_buck( FULL );
+    buck( 28, FULL );
 }

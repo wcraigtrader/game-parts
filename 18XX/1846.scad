@@ -23,6 +23,7 @@ BOX_DEPTH       =  3.0 * inch;
 // Tile dimensions
 TILE_DIAMETER   = 50.0 * mm;
 TILE_THICKNESS  =  3.0 * mm;
+TILE_EXTRA      =  2.0 * mm;
 
 // Inner well dimensions
 WELL_DEPTH      = 1.25 * inch;
@@ -43,12 +44,14 @@ MARK_DIAMETER   = 15 * mm;      // 9/16 * inch;
 MARK_THICKNESS  = 5*mm;         // 3.0 * mm;
 MARK_MAX        = 10;
 
-// Poker chip dimensions
-CHIP_DIAMETER   = 41 * mm;
-CHIP_THICKNESS  = 3.31 * mm;
-
 CARDS           = [ CARD_WIDTH, CARD_HEIGHT, MARK_DIAMETER ];
 CARD_SIZES      = [ CARD_HEIGHT, CARD_WIDTH, CARD_THICKNESS ];
+
+// ----- Data ---------------------------------------------------------------------------------------------------------
+
+horizontal = [BOX_WIDTH, BOX_HEIGHT, 5*TILE_THICKNESS + TILE_EXTRA ];
+vertical   = [BOX_HEIGHT, BOX_WIDTH, 5*TILE_THICKNESS + TILE_EXTRA ];
+half       = [BOX_WIDTH, BOX_HEIGHT/2, 5*TILE_THICKNESS + TILE_EXTRA ];
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
@@ -85,7 +88,7 @@ if (PART == "short-tile-tray") {            // bom: 2 | short tile tray |
     deep_card_lid( CARDS );
 } else if (PART == "card-sleeve") {         // bom: 1 | Card sleeve for trains |
     deck_box( CARD_SIZES, TRAIN_CARDS );
-} else {
+} else if (0) {
     translate( [-5, -5, 0] ) rotate( [0,0,180] ) tile_box( 5 );
     translate( [-5,  5, 0] ) rotate( [0,0,180] ) tile_lid( 5 );
 
@@ -93,4 +96,6 @@ if (PART == "short-tile-tray") {            // bom: 2 | short tile tray |
     translate( [ 5, -5, 0] ) rotate( [0,0,0] ) deep_card_lid( CARDS );
 
     translate( [77, 5, 0] ) deck_box( CARD_SIZES, TRAIN_CARDS );
+} else {
+    hex_tray_buck( hex_tile_even_rows( 3, 4 ), half, TILE_DIAMETER );
 }
