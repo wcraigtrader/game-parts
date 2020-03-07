@@ -1,8 +1,7 @@
+.~*
 *.save
 *.deps
-.~*
 *.gcode
 
-# *.stl
 .idea/
 game-parts.iml
