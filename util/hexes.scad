@@ -46,19 +46,23 @@ function hex_tile_uneven_rows( rows, cols ) = [ for( r=[0:rows-1] ) hex_tile_row
 function hex_length( diameter ) = diameter;
 function hex_width( diameter ) = hex_length( diameter ) * sin(60);
 function hex_edge( diameter ) = hex_length( diameter ) / 2;
+function hex_config( diameter ) = [ hex_width( diameter )/4, hex_length( diameter )/4, hex_edge( diameter ) ];
+
+function hex_rows( layout ) = len( layout );
+function hex_cols( layout ) = len( layout ) == 1 ? len( layout[0] ) : max( len( layout[0] ), len( layout[1] ) );
+function uneven_rows( layout ) = len( layout ) == 1 ? 0 : (len( layout[0] ) != len( layout[1] )) ? 0 : 0.5;
+function short_row( layout ) = len( layout ) == 1 ? 0 : len( layout[0] ) > len( layout[1] ) ? 1 : 0;
+
+function hex_row_shift( layout ) = (len( layout[0] ) != len( layout[1] )) ? 1 : 0;
+function hex_col_shift( layout ) = (len( layout ) % 2) == 0 ? 1.5 : 0;
+
+function layout_size( layout, hex ) = [ (hex_cols( layout ) + uneven_rows( layout ) ) * hex_width( hex ), (hex_rows( layout ) * 3+1) / 4 * hex_length( hex ), 0 ];
 
 function hex_angle( corner ) = corner * -60 - 30;
 function hex_tile_offset( c1, c2 ) = TILE_CORNERS[ c2 % 6 ] - TILE_CORNERS[ c1 % 6 ];
 function hex_outside_wall( layout, row, col, corner ) = is_undef( layout[row+NEIGHBORS[row%2][corner][0]][col+NEIGHBORS[row%2][corner][1]] );
 
-function hex_config( diameter ) = [ hex_width( diameter )/4, hex_length( diameter )/4, hex_edge( diameter ) ];
-
-function hex_rows( layout ) = len( layout );
-function hex_cols( layout ) = max( len( layout[0] ), len( layout[1] ) );
-function uneven_rows( layout ) = (len( layout[0] ) != len( layout[1] )) ? 0 : 0.5;
-function short_row( layout ) = len( layout[0] ) > len( layout[1] ) ? 1 : 0;
-
-function layout_size( layout, hex ) = [ (hex_cols( layout ) + uneven_rows( layout ) ) * hex_width( hex ), (hex_rows( layout ) * 3+1) / 4 * hex_length( hex ), 0 ];
+// function hex_heights( layout, maxz ) = [ for( r=[0:len(layout)-1] ) [ for( c=[0:len(layout[r]-1] ) ] ] ]
 
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
@@ -138,7 +142,7 @@ module hex_cube_wall( corner, config, width, height, size ) {
  * Same as hex_wall, except with sloped walls, for thermoform bucks
  */
 
-module hex_angle_wall( corner, config, width, height, size, zscale = 1.0 ) {
+module hex_angle_wall( corner, config, width, height, size, zscale = 1.0, vacuum=[0,0] ) {
     m0 = 0.0;
     m1 = (1 - abs( size ) ) / 2;
     m2 = 1 - m1;
@@ -152,8 +156,14 @@ module hex_angle_wall( corner, config, width, height, size, zscale = 1.0 ) {
     module angle_wall( size, zscale ) {
         dy0 = OVERLAP; dy1 = size.y/2;
         dx3 = size.x/2; dx2 = dx3-dy1; dx0 = -dx3; dx1 = dx0+dy1;
-        translate( [size.x/2,0,0] ) linear_extrude( size.z, scale=zscale )
-            polygon( [ [dx0,dy0], [dx3,dy0], [dx3,-dy1], [dx0,-dy1] ] );
+        translate( [size.x/2,0,0] ) union() {
+            linear_extrude( size.z, scale=zscale ) polygon( [ [dx0,dy0], [dx3,dy0], [dx3,-dy1], [dx0,-dy1] ] );
+            if ( vacuum[0] > 0 ) {
+                vdiameter = vacuum[0];
+                vheight = vacuum[1];
+                translate( [dx0+vdiameter/2, 0, -vheight-OVERLAP] ) cylinder( d=vdiameter, h=vheight+2*OVERLAP );
+            }
+        }
     }
 
     if (size > 0) {
@@ -192,6 +202,20 @@ module hex_prism( height, diameter, angle=0 ) {
     bot_d = diameter;
     top_d = diameter + height * sin( angle );
     rotate( [ 0, 0, 90 ] ) cylinder( h=height, d1=bot_d, d2=top_d, $fn=6 );
+}
+
+/* hex_prism_with_bump( height, diameter, angle )
+ *
+ * Create a vertical hexagonal prism of a given height and diameter
+ * If angle is not zero, the prism will be sloped, for thermform bucks
+ */
+module hex_prism_with_bump( height, diameter, bump, angle=0 ) {
+    bot_d = diameter;
+    top_d = diameter + height * sin( angle ) * 2;
+    difference() {
+        rotate( [ 0, 0, 90 ] ) cylinder( h=height, d1=bot_d, d2=top_d, $fn=6 );
+        rotate( [ 0, 0, 90 ] ) cylinder( h=bump, d1=bot_d*1/2, d2=bot_d*1/3, $fn=6 );
+    }
 }
 
 /* hex_layout( layout, size, delta )
@@ -262,5 +286,3 @@ module hex_corner_layout( layout, size, delta=[0,0,0] ) {
 }
 
 // ----- Testing ------------------------------------------------------------------------------------------------------
-
-

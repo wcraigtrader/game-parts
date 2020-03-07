@@ -48,7 +48,6 @@ STUBS  = 6;     // Height of lid stubs that overlap cell walls
 
 REASONABLE = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[3], WALL_WIDTH[2], 1*mm, 20*mm, 2*mm ];
 STURDY     = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[4], WALL_WIDTH[3], 1*mm, 20*mm, 2*mm ];
-THERMOFORM = [ 0.020 *inch, 0.020 *inch, 0.020 *inch, 0.020 *inch, 1*mm, 20*mm, 2*mm ];
 
 HORIZONTAL = [ 1, 1, 0 ];
 VERTICAL   = [ 0, 0, 1 ];
@@ -444,7 +443,7 @@ module cell_lid( cells, height, type=HOLLOW, stubs=false, holes=false, borders=R
  * quantity -- number of cards
  * wall     -- thickness of box wall
  */
-module deck_box( sizes, quantity, wall=WALL_WIDTH[1] ) {
+module deck_box( sizes, quantity, wall=WALL_WIDTH[1], rounded=false ) {
 
     bottom = layers( 3 );
 
@@ -460,12 +459,19 @@ module deck_box( sizes, quantity, wall=WALL_WIDTH[1] ) {
         echo( ThinDeckBox=sizes, Quantity=quantity, Thickness=wall, Inside=inside, Box=box );
     }
 
-    translate( [-wall, -wall, -bottom ] ) difference() {
+    difference() {
         // Outside of box
-        cube( box );
+        if (rounded) {
+            minkowski() {
+                cube( inside - [0,0,OVERLAP] );
+                hemisphere(wall);
+            }
+        } else {
+            translate( [-wall, -wall, -bottom ] ) cube( box );
+        }
 
         // Inside of box
-        translate( [ wall, wall, bottom ] ) cube( inside );
+        cube( inside );
     }
 }
 
