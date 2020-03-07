@@ -377,8 +377,10 @@ module hex_tray_buck( layout, size, hex, split=0, test=false, dimensions=STYRENE
 
     module full_buck() {
         difference() {
+            // Start with a buck
             buck_base( actual, 2*mm, [] );
 
+            // Remove wells for tiles
             hex_layout( layout, hex2, [border.x, border.y, bottom] ) {
                 hex_prism_with_bump( height+OVERLAP, hex1, rocker, slope );
 
@@ -405,6 +407,34 @@ module hex_tray_buck( layout, size, hex, split=0, test=false, dimensions=STYRENE
                     }
                 }
 
+            }
+
+            // Remove corners for tray lid
+            if (1) {
+                translate( [0,0,actual.z-5+bottom] ) difference() {
+                    minkowski() {
+                        cube( [actual.x, actual.y, 5] );
+                        cylinder( r=1, h=OVERLAP, $fn=48 );
+                    }
+
+                    translate( [5, 5, 0] ) minkowski() {
+                        cube( [actual.x-10, actual.y-10, 5] );
+                        cylinder( r=2, h=OVERLAP, $fn=48 );
+                    }
+                    translate( [0, actual.y/5, 0] ) cube( [actual.x, actual.y*.6,5+OVERLAP] );
+                    translate( [actual.x/5, 0, 0] ) cube( [actual.x*.6, actual.y,5+OVERLAP] );
+                }
+            }
+
+            // Inset timestamp in bottom of buck
+            if (TIMESTAMP > "") {
+                translate( [actual.x/2, 5, FONT_HEIGHT/2-OVERLAP] )
+                    rotate( [180,0,-0] ) linear_extrude( height=FONT_HEIGHT/2+OVERLAP )
+                        text( TIMESTAMP, font=FONT_NAME, size=FONT_SIZE/2, halign="center", valign="bottom" );
+
+                translate( [actual.x/2, actual.y-5, FONT_HEIGHT/2-OVERLAP] )
+                    rotate( [180,0,180] ) linear_extrude( height=FONT_HEIGHT/2+OVERLAP )
+                        text( TIMESTAMP, font=FONT_NAME, size=FONT_SIZE/2, halign="center", valign="bottom" );
             }
         }
 
