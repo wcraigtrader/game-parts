@@ -49,9 +49,17 @@ CARD_SIZES      = [ CARD_HEIGHT, CARD_WIDTH, CARD_THICKNESS ];
 
 // ----- Data ---------------------------------------------------------------------------------------------------------
 
-horizontal = [BOX_WIDTH, BOX_HEIGHT, 5*TILE_THICKNESS + TILE_EXTRA ];
-vertical   = [BOX_HEIGHT, BOX_WIDTH, 5*TILE_THICKNESS + TILE_EXTRA ];
+vertical   = [BOX_WIDTH, BOX_HEIGHT, 5*TILE_THICKNESS + TILE_EXTRA ];
+horizontal = [BOX_HEIGHT, BOX_WIDTH, 5*TILE_THICKNESS + TILE_EXTRA ];
 half       = [BOX_WIDTH, BOX_HEIGHT/2, 5*TILE_THICKNESS + TILE_EXTRA ];
+auto_fit   = [0, 0, 5*TILE_THICKNESS + TILE_EXTRA];
+
+layout0  = hex_tile_uneven_rows( 3, 3 );
+layout1  = hex_tile_uneven_rows( 6, 4 );
+layout20 = hex_tile_even_rows( 4, 5 );
+layout28 = hex_tile_uneven_rows( 5, 6 );
+layout30 = hex_tile_even_rows( 5, 6 );
+layout32 = hex_tile_uneven_rows( 7, 5 ) ;
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
@@ -66,6 +74,18 @@ module tile_box( count=5 ) {
 
 module tile_lid( count=5 ) {
     hex_lid_corners(  hex_tile_even_rows( 3, 4 ), half_box_size( count ), TILE_DIAMETER, false, true );
+}
+
+module buck( wells=32, orientation=FULL, test=false ) {
+    if (wells == 28) {
+        hex_tray_buck( layout28, horizontal, TILE_DIAMETER, orientation, test );
+    } else if (wells == 30) {
+        hex_tray_buck( layout30, horizontal, TILE_DIAMETER, orientation, test );
+    } else if (wells == 32) {
+        hex_tray_buck( layout32, vertical, TILE_DIAMETER, orientation, test );
+    } else {
+        hex_tray_buck( layout0, auto_fit, TILE_DIAMETER, orientation, test );
+    }
 }
 
 // ----- Rendering ----------------------------------------------------------------------------------------------------
@@ -97,5 +117,5 @@ if (PART == "short-tile-tray") {            // bom: 2 | short tile tray |
 
     translate( [77, 5, 0] ) deck_box( CARD_SIZES, TRAIN_CARDS );
 } else {
-    hex_tray_buck( hex_tile_even_rows( 3, 4 ), half, TILE_DIAMETER );
+    buck( 0 );
 }

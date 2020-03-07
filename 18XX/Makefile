@@ -48,9 +48,11 @@
 
 # ----- Local OpenSCAD settings -----------------------------------------------
 
+TIMESTAMP=$(shell date +"%Y-%M-%dT%H:%m")
+
 # OpenSCAD binary and options
-OPENSCAD=/opt/openscad
-OPENSCAD_OPTIONS=-DVERBOSE=false
+OPENSCAD=/opt/openscad/latest
+OPENSCAD_OPTIONS=-DVERBOSE=false -DTIMESTAMP=\"$(TIMESTAMP)\"
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
 # ----- Everything after this should not need modification

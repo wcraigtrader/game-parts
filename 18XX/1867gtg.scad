@@ -12,13 +12,14 @@
 // Command Line Arguments
 PART = "other";         // Which part to output
 VERBOSE = true;        	// Set to non-zero to see more data
+TIMESTAMP = "2020-03-07T00:03"; // "yyyy-mm-ddThh:mm";
 
 include <18XX.scad>;
 
 // Game box dimensions
 
 BOX_WIDTH       = 294 * mm;    // (X)
-BOX_HEIGHT      = 219 * mm;    // (Y)
+BOX_HEIGHT      = 219 * mm;    // (Y)  219 * mm
 BOX_DEPTH       =  80 * mm;    // (Z)
 
 // Tokens
@@ -42,24 +43,33 @@ TILE_EXTRA      =  2.00 * mm;
 
 horizontal = [BOX_WIDTH, BOX_HEIGHT, 5*TILE_THICKNESS + TILE_EXTRA ];
 vertical   = [BOX_HEIGHT, BOX_WIDTH, 5*TILE_THICKNESS + TILE_EXTRA ];
+auto_fit   = [0, 0, 5*TILE_THICKNESS + TILE_EXTRA];
 
+layout1  = hex_tile_even_rows( 1, 1 );
+layout5  = hex_tile_uneven_rows( 3, 2 );
+layout8  = hex_tile_uneven_rows( 3, 3 );
+layout25 = hex_tile_even_rows( 5, 5 );
 layout28 = hex_tile_uneven_rows( 5, 6 );
 layout30 = hex_tile_even_rows( 5, 6 );
 layout32 = hex_tile_uneven_rows( 7, 5 ) ;
 
-if (VERBOSE) {
-    echo( TraySize=vertical, inches=vertical/inch );
-}
-
 // ----- Modules ------------------------------------------------------------------------------------------------------
 
-module buck( wells=32, orientation=FULL ) {
-    if (wells == 28) {
-        hex_tray_buck( layout28, horizontal, TILE_DIAMETER, orientation );
+module buck( wells=32, orientation=FULL, test=false, dimensions=STYRENE_30MIL ) {
+    if (wells == 1) {
+        hex_tray_buck( layout1, auto_fit, TILE_DIAMETER, orientation, test, dimensions );
+    } else if (wells == 5) {
+        hex_tray_buck( layout5, auto_fit, TILE_DIAMETER, orientation, test, dimensions );
+    } else if (wells == 8) {
+        hex_tray_buck( layout8, auto_fit, TILE_DIAMETER, orientation, test, dimensions );
+    } else if (wells == 28) {
+        hex_tray_buck( layout28, auto_fit, TILE_DIAMETER, orientation, test, dimensions );
     } else if (wells == 30) {
-        hex_tray_buck( layout30, horizontal, TILE_DIAMETER, orientation );
+        hex_tray_buck( layout30, auto_fit, TILE_DIAMETER, orientation, test, dimensions );
     } else if (wells == 32) {
-        hex_tray_buck( layout32, vertical, TILE_DIAMETER, orientation );
+        hex_tray_buck( layout32, auto_fit, TILE_DIAMETER, orientation, test, dimensions );
+    } else {
+        hex_tray_buck( layout0, auto_fit, TILE_DIAMETER, orientation, test, dimensions );
     }
 }
 
@@ -67,16 +77,16 @@ module buck( wells=32, orientation=FULL ) {
 
 if (PART == "buck-28-full") {
     buck( 28, FULL );
-} else if (PART == "buck-28-upper") {
-    buck( 28, UPPER );
-} else if (PART == "buck-28-lower") {
-    buck( 28, LOWER );
+} else if (PART == "buck-28-left") {
+    buck( 28, LEFT );
+} else if (PART == "buck-28-right") {
+    buck( 28, RIGHT );
 } else if (PART == "buck-30-full") {
     buck( 30, FULL );
-} else if (PART == "buck-30-upper") {
-    buck( 30, UPPER );
-} else if (PART == "buck-30-lower") {
-    buck( 30, LOWER );
+} else if (PART == "buck-30-left") {
+    buck( 30, LEFT );
+} else if (PART == "buck-30-right") {
+    buck( 30, RIGHT );
 } else if (PART == "buck-32-full") {
     buck( 32, FULL );
 } else if (PART == "buck-32-upper") {
@@ -84,5 +94,15 @@ if (PART == "buck-28-full") {
 } else if (PART == "buck-32-lower") {
     buck( 32, LOWER );
 } else {
-    buck( 28, FULL );
+    // buck( 28, LEFT );
+    // translate( [2,0,0] ) buck( 28, RIGHT );
+
+    // buck( 0, LOWER );
+    // translate( [0,2,0] ) buck( 0, UPPER );
+
+    // rotate( [0,0,90] ) buck( 0 );
+
+    buck( 1, FULL, false );
+    // translate( [0, 0, 0] ) buck( 8, LOWER, false );
+    // translate( [0, 2, 0] ) buck( 8, UPPER, false );
 }

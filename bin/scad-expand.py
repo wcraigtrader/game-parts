@@ -28,7 +28,7 @@ def expand_path( src_path, dst_file ):
             here = os.path.curdir
             os.chdir( os.path.dirname( canonical ) )
 
-            for unused, line in enumerate( src_file ):
+            for dummy_index, line in enumerate( src_file ):
                 match = INCLUDE.match( line )
                 if match:
                     filename = match.group( 1 )

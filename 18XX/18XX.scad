@@ -19,7 +19,7 @@ include <../util/hexes.scad>;
 STUB        = 2.00 * mm;  // Height of lid stubs
 STUB_GAP    = 0.25 * mm;  // Separation between lid stubs and tray hex corners
 
-FONT_NAME   = "helvetica:style=Bold";
+FONT_NAME   = "OCRA:style=Bold";
 FONT_SIZE   = 6.0;
 FONT_HEIGHT = layers( 4 );
 
@@ -33,11 +33,6 @@ WALL3 = WALL2 + 2*WALL_WIDTH[4];
 PADDING = [ 4*WALL1, 2*WALL1, 0 ];
 
 HEX_SPACING = 3 * mm;   // 1.5 mm padding on each side of the tile
-
-if (DEBUG_18XX) {
-    echo ( Walls = [WALL1, WALL2, WALL3], Spacing=HEX_SPACING );
-}
-
 SHIFTING = 1.00 * mm;    // Room for tiles to shift
 
 WIDTH  = 0;     // (X) Card width
@@ -49,6 +44,10 @@ LEFT  = 1;      // When splitting a buck, show the left section
 RIGHT = 2;      // When splitting a buck, show the right section
 UPPER = 3;      // When splitting a buck, show the upper section
 LOWER = 4;      // When splitting a buck, show the lower section
+UL    = 5;
+UR    = 6;
+LL    = 7;
+LR    = 8;
 
 // ----- Functions ----------------------------------------------------------------------------------------------------
 
@@ -64,7 +63,7 @@ module hex_box_labels( labels, layout, size, inside, delta) {
 
         for (l=[len(labels)-1:-1:0]) {
             ly = layout[sr+2*l][0][1]*config.y + delta.y;
-            translate( [inside.x-delta.x+1, ly, -OVERLAP] )
+            translate( [inside.x-delta.x+1, ly, delta.z-OVERLAP] )
                 rotate( [0,0,-90] ) linear_extrude( height=FONT_HEIGHT+OVERLAP )
                     text( labels[l], font=FONT_NAME, size=FONT_SIZE, halign="center", valign="top" );
         }
@@ -95,7 +94,12 @@ module hex_box_corners( layout, size, hex, labels=[], dimensions=REASONABLE ) {
 
 
     if (DEBUG_18XX) {
-        echo( HexBoxCorners_Size=size, InSize=inside, Minimum=minimum, Border=border );
+        echo( HexBoxCorners_Size=size, InSize=inside, Exterior=(inside+walls)/inch );
+        echo( Minimum=minimum, Border=border );
+    }
+    if (size.x == 0 || size.y == 0) {
+        outside = inside + walls;
+        echo( Exterior=outside, Inches=outside/inch );
     }
 
     difference() {
@@ -178,7 +182,6 @@ module hex_lid_corners( layout, size, hex, add_stubs=false, remove_holes=true, d
         }
     }
 }
-
 
 /* hex_box_walls( layout, size, hex, labels, dimensions )
  *
@@ -291,6 +294,17 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
     }
 }
 
+// BOTTOM = 0;  // Bottom thickness (mm)
+VACUUM   = 1;   // Size of vacuum relief holes (mm)
+MOAT     = 2;   // Depth of moat along well edges (mm)
+ROCKER   = 3;   // Height of tile rocker (mm)
+SLOPE    = 4;   // Draft angle (degrees)
+SPACING  = 5;   // Additional spacing around tile (mm)
+MATERIAL = 6;   // Material thickness (mm)
+
+STYRENE_30MIL = [ 1.0 * mm, 1.5 * mm, 0.40 * mm, 3.0 * mm, 8, 1.25 * mm, 0.030 * inch ];
+MOCKUP        = [ 0.6 * mm, 0.0 * mm, 0.00 * mm, 3.0 * mm, 8, 1.25 * mm, 0.000 * inch ];
+
 /* hex_tray_buck( layout, size, hex, dimensions )
  *
  * Create a tray to hold hexagonal tiles
@@ -301,38 +315,45 @@ module hex_lid_walls( layout, size, hex, add_stubs=false, remove_holes=true, dim
  * split      -- If non-zero, will render half of the buck (LEFT, RIGHT, UPPER, LOWER)
  * dimensions -- List of physical dimensions
  */
-module hex_tray_buck( layout, size, hex, split=0, dimensions=THERMOFORM ) {
-    bottom = 1.0 * mm;
-    vacuum = 1.5 * mm;
-    moat   = 0.4 * mm;
-    slope  = 10; // degrees
-    spread = 1.0 + sin(slope) * sin( 45 );
-    spacing = 4.0 * mm;
-    styrene =  0.030 * inch;
-    outside = WALL_WIDTH[4]+size.z * sin( slope ) + styrene;
+module hex_tray_buck( layout, size, hex, split=0, test=false, dimensions=STYRENE_30MIL ) {
+    bottom   = dimensions[ BOTTOM ];
+    vacuum   = dimensions[ VACUUM ];
+    moat     = dimensions[ MOAT ];
+    rocker   = dimensions[ ROCKER ];
+    slope    = dimensions[ SLOPE ];
+    spacing  = dimensions[ SPACING ];
+    material = dimensions[ MATERIAL ];
 
-    hex1 = hex + 3.0 * mm;
-    hex2 = hex1 + spacing;
+    assert( bottom > moat, "Bottom must be thicker than moat" );
+
+    height  = size.z + rocker;
+    draft = height * sin( slope ) * 2;
+    outside = WALL_WIDTH[0] + draft + material;
+
+    hex1 = hex + 2*material + spacing;
+    hex2 = hex1 + draft + WALL_WIDTH[4];
 
     base = [ 0, 0, bottom ];
     padding = [ outside*2, outside*2, 0];
     minimum = layout_size( layout, hex2 );
     optimum = minimum + padding;
 
-    actual = actual_size( size, optimum );
+    actual = actual_size( [size.x, size.y, height], optimum );
     border = (actual - minimum) / 2;
 
     if (DEBUG_18XX) {
-        echo( HexTrayBuck_size=size, config=hex_config(hex2), minimum=minimum, optimum=optimum, actual=actual, inches=actual/inch );
-        echo( Slope=slope, Spread=spread, border=border, padding=padding );
+        echo( HexTrayBuck_size=size, config=hex_config(hex2) );
+        echo( Vacuum=vacuum, Moat=moat, Rocker=rocker, Slope=slope, Spacing=spacing, Material=material);
+        echo( Height=height, Draft=draft, Border=border, Padding=padding );
+        echo( Minimum=minimum, Optimum=optimum, Actual=actual, Inches=actual/inch );
     }
 
-    module buck_base( bsize, radius ) {
+    module buck_base( bsize, radius, labels=[] ) {
         mx = bsize.x;
         my = bsize.y;
-        mz = bsize.z - OVERLAP + 1;
+        mz = bsize.z - OVERLAP + bottom;
         dr = radius;
-        ds = mz * sin( slope ) / 2;
+        ds = mz * sin( slope );
 
         points = [
             [    dr,    dr,  0 ], [    mx-dr,    dr,  0 ], [    mx-dr,    my-dr,  0 ], [    dr,    my-dr,  0 ], // bottom
@@ -344,71 +365,89 @@ module hex_tray_buck( layout, size, hex, split=0, dimensions=THERMOFORM ) {
             echo( BuckBase=bsize, size=[mx, my, mz], dr=dr, ds=ds );
         }
 
-        minkowski() {
-            polyhedron( points, faces );
-            cylinder( r=radius, h=OVERLAP, $fn=48 );
+        union() {
+            color( "gray" ) minkowski() {
+                polyhedron( points, faces );
+                cylinder( r=radius, h=OVERLAP, $fn=48 );
+            }
+
+            color( "white" ) hex_box_labels( labels, layout, hex2, bsize, [border.x+WALL_WIDTH[4],border.y,bsize.z+FONT_HEIGHT] );
         }
     }
 
     module full_buck() {
         difference() {
-            buck_base( actual, 2*mm );
+            buck_base( actual, 2*mm, [] );
 
             hex_layout( layout, hex2, [border.x, border.y, bottom] ) {
-                hex_prism( size.z+OVERLAP, hex1, slope );
-
-                // Center hole
-                // translate( [0,0,-bottom-OVERLAP] ) cylinder( d=vacuum, h=bottom+size.z+2*OVERLAP );
+                hex_prism_with_bump( height+OVERLAP, hex1, rocker, slope );
 
                 for (c = [0:5]) {
                     tc = TILE_CORNERS[c];
-                    hconfig = hex_config( hex1-spacing/2 );
+                    hconfig = hex_config( hex1-draft/2 );
                     hposition = [ tc.x*hconfig.x, tc.y*hconfig.y, -bottom-OVERLAP ];
 
                     // Vacuum holes
-                    translate( hposition ) cylinder( d=vacuum, h=bottom+size.z+2*OVERLAP, $fn=30 );
-                    translate( hposition+[0,0,+bottom-moat] ) hex_cube_wall( c, hconfig, vacuum, size.z+moat+2*OVERLAP, 1.0 );
+                    if (vacuum > 0) {
+                        translate( hposition ) cylinder( d=vacuum, h=bottom+height+2*OVERLAP, $fn=30 );
+                        if (moat > 0) {
+                            translate( hposition+[0,0,+bottom-moat] ) hex_cube_wall( c, hconfig, vacuum, height+moat+2*OVERLAP, 1.0 );
+                        }
+                    }
 
-                    outside = hex_outside_wall(layout, $row, $col, c);
-                    if (!outside) {
-                        cposition = [ tc.x*$config.x, tc.y*$config.y, 0 ];
-                        translate( cposition ) hex_angle_wall( c, $config, spacing, size.z+2*OVERLAP, 0.5, spread );
+                    // Gap between wells
+                    if (0) {
+                        outside = hex_outside_wall(layout, $row, $col, c);
+                        if (!outside) {
+                            cposition = [ tc.x*$config.x, tc.y*$config.y, 0 ];
+                            translate( cposition ) hex_angle_wall( c, $config, spacing, height+2*OVERLAP, 0.4, 1.0 + sin(2*slope), [vacuum, bottom] );
+                        }
                     }
                 }
 
             }
         }
+
+        if (test) {
+            color( "DarkSlateGray" )
+            hex_layout( layout, hex2, [border.x, border.y, bottom + material + rocker ] ) {
+                hex_prism( 10*mm, hex );
+            }
+        }
     }
 
+    function wave( wavelength, amplitude, i ) = sin( i*360/wavelength ) * amplitude;
+
     module half_block( split ) {
-        granularity = 20;
+        wavelength = 6;
+        amplitude  = 1/6;
+
         config = hex_config( hex2 );
 
-        x0 = -OVERLAP; cx = actual.x/2; mx = actual.x+OVERLAP;
-        y0 = -OVERLAP; cy = actual.y/2; my = actual.y+OVERLAP;
+        // Calculate minimum, center-line, and maximum boundaries for x and y
+        x0 = -OVERLAP; cx = actual.x/2 + hex_row_shift( layout ) * config.x; mx = actual.x+OVERLAP;
+        y0 = -OVERLAP; cy = actual.y/2 + hex_col_shift( layout ) * config.y; my = actual.y+OVERLAP;
 
         if (split == UPPER || split == LOWER ) {
-            cycles = floor( actual.x / granularity );
-            ticks = cycles * granularity;
+            ticks = floor( actual.x / wavelength ) * wavelength;
             dx = (actual.x - ticks) / 2;
             sy = (split == LOWER) ? y0 : my;
 
             paths = [
                 [ mx, cy ], [ mx, sy ], [ x0, sy ], [ x0, cy ],
-                for (i=[0:ticks] ) [ dx + i, sin( i*360/granularity )*config.y/2 + cy ],
+                for (i=[0:ticks] ) [ dx + i, wave( wavelength, config.y*amplitude, i ) + cy ],
             ];
-            translate( [0,0,-OVERLAP] ) linear_extrude( size.z + 2*OVERLAP ) polygon( paths );
+            translate( [0,0,-OVERLAP] ) linear_extrude( height + bottom + 2*OVERLAP ) polygon( paths );
         } else {
-            cycles = floor( actual.y / granularity );
-            ticks = cycles * granularity;
+            ticks = floor( actual.y / wavelength ) * wavelength;
             dy = (actual.y - ticks) / 2;
             sx = (split == LEFT) ? x0 : mx;
 
             paths = [
                 [ cx, my ], [ sx, my ], [ sx, y0 ], [ cx, y0 ],
-                for (i=[0:ticks] ) [ sin( i*360/granularity )*config.x/2 + cx, dy + i ],
+                for (i=[0:ticks] ) [ wave( wavelength, config.x*amplitude, i ) + cx, dy + i ],
             ];
-            translate( [0,0,-OVERLAP] ) linear_extrude( size.z + 2*OVERLAP ) polygon( paths );
+            translate( [0,0,-OVERLAP] ) linear_extrude( height + bottom + 2*OVERLAP ) polygon( paths );
         }
 
     }
