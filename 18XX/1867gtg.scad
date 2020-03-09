@@ -105,4 +105,12 @@ if (PART == "buck-28-full") {
     buck( 1, FULL, false );
     // translate( [0, 0, 0] ) buck( 8, LOWER, false );
     // translate( [0, 2, 0] ) buck( 8, UPPER, false );
+
+    // difference() {
+    //     minkowski() {
+    //         buck( 1, FULL );
+    //         sphere( d=0.030*inch );
+    //     }
+    //     buck( 1, FULL );
+    // }
 }

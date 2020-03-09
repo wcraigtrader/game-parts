@@ -15,13 +15,16 @@ include <../util/boxes.scad>;
 include <../util/hexes.scad>;
 
 // ----- Physical dimensions ------------------------------------------------------------------------------------------
-
 STUB        = 2.00 * mm;  // Height of lid stubs
 STUB_GAP    = 0.25 * mm;  // Separation between lid stubs and tray hex corners
 
-FONT_NAME   = "OCRA:style=Bold";
-FONT_SIZE   = 6.0;
-FONT_HEIGHT = layers( 4 );
+LABEL_FONT_NAME   = "OCRA:style=Bold";
+LABEL_FONT_SIZE   = 6.0;
+LABEL_FONT_HEIGHT = layers( 4 );
+
+STAMP_FONT_NAME   = "OCRA:style=Bold";
+STAMP_FONT_SIZE   = 3.0;
+STAMP_FONT_HEIGHT = layers( 2 );
 
 $fa=4; $fn=30;
 
@@ -64,8 +67,8 @@ module hex_box_labels( labels, layout, size, inside, delta) {
         for (l=[len(labels)-1:-1:0]) {
             ly = layout[sr+2*l][0][1]*config.y + delta.y;
             translate( [inside.x-delta.x+1, ly, delta.z-OVERLAP] )
-                rotate( [0,0,-90] ) linear_extrude( height=FONT_HEIGHT+OVERLAP )
-                    text( labels[l], font=FONT_NAME, size=FONT_SIZE, halign="center", valign="top" );
+                rotate( [0,0,-90] ) linear_extrude( height=LABEL_FONT_HEIGHT+OVERLAP )
+                    text( labels[l], font=LABEL_FONT_NAME, size=LABEL_FONT_SIZE, halign="center", valign="top" );
         }
     }
 }
@@ -371,7 +374,7 @@ module hex_tray_buck( layout, size, hex, split=0, test=false, dimensions=STYRENE
                 cylinder( r=radius, h=OVERLAP, $fn=48 );
             }
 
-            color( "white" ) hex_box_labels( labels, layout, hex2, bsize, [border.x+WALL_WIDTH[4],border.y,bsize.z+FONT_HEIGHT] );
+            color( "white" ) hex_box_labels( labels, layout, hex2, bsize, [border.x+WALL_WIDTH[4],border.y,bsize.z+LABEL_FONT_HEIGHT] );
         }
     }
 
@@ -428,13 +431,13 @@ module hex_tray_buck( layout, size, hex, split=0, test=false, dimensions=STYRENE
 
             // Inset timestamp in bottom of buck
             if (TIMESTAMP > "") {
-                translate( [actual.x/2, 5, FONT_HEIGHT/2-OVERLAP] )
-                    rotate( [180,0,-0] ) linear_extrude( height=FONT_HEIGHT/2+OVERLAP )
-                        text( TIMESTAMP, font=FONT_NAME, size=FONT_SIZE/2, halign="center", valign="bottom" );
+                translate( [actual.x/2, 5, STAMP_FONT_HEIGHT-OVERLAP] )
+                    rotate( [180,0,-0] ) linear_extrude( height=STAMP_FONT_HEIGHT+OVERLAP )
+                        text( TIMESTAMP, font=STAMP_FONT_NAME, size=STAMP_FONT_SIZE, halign="center", valign="bottom" );
 
-                translate( [actual.x/2, actual.y-5, FONT_HEIGHT/2-OVERLAP] )
-                    rotate( [180,0,180] ) linear_extrude( height=FONT_HEIGHT/2+OVERLAP )
-                        text( TIMESTAMP, font=FONT_NAME, size=FONT_SIZE/2, halign="center", valign="bottom" );
+                translate( [actual.x/2, actual.y-5, STAMP_FONT_HEIGHT-OVERLAP] )
+                    rotate( [180,0,180] ) linear_extrude( height=STAMP_FONT_HEIGHT+OVERLAP )
+                        text( TIMESTAMP, font=STAMP_FONT_NAME, size=STAMP_FONT_SIZE, halign="center", valign="bottom" );
             }
         }
 
