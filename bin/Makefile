@@ -33,7 +33,7 @@
 # ----- Local OpenSCAD settings -----------------------------------------------
 
 # OpenSCAD binary and options
-OPENSCAD=/opt/openscad
+OPENSCAD=/snap/bin/openscad
 OPENSCAD_OPTIONS=-DVERBOSE=false
 IMAGE_OPTIONS=--imgsize=1024,768 --colorscheme=DeepOcean
 
@@ -61,7 +61,7 @@ ALLIN1=$(PREFIX)-all.scad
 all:	models images $(ALLIN1)
 
 directories:
-@:$(call check_defined, PREFIX, game prefix)
+	@:$(call check_defined, PREFIX, game prefix)
 	@mkdir -p $(STL) $(IMAGE)
 
 models: directories $(MODELS)
