@@ -45,9 +45,10 @@ INNER  = 3;     // Inside partition walls thickness
 FILLET = 4;     // Size of inside fillet
 BUMPS  = 5;     // Minimum spacing between bumps
 STUBS  = 6;     // Height of lid stubs that overlap cell walls
+GAPE   = 7;     // Width of gap between lid and box
 
-REASONABLE = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[3], WALL_WIDTH[2], 1*mm, 20*mm, 2*mm ];
-STURDY     = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[4], WALL_WIDTH[3], 1*mm, 20*mm, 2*mm ];
+REASONABLE = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[3], WALL_WIDTH[2], 1*mm, 20*mm, 2*mm, 0.3*mm ];
+STURDY     = [ 5*LAYER_HEIGHT, 5*LAYER_HEIGHT, WALL_WIDTH[4], WALL_WIDTH[3], 1*mm, 20*mm, 2*mm, WALL_WIDTH[1]/2 ];
 
 HORIZONTAL = [ 1, 1, 0 ];
 VERTICAL   = [ 0, 0, 1 ];
@@ -103,8 +104,9 @@ module dit( r=0, d=0 ) {
  */
 
 module rounded_box( size, type=HOLLOW, borders=REASONABLE ) {
+    gap    = borders[GAPE];
     outer1 = borders[OUTER];
-    outer2 = borders[OUTER] + GAP;
+    outer2 = borders[OUTER] + gap;
     bottom = borders[BOTTOM];
     fillet = borders[FILLET];
     bumps  = borders[BUMPS];
@@ -112,7 +114,7 @@ module rounded_box( size, type=HOLLOW, borders=REASONABLE ) {
     lip = layer_height( size.z/2 );
 
     midsize = [size.x+2*outer1, size.y+2*outer1, size.z];
-    gapsize = [midsize.x+2*GAP, midsize.y+2*GAP, size.z];
+    gapsize = [midsize.x+2*gap, midsize.y+2*gap, size.z];
     lipsize = [gapsize.x, gapsize.y, lip];
     outsize = [lipsize.x+2*outer1, lipsize.y+2*outer1, size.z+bottom];
 
@@ -217,9 +219,10 @@ module overlap_box( size, type=HOLLOW, borders=REASONABLE ) {
     outer  = borders[OUTER];
     bottom = borders[BOTTOM];
     fillet = borders[FILLET];
+    gap    = borders[GAPE];
 
     midsize =    size + [ 2*outer, 2*outer, 0 ];
-    gapsize = midsize + [ 2*GAP, 2*GAP, 0 ];
+    gapsize = midsize + [ 2*gap, 2*gap, 0 ];
     outsize = gapsize + [ 2*outer, 2*outer, 0 ];
 
     if (DEBUG_BOXES) {
@@ -254,9 +257,10 @@ module overlap_box( size, type=HOLLOW, borders=REASONABLE ) {
 module overlap_lid( size, borders=REASONABLE ) {
     outer = borders[OUTER];
     top   = borders[TOP];
+    gap    = borders[GAPE];
 
     midsize =    size + [ 2*outer, 2*outer, 0 ];
-    gapsize = midsize + [ 2*GAP, 2*GAP, 0 ];
+    gapsize = midsize + [ 2*gap, 2*gap, 0 ];
     outsize = gapsize + [ 2*outer, 2*outer, 0 ];
 
     nz = (size.z > NOTCH*1.5) ? size.z : (size.z < NOTCH/2 ? NOTCH : NOTCH/2 + size.z);
